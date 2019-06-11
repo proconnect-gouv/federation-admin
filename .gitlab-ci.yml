@@ -1,0 +1,6 @@
+stages:
+  - build
+  - test
+
+include:
+  - '/fc-exploitation/.gitlab-ci.yml'
