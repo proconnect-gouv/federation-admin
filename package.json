@@ -5,7 +5,7 @@
     "fc-exploitation": "file:fc-exploitation",
     "fc-stats": "file:fc-stats",
     "fc-workers": "file:fc-workers",
-    "nest-typescript-starter": "file:fc-support"
+    "fc-support": "file:fc-support"
   },
   "devDependencies": {
     "lerna": "^3.15.0"
