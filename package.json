@@ -1,0 +1,17 @@
+{
+  "name": "fc-apps",
+  "version": "0.0.1",
+  "dependencies": {
+    "fc-exploitation": "file:fc-exploitation",
+    "fc-stats": "file:fc-stats",
+    "fc-workers": "file:fc-workers",
+    "fc-support": "file:fc-support"
+  },
+  "devDependencies": {
+    "lerna": "^3.15.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
+  }
+}
