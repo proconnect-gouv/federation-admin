@@ -8,6 +8,12 @@ class Config {
 
     return { host: `${ES_HOST || 'localhost'}:${ES_PORT || '9200'}` };
   }
+
+  getPort() {
+    const { PORT } = this.config;
+
+    return PORT || 3000;
+  }
 }
 
 export default Config;

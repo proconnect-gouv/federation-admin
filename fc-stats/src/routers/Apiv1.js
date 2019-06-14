@@ -1,5 +1,5 @@
 import express from 'express';
-import { Api } from '../controllers';
+import Api from '../controllers/Api';
 
 class ApiV1 {
   constructor(container) {
