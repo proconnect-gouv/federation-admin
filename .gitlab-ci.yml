@@ -2,5 +2,16 @@ stages:
   - build
   - test
 
+lerna-bootstrap:
+  image: node:8
+  stage: build
+  script:
+    - npm install
+    - npx lerna bootstrap
+  artifacts:
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+
 include:
   - '/fc-exploitation/.gitlab-ci.yml'
