@@ -13,3 +13,4 @@ lerna-bootstrap:
 
 include:
   - '/fc-exploitation/.gitlab-ci.yml'
+  - '/fc-stats/.gitlab-ci.yml'
