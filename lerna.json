@@ -1,6 +1,7 @@
 {
   "packages": [
-    "fc-*"
+    "fc-*",
+    "shared"
   ],
   "version": "0.0.1"
 }
