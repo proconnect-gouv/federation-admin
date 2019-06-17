@@ -6,10 +6,18 @@ import { LocalStrategy } from './passport/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { LocalSerializer } from './passport/local.serializer';
 import { LocalAuthGuard } from './guard/local.guard';
+import * as passport from 'passport';
 
 const authenticationServiceProvider = {
   provide: 'IAuthenticationService',
   useClass: AuthenticationService,
+};
+
+export const PASSPORT = 'Passport';
+
+const passportProvider = {
+  provide: PASSPORT,
+  useValue: passport,
 };
 
 @Module({
@@ -23,6 +31,11 @@ const authenticationServiceProvider = {
     LocalStrategy,
     LocalSerializer,
     LocalAuthGuard,
+    passportProvider,
+  ],
+  exports: [
+    LocalSerializer,
+    passportProvider,
   ],
 })
 export class AuthenticationModule {}

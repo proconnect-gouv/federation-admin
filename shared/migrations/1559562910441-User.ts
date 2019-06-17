@@ -1,0 +1,13 @@
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class User1559562910441 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<any> {
+    await queryRunner.query(
+      `CREATE TABLE "user" ("id" varchar PRIMARY KEY NOT NULL, "username" varchar NOT NULL, "passwordHash" varchar)`
+    );
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<any> {
+    await queryRunner.query(`DROP TABLE "user"`);
+  }
+}
