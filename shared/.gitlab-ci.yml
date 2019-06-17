@@ -1,0 +1,18 @@
+build(shared):
+  stage: build
+  image: node:8
+  script:
+    - cd shared
+    - npm ci
+  artifacts:
+    paths:
+      - shared/node_modules
+
+test(shared):
+  stage: test
+  image: node:8
+  dependencies:
+    - build(shared)
+  script:
+    - cd shared
+    - npm test

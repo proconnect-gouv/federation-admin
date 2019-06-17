@@ -12,5 +12,5 @@ lerna-bootstrap:
       - node_modules
 
 include:
-  - '/fc-exploitation/.gitlab-ci.yml'
+  - '/shared/.gitlab-ci.yml'
   - '/fc-stats/.gitlab-ci.yml'
