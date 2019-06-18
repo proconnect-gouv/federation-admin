@@ -1,3 +1,0 @@
-CREATE USER typeormtest;
-CREATE DATABASE testdb;
-GRANT ALL PRIVILEGES ON DATABASE testdb TO typeormtest

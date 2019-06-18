@@ -1,29 +1,54 @@
 import { NestFactory } from '@nestjs/core';
-import { INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
-import { config } from 'dotenv';
+import * as session from 'express-session';
+import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
+import * as flash from 'express-flash';
+
+import 'dotenv';
+import { ConfigService } from 'nestjs-config';
+import { UnauthorizedExceptionFilter } from 'shared/authentication/filter/UnauthorizedException.filter';
+import { PASSPORT } from 'shared/authentication/authentication.module';
 
 async function bootstrap() {
-  config({ path: join(process.cwd(), '.env') });
-  const server: INestApplication = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // CORS
-  server.enableCors();
+  // View engine initialization
+  app.engine('ejs', require('ejs').renderFile);
+  app.set('views', [join(__dirname, '..', 'views'), join(__dirname, '../../shared', 'views')]);
+  app.setViewEngine('ejs');
 
-  // Improve security
-  server.use(require('helmet')());
+  // Static files
+  app.use(express.static('public'));
 
-  // improve performance
-  server.use(require('compression')());
+  // Flash messages
+  app.use(flash());
 
-  // enable cokkie
-  server.use(require('cookie-parser')());
+  // Sessions initialization
+  app.use(
+    session({
+      secret: "le père Noël n'existe pas",
+      name: 'sessionId',
+      resave: true,
+      saveUninitialized: false,
+    }),
+  );
+  app.use(cookieParser());
 
-  //enable json response
-  server.use(require('body-parser').urlencoded({ extended: true }));
-  server.use(require('body-parser').json());
+  // Passport initialization
+  const passport = app.get(PASSPORT);
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-  await server.listen(process.env.PORT, '0.0.0.0');
+  // Redirect to login if unauthorized
+  app.useGlobalFilters(new UnauthorizedExceptionFilter());
+
+  // Get port from config
+  const configService = app.get<ConfigService>(ConfigService);
+  const port = configService.get('http').port;
+
+  await app.listen(port);
 }
 bootstrap();
