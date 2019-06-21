@@ -1,9 +1,9 @@
 import {
   MissingInputError,
   InvalidInputError,
-} from '../../../../src/services/Input/errors';
+} from '../../../../src/services/InputValidator/errors';
 
-describe('services/input/errors', () => {
+describe('services/InputValidator/errors', () => {
   describe('MissingInputError', () => {
     it('Should have stack property', () => {
       // Given
