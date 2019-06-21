@@ -2,12 +2,15 @@ import {
   MissingInputError,
   MissingValidatorError,
   InvalidInputError,
-} from '../../../../src/services/Input/errors';
+} from '../../../../src/services/InputValidator/errors';
 
-import Input from '../../../../src/services/Input';
+import * as validators from '../../../../src/services/InputValidator/validators';
+import InputValidator from '../../../../src/services/InputValidator/InputValidator';
 
-describe('services/Input', () => {
-  describe('Input.get', () => {
+const inputValidator = new InputValidator([validators]);
+
+describe('services/InputValidator', () => {
+  describe('inputValidator.get', () => {
     it('Should throw an error if one mandatory input is missing', () => {
       // Given
       const schema = {
@@ -17,7 +20,7 @@ describe('services/Input', () => {
       const input = { bar: 42 };
       // Then
       expect(() => {
-        Input.get(schema, input);
+        inputValidator.get(schema, input);
       }).toThrowError(
         new MissingInputError(['foo'], 'Missing mandatory inputs')
       );
@@ -32,7 +35,7 @@ describe('services/Input', () => {
 
       try {
         // When
-        Input.get(schema, input);
+        inputValidator.get(schema, input);
       } catch (error) {
         // Then
         expect(Array.isArray(error.stack)).toBe(true);
@@ -47,7 +50,7 @@ describe('services/Input', () => {
       };
       const input = { bar: 42, foo: 'foo' };
       // When
-      const result = Input.get(schema, input);
+      const result = inputValidator.get(schema, input);
       // Then
       expect(result).toEqual({
         foo: 'foo',
@@ -62,7 +65,7 @@ describe('services/Input', () => {
       };
       const input = { bar: 42, foo: 'foo', wiz: 'wiz' };
       // When
-      const result = Input.get(schema, input);
+      const result = inputValidator.get(schema, input);
       // Then
       expect(result).toEqual({
         foo: 'foo',
@@ -78,7 +81,7 @@ describe('services/Input', () => {
       const input = { foo: 45, bar: 42 };
       // Then
       expect(() => {
-        Input.get(schema, input);
+        inputValidator.get(schema, input);
       }).toThrowError(InvalidInputError);
     });
     it('Should throw with list of invalids if input fails validation', () => {
@@ -91,7 +94,7 @@ describe('services/Input', () => {
 
       try {
         // When
-        Input.get(schema, input);
+        inputValidator.get(schema, input);
       } catch (error) {
         // Then
         expect(Array.isArray(error.stack)).toBe(true);
@@ -110,7 +113,7 @@ describe('services/Input', () => {
       };
       const input = { bar: 42 };
       // When
-      const result = Input.getMissingMandatories(schema, input);
+      const result = inputValidator.getMissingMandatories(schema, input);
       // Then
       expect(result).toHaveLength(2);
       expect(result).toEqual(['foo', 'wiz']);
@@ -126,7 +129,7 @@ describe('services/Input', () => {
     };
     const input = { bar: 42, foo: 'foo', wiz: 'wiz' };
     // When
-    const result = Input.getMissingMandatories(schema, input);
+    const result = inputValidator.getMissingMandatories(schema, input);
     // Then
     expect(result).toHaveLength(0);
     expect(result).toEqual([]);
@@ -141,7 +144,7 @@ describe('services/Input', () => {
       };
       const input = { bar: 'bar', foo: 'foo', wiz: 'wiz' };
       // When
-      const result = Input.getSchemaValues(schema, input);
+      const result = inputValidator.getSchemaValues(schema, input);
       // Then
       expect(result).toEqual({ foo: 'foo', bar: 'bar' });
     });
@@ -157,7 +160,7 @@ describe('services/Input', () => {
       const input = { foo: 'foo', bar: 'bar' };
       // Then
       expect(() => {
-        Input.getInvalidInputs(schema, input);
+        inputValidator.getInvalidInputs(schema, input);
       }).toThrowError(
         new MissingValidatorError(
           'Schema error: No validator defined for type <not_a_validator>'
@@ -171,7 +174,7 @@ describe('services/Input', () => {
       };
       const input = { foo: 'foo' };
       // When
-      const result = Input.getInvalidInputs(schema, input);
+      const result = inputValidator.getInvalidInputs(schema, input);
       // Then
       expect(result).toEqual([]);
     });
@@ -183,7 +186,7 @@ describe('services/Input', () => {
       };
       const input = { foo: 'foo', bar: 'bar' };
       // When
-      const result = Input.getInvalidInputs(schema, input);
+      const result = inputValidator.getInvalidInputs(schema, input);
       // Then
       expect(result).toEqual(['bar']);
     });

@@ -3,7 +3,7 @@ import {
   number,
   action,
   date,
-} from '../../../../src/services/Input/validators';
+} from '../../../../src/services/InputValidator/validators';
 
 describe('services/input/validators', () => {
   describe('string', () => {
