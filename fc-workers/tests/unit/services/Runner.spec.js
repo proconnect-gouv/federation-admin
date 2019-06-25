@@ -36,20 +36,41 @@ describe('Runner', () => {
     it('Should throw if no job name provided', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
-      const runner = new Runner(null, jobs);
+      const container = {
+        services: {
+          logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
+        },
+      };
+      jest.spyOn(process, 'exit').mockImplementation(() => {});
+      const runner = new Runner(container, jobs);
+      // When
+      runner.run();
       // Then
-      // runner.run('wizz');
-      expect(runner.run()).rejects.toEqual(new Error('No job specified'));
+      expect(container.services.logger.error.mock.calls).toHaveLength(1);
+      expect(container.services.logger.error.mock.calls[0][0]).toBe(
+        'An error occured: No job specified'
+      );
+      expect(container.services.logger.debug.mock.calls).toHaveLength(1);
+      expect(container.services.logger.log.mock.calls).toHaveLength(1);
     });
     it('Should throw if job does not exists', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
-      const runner = new Runner(null, jobs);
+      const container = {
+        services: {
+          logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
+        },
+      };
+      const runner = new Runner(container, jobs);
+      // When
+      runner.run('wizz');
       // Then
-      // runner.run('wizz');
-      expect(runner.run('wizz')).rejects.toEqual(
-        new Error('Unknow job <wizz>')
+      expect(container.services.logger.error.mock.calls).toHaveLength(1);
+      expect(container.services.logger.error.mock.calls[0][0]).toBe(
+        'An error occured: Unknow job <wizz>'
       );
+      expect(container.services.logger.debug.mock.calls).toHaveLength(1);
+      expect(container.services.logger.log.mock.calls).toHaveLength(1);
     });
     it('Should throw if job does not implement run() method', async () => {
       // Given
@@ -141,8 +162,9 @@ describe('Runner', () => {
           logger: { error: jest.fn(), log: jest.fn(), debug: jest.fn() },
         },
       };
+      const jobs = { foo: 'foo' };
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-      const runner = new Runner(container);
+      const runner = new Runner(container, jobs);
       // When
       runner.handleError(error, jobName);
       // Then
@@ -150,7 +172,13 @@ describe('Runner', () => {
       expect(container.services.logger.error.mock.calls[0][0]).toBe(
         `An error occured: ${error.message}`
       );
-      expect(container.services.logger.log.mock.calls).toHaveLength(0);
+      expect(container.services.logger.log.mock.calls).toHaveLength(1);
+      expect(container.services.logger.log.mock.calls[0][0]).toBe(`
+      This tool is intendeed to run jobs
+
+      Available jobs:
+      - foo : undefined
+    `);
       expect(container.services.logger.debug.mock.calls).toHaveLength(1);
       expect(container.services.logger.debug.mock.calls[0][0]).toBe(error);
       expect(mockExit).toHaveBeenCalledWith(127);

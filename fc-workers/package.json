@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "elasticsearch": "^16.1.1",
     "mailjet": "0.0.1",
     "minimist": "^1.2.0",
     "node-mailjet": "^3.3.1"

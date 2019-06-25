@@ -12,13 +12,19 @@ class Config {
   getMailerType() {
     const { MAILER } = this.config;
 
-    return MAILER;
+    return MAILER || 'log';
   }
 
   getMailjet() {
     const { MAILJET_KEY, MAILJET_SECRET } = this.config;
 
     return { key: MAILJET_KEY, secret: MAILJET_SECRET };
+  }
+
+  getElastic() {
+    const { ES_HOST, ES_PORT } = this.config;
+
+    return { host: `${ES_HOST || 'localhost'}:${ES_PORT || '9200'}` };
   }
 }
 
