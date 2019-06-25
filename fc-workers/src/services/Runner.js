@@ -31,6 +31,8 @@ class Runner {
       if (this.jobs[jobName] && this.jobs[jobName].usage) {
         logger.log(this.jobs[jobName].usage());
       }
+    } else {
+      logger.log(this.usage());
     }
 
     logger.debug(error);
@@ -39,22 +41,21 @@ class Runner {
 
   async run(jobName, params) {
     if (typeof jobName === 'undefined' || jobName === '') {
-      throw new Error('No job specified');
+      return this.handleError(new Error('No job specified'), jobName);
     }
 
     if (!this.isJob(jobName)) {
-      throw new Error(`Unknow job <${jobName}>`);
+      return this.handleError(new Error(`Unknow job <${jobName}>`), jobName);
     }
 
     try {
       if (params && params.help) {
-        this.container.services.logger.log(this.jobs[jobName].usage());
-      } else {
-        const job = new this.jobs[jobName](this.container);
-        await job.run(params);
+        return this.container.services.logger.log(this.jobs[jobName].usage());
       }
+      const job = new this.jobs[jobName](this.container);
+      return job.run(params);
     } catch (error) {
-      this.handleError(error, jobName);
+      return this.handleError(error, jobName);
     }
   }
 }

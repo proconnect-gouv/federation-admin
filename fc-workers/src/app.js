@@ -1,5 +1,6 @@
 import parseArgs from 'minimist';
 import axios from 'axios';
+import elasticsearch from 'elasticsearch';
 import * as jobs from './jobs';
 import Container, {
   Config,
@@ -7,6 +8,7 @@ import Container, {
   Logger,
   MailerFactory,
   Runner,
+  Stats,
 } from './services';
 
 const container = new Container();
@@ -20,12 +22,21 @@ container.add(
   MailerFactory.get(container.services.config.getMailerType(), container)
 );
 container.add('runner', new Runner(container, jobs, Input));
+container.add(
+  'dataApi',
+  new elasticsearch.Client(container.services.config.getElastic())
+);
+container.add('stats', new Stats(container.services.dataApi));
 
 const jobName = process.argv[2];
 const args = parseArgs(process.argv.splice(3));
 
 async function main() {
-  await container.services.runner.run(jobName, args);
+  try {
+    await container.services.runner.run(jobName, args);
+  } catch (e) {
+    container.services.logger.error(e);
+  }
 }
 
 main();

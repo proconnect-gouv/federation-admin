@@ -15,3 +15,4 @@ include:
   - '/shared/.gitlab-ci.yml'
   - '/fc-exploitation/.gitlab-ci.yml'
   - '/fc-stats/.gitlab-ci.yml'
+  - '/fc-workers/.gitlab-ci.yml'
