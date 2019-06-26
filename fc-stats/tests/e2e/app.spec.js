@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../../src/app';
 
 const PORT = process.env.PORT || 3000;
+const { API_KEY } = process.env;
 
 const req = request(`http://localhost:${PORT}`);
 
@@ -13,11 +14,27 @@ describe('App', () => {
   afterAll(() => app.instance.close());
 
   describe('Index', () => {
-    it('should respond', async () => {
+    it('Should respond 401 without credentials', async () => {
       // Given
       const url = '/';
       // When
       const res = await req.get(url);
+      // Then
+      expect(res.status).toBe(401);
+    });
+    it('Should respond 403 with invalid credentials', async () => {
+      // Given
+      const url = '/';
+      // When
+      const res = await req.get(url).set('token', 'blah');
+      // Then
+      expect(res.status).toBe(403);
+    });
+    it('should respond', async () => {
+      // Given
+      const url = '/';
+      // When
+      const res = await req.get(url).set('token', API_KEY);
       // Then
       expect(res.status).toBe(200);
     });
@@ -26,7 +43,7 @@ describe('App', () => {
       // Given
       const url = '/';
       // When
-      const resp = await req.get(url);
+      const resp = await req.get(url).set('token', API_KEY);
       // Then
       expect(resp.text).toBe("I'm alive!\n");
     });
@@ -47,7 +64,7 @@ describe('API@v1 E2E', () => {
       // Given
       const url = `${BASE_URL}/total/newauthenticationquery/2018-01-01/2019-03-01`;
       // When
-      const resp = await req.get(url);
+      const resp = await req.get(url).set('token', API_KEY);
       // Then
       expect(resp.status).toBe(200);
       expect(resp.header['content-type']).toBe(
@@ -65,7 +82,7 @@ describe('API@v1 E2E', () => {
       // Given
       const url = `${BASE_URL}/totalByFi/dgfip/2018-01-01/2018-03-01`;
       // When
-      const resp = await req.get(url);
+      const resp = await req.get(url).set('token', API_KEY);
       // Then
       expect(resp.status).toBe(200);
       expect(resp.header['content-type']).toBe(
