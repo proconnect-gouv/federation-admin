@@ -1,4 +1,12 @@
-import {Controller, Get, Post, Render, Req, Res, UseGuards} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Render,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './guard/local.guard';
 
 @Controller()

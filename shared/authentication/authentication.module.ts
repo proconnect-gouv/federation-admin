@@ -33,9 +33,6 @@ const passportProvider = {
     LocalAuthGuard,
     passportProvider,
   ],
-  exports: [
-    LocalSerializer,
-    passportProvider,
-  ],
+  exports: [LocalSerializer, passportProvider],
 })
 export class AuthenticationModule {}
