@@ -1,5 +1,6 @@
 stages:
   - build
+  - code_quality
   - test
 
 lerna-bootstrap:
@@ -10,6 +11,14 @@ lerna-bootstrap:
   artifacts:
     paths:
       - node_modules
+
+lint:
+  image: node:8
+  stage: code_quality
+  script:
+    - npm run lint
+  dependencies:
+    - lerna-bootstrap
 
 include:
   - '/shared/.gitlab-ci.yml'
