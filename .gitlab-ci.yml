@@ -1,24 +1,16 @@
 stages:
   - build
-  - code_quality
   - test
 
-lerna-bootstrap:
+global-install:
   image: node:8
   stage: build
   script:
     - npm ci
+    - npm run lint
   artifacts:
     paths:
       - node_modules
-
-lint:
-  image: node:8
-  stage: code_quality
-  script:
-    - npm run lint
-  dependencies:
-    - lerna-bootstrap
 
 include:
   - '/shared/.gitlab-ci.yml'
