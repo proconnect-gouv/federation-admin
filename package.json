@@ -2,7 +2,7 @@
   "name": "fc-apps",
   "version": "0.0.1",
   "scripts": {
-    "lint": "tslint fc-exploitation/**/*.ts --exclude \"**/node_modules/**/*\" && tslint shared/**/*.ts --exclude \"**/node_modules/**/*\""
+    "lint": "tslint fc-exploitation/**/*.ts --exclude \"**/node_modules/**/*\" && tslint shared/**/*.ts --exclude \"**/node_modules/**/*\" && tslint fc-support/**/*.ts --exclude \"**/node_modules/**/*\""
   },
   "dependencies": {
     "fc-exploitation": "file:fc-exploitation",
