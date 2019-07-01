@@ -1,8 +1,8 @@
-import {Module} from '@nestjs/common';
-import {AuthenticationModule} from "./authentication/authentication.module";
+import { Module } from '@nestjs/common';
+import { AuthenticationModule } from './authentication/authentication.module';
 
 @Module({
-  imports: [ AuthenticationModule ],
-  exports: [ AuthenticationModule ],
+  imports: [AuthenticationModule],
+  exports: [AuthenticationModule],
 })
 export class SharedModule {}

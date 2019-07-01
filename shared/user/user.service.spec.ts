@@ -33,8 +33,9 @@ describe('UserService', () => {
         true,
       );
     });
+    
 
-    it("resolves false if the hashes don't match", async () => {
+    it('resolves false if the hashes don\'t match', async () => {
       const password = 'georgesmoustaki';
       const hash = 'la barbe de sa femme';
 

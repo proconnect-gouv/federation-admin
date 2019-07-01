@@ -2,11 +2,12 @@ stages:
   - build
   - test
 
-lerna-bootstrap:
+global-install:
   image: node:8
   stage: build
   script:
     - npm ci
+    - npm run lint
   artifacts:
     paths:
       - node_modules

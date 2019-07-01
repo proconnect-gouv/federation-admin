@@ -17,7 +17,10 @@ async function bootstrap() {
 
   // View engine initialization
   app.engine('ejs', require('ejs').renderFile);
-  app.set('views', [join(__dirname, '..', 'views'), join(__dirname, '../../shared', 'views')]);
+  app.set('views', [
+    join(__dirname, '..', 'views'),
+    join(__dirname, '../../shared', 'views')
+  ]);
   app.setViewEngine('ejs');
 
   // Static files
@@ -29,11 +32,11 @@ async function bootstrap() {
   // Sessions initialization
   app.use(
     session({
-      secret: "le père Noël n'existe pas",
+      secret: 'le père Noël n\'existe pas',
       name: 'sessionId',
       resave: true,
-      saveUninitialized: false,
-    }),
+      saveUninitialized: false
+    })
   );
   app.use(cookieParser());
 
