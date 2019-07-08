@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <% include partials/head.ejs %>
+</head>
+<body>
+<div class="container">
+    <form class="login-form" method="POST" action="/login">
+        <h2 class="login-form-heading"><img src="/images/FClogo.png" alt=""></h2>
+        <% if (messages.error) {%>
+            <div class="alert alert-danger">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        <label for="username" class="sr-only">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="Username" required autofocus="">
+        <label for="password" class="sr-only">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Valider</button>
+    </form>
+</div>
+</body>
+</html>

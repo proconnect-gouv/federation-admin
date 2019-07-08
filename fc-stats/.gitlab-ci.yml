@@ -1,20 +1,21 @@
-build(fc-stats):
+build(fc-exploitation):
   stage: build
   image: node:8
   script:
-    - cd fc-stats
-    - npm ci
-    - npm build
+    - cd fc-exploitation
+    - npm i
+    - cd ../shared
+    - npm i
   artifacts:
     paths:
-      - fc-stats/node_modules
+      - fc-exploitation/node_modules
+      - shared/node_modules
 
-test(fc-stats):
+test(fc-exploitation):
   stage: test
   image: node:8
   dependencies:
-    - build(fc-stats)
+    - build(fc-exploitation)
   script:
-    - cd fc-stats
-    # Can't run all tests on CI yet, E2E tests need an elasticsearch instance/mock
-    - npm run test:unit
+    - cd fc-exploitation
+    - npm test
