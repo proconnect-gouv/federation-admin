@@ -14,6 +14,12 @@ class Config {
 
     return PORT || 3000;
   }
+
+  getAuthentication() {
+    const { API_KEY } = this.config;
+
+    return { token: API_KEY };
+  }
 }
 
 export default Config;
