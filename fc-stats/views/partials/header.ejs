@@ -1,0 +1,32 @@
+<div class="row header mb-5 mt-2">
+    <div class="col-2 logo">
+        <img src="images/FClogo.png">
+    </div>
+    <div class="col-4 d-flex flex-column justify-content-center">
+        <div>
+            <h3>FranceConnect Statistiques</h3>
+        </div>
+        <div class="meta-information">
+            <i>Environnement : <%= APP_ENVIRONMENT %></i>
+        </div>
+        <div class="meta-information">
+            <i>Branche : <%= GIT_CURRENT_BRANCH %></i>
+        </div>
+        <div class="meta-information">
+            <i>Commit : <a href="<%= COMMIT_URL_PREFIX + GIT_LATEST_COMMIT_LONG_HASH %>"><%= GIT_LATEST_COMMIT_SHORT_HASH %></a></i>
+        </div>
+    </div>
+    <div class="col-6 d-flex">
+        <ul class="nav align-self-center justify-content-end nav-pills">
+            <li class="nav-item">
+                <a class="nav-link" data-prefix="/service-provider" href="/stats">Statistiques</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><%= CURRENT_USER.username %></a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="/logout">Déconnexion</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>

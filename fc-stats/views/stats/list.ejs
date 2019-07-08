@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <% include partials/head.ejs %>
+</head>
+<body>
+<div class="container">
+    <% include partials/header.ejs %>
+    <div class="row">
+        <div class="col-12">
+            <p class="h2">Stats</p>
+            <p><i>Mesure All the things!</i></p>
+
+            <table class="table table-hover table-light shadow-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% stats.forEach(function(stat){ %>
+                    <tr>
+                        <th scope="row"><%= stat.name %></th>
+                        <td><%= stat.value %></td>
+                    </tr>
+                <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
