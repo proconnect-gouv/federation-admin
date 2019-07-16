@@ -9,6 +9,9 @@ export class User {
   @Column({ unique: true })
   username: string;
 
+  @Column()
+  email: string;
+
   @Column({
     type: 'enum',
     enum: UserRole,
