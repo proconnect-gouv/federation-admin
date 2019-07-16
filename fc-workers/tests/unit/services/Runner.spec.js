@@ -178,6 +178,9 @@ describe('Runner', () => {
 
       Available jobs:
       - foo : undefined
+
+      To get more info about a specific job, run
+      > ./run <jobName> --help
     `);
       expect(container.services.logger.debug.mock.calls).toHaveLength(1);
       expect(container.services.logger.debug.mock.calls[0][0]).toBe(error);

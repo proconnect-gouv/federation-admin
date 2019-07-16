@@ -19,6 +19,9 @@ class Runner {
       This tool is intendeed to run jobs
 
       Available jobs:\n${jobList}
+
+      To get more info about a specific job, run
+      > ./run <jobName> --help
     `;
   }
 
