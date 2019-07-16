@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { IUserService } from '../user/user.service';
+import { Injectable } from '@nestjs/common';
+import { UserService } from '../user/user.service';
 
 export interface IAuthenticationService {
   validateCredentials(username: string, password: string): Promise<any>;
@@ -7,9 +7,7 @@ export interface IAuthenticationService {
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
-  constructor(
-    @Inject('IUserService') private readonly userService: IUserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   async validateCredentials(username: string, password: string): Promise<any> {
     const user = await this.userService.findByUsername(username);

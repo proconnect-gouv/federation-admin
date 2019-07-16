@@ -11,13 +11,13 @@ export = {
   synchronize: (process.env.DB_SYNCHRONIZE || 'false') === 'true',
   entities: [
     resolve(__dirname, '../**/*.entity{.ts,.js}'),
-    resolve(__dirname, '../../../shared/!(node_modules)/**/*.entity{.ts,.js}')
+    resolve(__dirname, '../../../shared/!(node_modules)/**/*.entity{.ts,.js}'),
   ],
   migrations: [
     join(__dirname, '../../migrations/*.ts'),
-    join(__dirname, '../../../shared/migrations/*.ts')
+    join(__dirname, '../../../shared/migrations/*.ts'),
   ],
   cli: {
-    migrationsDir: 'migrations'
-  }
+    migrationsDir: 'migrations',
+  },
 };

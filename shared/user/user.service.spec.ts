@@ -1,13 +1,17 @@
+import * as bcrypt from 'bcrypt';
 import { UserService } from './user.service';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { UserCreation } from './value-object/user-creation';
+import { UserRole } from './roles.enum';
 
 describe('UserService', () => {
   let userService: UserService;
   const userRepository = {
     findOne: jest.fn(),
+    save: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,9 +37,8 @@ describe('UserService', () => {
         true,
       );
     });
-    
 
-    it('resolves false if the hashes don\'t match', async () => {
+    it("resolves false if the hashes don't match", async () => {
       const password = 'georgesmoustaki';
       const hash = 'la barbe de sa femme';
 
@@ -61,6 +64,22 @@ describe('UserService', () => {
       return expect(
         userService.findByUsername('michael jackson'),
       ).rejects.toBeDefined();
+    });
+  });
+
+  describe('createUser', () => {
+    it('creates the user', async () => {
+      const userCreation = new UserCreation(
+        'jean_moust',
+        'jean@moust.lol',
+        'georgesmoustaki',
+        [UserRole.ADMIN, UserRole.OPERATOR],
+      );
+      await userService.createUser(userCreation);
+
+      expect(userRepository.save).toHaveBeenCalledTimes(1);
+      const { passwordHash } = userRepository.save.mock.calls[0][0];
+      expect(bcrypt.compare(userCreation.password, passwordHash)).toBeTruthy();
     });
   });
 });
