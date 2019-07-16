@@ -2,7 +2,7 @@
   "name": "fc-apps",
   "version": "0.0.1",
   "scripts": {
-    "lint": "tslint fc-exploitation/**/*.ts --exclude \"**/node_modules/**/*\" && tslint shared/**/*.ts --exclude \"**/node_modules/**/*\" && tslint fc-support/**/*.ts --exclude \"**/node_modules/**/*\""
+    "lint": "tslint fc-exploitation/src/**/*.ts && tslint shared/**/*.ts --exclude \"**/node_modules/**/*\" && tslint fc-support/**/*.ts --exclude \"**/node_modules/**/*\""
   },
   "dependencies": {
     "fc-exploitation": "file:fc-exploitation",
@@ -16,6 +16,7 @@
     "prettier": "^1.18.2",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.5.2"
   },
   "repository": {

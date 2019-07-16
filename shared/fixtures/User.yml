@@ -2,7 +2,17 @@ entity: User
 items:
   jean_moust:
     username: 'jean_moust'
+    roles:
+      - 'admin'
+      - 'operator'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+  jean_patoche:
+    username: 'jean_patoche'
+    roles:
+      - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
   user{1..10}:
     username: '{{name.firstName}}'
+    roles:
+      - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki

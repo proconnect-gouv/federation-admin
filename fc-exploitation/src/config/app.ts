@@ -5,5 +5,5 @@ export default {
     'https://gitlab.com/france-connect/FranceConnect/commit/',
   currentBranch: process.env.CURRENT_BRANCH || 'dev',
   latestCommitShortHash: process.env.GIT_LATEST_COMMIT_SHORT_HASH || '',
-  latestCommitLongHash: process.env.GIT_LATEST_COMMIT_LONG_HASH || ''
+  latestCommitLongHash: process.env.GIT_LATEST_COMMIT_LONG_HASH || '',
 };
