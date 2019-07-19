@@ -1,18 +1,28 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Render,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { StatsService } from './stats.service';
+import { StatsInputDTO } from './dto/stats-input.dto';
+import { StatsOutputDTO } from './dto/stats-output.dto';
 
 @Controller()
 export class StatsController {
-  constructor() {}
+  constructor(private readonly statsService: StatsService) {}
 
   @Get('stats')
   @Render('stats/list')
-  async list() {
-    const stats = [
-      { name: 'fooName', value: 'fooValue' },
-      { name: 'barName', value: 'barValue' },
-    ];
-    return {
-      stats,
-    };
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async list(@Query() query: StatsInputDTO): Promise<StatsOutputDTO> {
+    if (query.start && query.stop) {
+      const stats = await this.statsService.getEvents(query);
+      return { stats };
+    }
+
+    return {};
   }
 }

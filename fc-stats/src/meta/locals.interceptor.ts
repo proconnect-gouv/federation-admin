@@ -30,6 +30,8 @@ export class LocalsInterceptor implements NestInterceptor {
 
     res.locals.CURRENT_USER = req.user;
 
+    res.locals.REQ_PARAMS = req.params;
+    res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
 
     return next.handle();
