@@ -12,23 +12,20 @@ import { StatsController } from './stats/stats.controller';
 @Module({
   imports: [
     AuthenticationModule,
-    StatsModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
+    StatsModule,
   ],
   providers: [LocalsInterceptor],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
     consumer
       .apply(AuthenticatedMiddleware)
-      .forRoutes(
-        AppController,
-        StatsController,
-      );
+      .forRoutes(AppController, StatsController);
   }
 }

@@ -1,21 +1,19 @@
-build(fc-exploitation):
+build(fc-stats):
   stage: build
   image: node:8
   script:
-    - cd fc-exploitation
-    - npm i
-    - cd ../shared
+    - cd fc-stats
     - npm i
   artifacts:
     paths:
-      - fc-exploitation/node_modules
+      - fc-stats/node_modules
       - shared/node_modules
 
-test(fc-exploitation):
+test(fc-stats):
   stage: test
   image: node:8
   dependencies:
-    - build(fc-exploitation)
+    - build(fc-stats)
   script:
-    - cd fc-exploitation
+    - cd fc-stats
     - npm test

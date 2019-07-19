@@ -11,22 +11,65 @@
             <p class="h2">Stats</p>
             <p><i>Mesure All the things!</i></p>
 
-            <table class="table table-hover table-light shadow-sm">
+            <div>
+              <form id="search" action="/stats" method="get">
+                <div class="form-row">
+                  <div class="form-group col-md-3">
+                    <label for="start">Du</label>
+                    <input
+                      id="start"
+                      name="start"
+                      type="text"
+                      data-init="datePicker"
+                      data-secondField="stop"
+                      data-form="search"
+                      value="<%= REQ_QUERY.start %>"
+                    />
+                  </div>
+
+                  <div class="form-group col-md-3">
+                    <label for="stop">au</label>
+                    <input
+                      id="stop"
+                      name="stop"
+                      type="text"
+                      value="<%= REQ_QUERY.stop %>"
+                    />
+                  </div>
+                  <div class="form-group col-md-6">
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <% if (!REQ_QUERY.start || !REQ_QUERY.stop) { %>
+              <h2>Choisissez des dates</h2>
+            <% } else { %>
+              <table class="table table-hover table-light shadow-sm">
                 <thead class="thead-light">
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Value</th>
-                    </tr>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">FI</th>
+                    <th scope="col">FS</th>
+                    <th scope="col">Type d'action</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Compteur</th>
+                  </tr>
                 </thead>
                 <tbody>
-                <% stats.forEach(function(stat){ %>
+                  <% stats.forEach(function(stat){ %>
                     <tr>
-                        <th scope="row"><%= stat.name %></th>
-                        <td><%= stat.value %></td>
+                      <th scope="row"><%= moment(stat.date).format('DD/MM/YYYY') %></th>
+                      <td><%= stat.fi %></td>
+                      <td><%= stat.fs %></td>
+                      <td><%= stat.typeAction %></td>
+                      <td><%= stat.action %></td>
+                      <td><%= stat.count %></td>
                     </tr>
-                <% }) %>
-                </tbody>
-            </table>
+                    <% }) %>
+                  </tbody>
+                </table>
+            <% } %>
         </div>
     </div>
 </div>
