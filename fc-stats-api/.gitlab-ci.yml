@@ -1,19 +1,8 @@
-build(fc-stats):
-  stage: build
-  image: node:8
-  script:
-    - cd fc-stats
-    - npm ci
-    - npm build
-  artifacts:
-    paths:
-      - fc-stats/node_modules
-
 test(fc-stats):
   stage: test
   image: node:8
   dependencies:
-    - build(fc-stats)
+    - global-install
   script:
     - cd fc-stats
     # Can't run all tests on CI yet, E2E tests need an elasticsearch instance/mock

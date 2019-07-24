@@ -9,8 +9,8 @@ import * as flash from 'express-flash';
 
 import 'dotenv';
 import { ConfigService } from 'nestjs-config';
-import { UnauthorizedExceptionFilter } from 'shared/authentication/filter/UnauthorizedException.filter';
-import { PASSPORT } from 'shared/authentication/authentication.module';
+import { UnauthorizedExceptionFilter } from '@fc/shared/authentication/filter/UnauthorizedException.filter';
+import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

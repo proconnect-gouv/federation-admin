@@ -1,20 +1,8 @@
-build(fc-workers):
-  stage: build
-  image: node:8
-  script:
-    - cd fc-workers
-    - npm ci
-    - npm build
-  artifacts:
-    paths:
-      - fc-workers/node_modules
-
 test(fc-workers):
   stage: test
   image: node:8
   dependencies:
-    - build(fc-workers)
+    - global-install
   script:
     - cd fc-workers
-    - npm run lint
     - npm run test
