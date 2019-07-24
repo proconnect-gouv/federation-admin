@@ -10,8 +10,8 @@ import * as Bundler from 'parcel-bundler';
 
 import 'dotenv';
 import { ConfigService } from 'nestjs-config';
-import { UnauthorizedExceptionFilter } from 'shared/authentication/filter/UnauthorizedException.filter';
-import { PASSPORT } from 'shared/authentication/authentication.module';
+import { UnauthorizedExceptionFilter } from '@fc/shared/authentication/filter/UnauthorizedException.filter';
+import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 
 async function bootstrap() {

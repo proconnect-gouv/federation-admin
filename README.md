@@ -2,9 +2,5 @@
 
 ## Installation
 
-- `npm install`
-- `npx lerna bootstrap`
-
-## Tests
-
-- `npm test`
+- `cd /var/www/app`
+- `yarn install`

@@ -1,9 +1,10 @@
 {
-  "name": "fc-stats-nest",
+  "name": "@fc/stats",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --sync --require=ts-node/register --require=tsconfig-paths/register",
@@ -52,7 +53,7 @@
     "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
-    "shared": "file:../shared",
+    "@fc/shared": "^0.0.01",
     "sqlite3": "^4.0.8",
     "typeorm": "^0.2.17"
   },
@@ -64,7 +65,6 @@
     "@types/supertest": "^2.0.7",
     "jest": "^23.6.0",
     "less": "^3.9.0",
-    "nodemon": "^1.18.9",
     "supertest": "^3.4.1",
     "ts-jest": "24.0.2",
     "ts-node": "8.1.0",
