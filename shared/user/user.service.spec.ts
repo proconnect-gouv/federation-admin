@@ -12,6 +12,7 @@ describe('UserService', () => {
   const userRepository = {
     findOne: jest.fn(),
     save: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -80,6 +81,20 @@ describe('UserService', () => {
       expect(userRepository.save).toHaveBeenCalledTimes(1);
       const { passwordHash } = userRepository.save.mock.calls[0][0];
       expect(bcrypt.compare(userCreation.password, passwordHash)).toBeTruthy();
+    });
+  });
+  describe('deleteUserById', () => {
+    it('calls the delete function of the userRepository', async () => {
+      // set up
+      const id = '123';
+      const expectedRepositoryDeleteArguments = { id: '123' };
+      // action
+      await userService.deleteUserById(id);
+      // assertion
+      expect(userRepository.delete).toHaveBeenCalledTimes(1);
+      expect(userRepository.delete).toHaveBeenCalledWith(
+        expectedRepositoryDeleteArguments,
+      );
     });
   });
 });

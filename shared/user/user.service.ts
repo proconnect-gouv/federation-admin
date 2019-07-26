@@ -30,4 +30,8 @@ export class UserService {
       passwordHash,
     });
   }
+
+  async deleteUserById(id: string): Promise<any> {
+    return this.userRepository.delete({ id });
+  }
 }
