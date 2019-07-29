@@ -7,7 +7,6 @@ import { AuthenticationModule } from '@fc/shared/authentication/authentication.m
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { StatsModule } from './stats/stats.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
-import { StatsController } from './stats/stats.controller';
 
 @Module({
   imports: [
@@ -24,8 +23,6 @@ import { StatsController } from './stats/stats.controller';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-    consumer
-      .apply(AuthenticatedMiddleware)
-      .forRoutes(AppController, StatsController);
+    consumer.apply(AuthenticatedMiddleware).forRoutes(AppController);
   }
 }

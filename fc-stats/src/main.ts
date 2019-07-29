@@ -13,9 +13,11 @@ import { ConfigService } from 'nestjs-config';
 import { UnauthorizedExceptionFilter } from '@fc/shared/authentication/filter/UnauthorizedException.filter';
 import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
+import { RolesGuard } from '@fc/shared/authentication/guard/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get<ConfigService>(ConfigService);
 
   // View engine initialization
   app.engine('ejs', require('ejs').renderFile);
@@ -29,14 +31,8 @@ async function bootstrap() {
   app.use(flash());
 
   // Sessions initialization
-  app.use(
-    session({
-      secret: 'le père Noël n\'existe pas',
-      name: 'sessionId',
-      resave: true,
-      saveUninitialized: false
-    })
-  );
+  app.use(session(configService.get('session')));
+
   app.use(cookieParser());
 
   // Passport initialization
@@ -48,7 +44,6 @@ async function bootstrap() {
   app.useGlobalFilters(new UnauthorizedExceptionFilter());
 
   // Get port from config
-  const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('http').port;
 
   // Setup locals for all the routes
@@ -58,9 +53,13 @@ async function bootstrap() {
   // Setup assets bundling
   const file = join(__dirname, '..', 'public/javascript/main.js');
   const bundler = new Bundler(file, {
-    outDir: './dist/client/'
+    outDir: './dist/client/',
   });
   app.use(bundler.middleware());
+
+  // Setup roles-based security
+  const rolesGuard = app.get<RolesGuard>(RolesGuard);
+  app.useGlobalGuards(rolesGuard);
 
   await app.listen(port);
 }

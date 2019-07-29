@@ -20,5 +20,5 @@ export class StatsDTO {
   readonly date: Date;
 
   @IsInt()
-  readonly count: Number;
+  readonly count: number;
 }

@@ -5,12 +5,12 @@ import { ConfigService } from 'nestjs-config';
 describe('LocalsInterceptor', () => {
   let localsInterceptor;
   const configService = {
-    get: jest.fn()
+    get: jest.fn(),
   };
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [LocalsInterceptor, ConfigService]
+      providers: [LocalsInterceptor, ConfigService],
     })
       .overrideProvider(ConfigService)
       .useValue(configService)
@@ -20,10 +20,10 @@ describe('LocalsInterceptor', () => {
 
   it('should add the meta information to all responses', async () => {
     const req = {
-      user: 'jean_moust'
+      user: 'jean_moust',
     };
     const res: any = {
-      locals: {}
+      locals: {},
     };
     const currentBranch = 'testing';
     const shortHash = '3f17f344';
@@ -31,11 +31,11 @@ describe('LocalsInterceptor', () => {
     const context = {
       switchToHttp: jest.fn(() => ({
         getRequest: jest.fn(() => req),
-        getResponse: jest.fn(() => res)
-      }))
+        getResponse: jest.fn(() => res),
+      })),
     };
     const next = {
-      handle: jest.fn()
+      handle: jest.fn(),
     };
     configService.get.mockReturnValueOnce({
       environment: 'testing',
@@ -43,7 +43,7 @@ describe('LocalsInterceptor', () => {
         'https://gitlab.com/france-connect/FranceConnect/commit/',
       currentBranch,
       latestCommitShortHash: shortHash,
-      latestCommitLongHash: longHash
+      latestCommitLongHash: longHash,
     });
 
     await localsInterceptor.intercept(context, next);
@@ -51,7 +51,7 @@ describe('LocalsInterceptor', () => {
     expect(configService.get).toBeCalledWith('app');
     expect(res.locals.APP_ENVIRONMENT).toBe('testing');
     expect(res.locals.COMMIT_URL_PREFIX).toBe(
-      'https://gitlab.com/france-connect/FranceConnect/commit/'
+      'https://gitlab.com/france-connect/FranceConnect/commit/',
     );
     expect(res.locals.GIT_CURRENT_BRANCH).toBe(currentBranch);
     expect(res.locals.GIT_LATEST_COMMIT_SHORT_HASH).toBe(shortHash);

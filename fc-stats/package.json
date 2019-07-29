@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --sync --require=ts-node/register --require=tsconfig-paths/register",
+    "fixtures:es": "curl -XPUT http://elasticsearch:9200/_bulk --data-binary @fixtures/bulk.json",
     "migrations:run": "npm run typeorm migration:run",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
@@ -21,7 +22,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node ./node_modules/typeorm/cli.js --config src/config/database.ts"
+    "typeorm": "ts-node ../node_modules/typeorm/cli.js --config src/config/database.ts"
   },
   "dependencies": {
     "@nestjs/common": "^6.0.0",
@@ -30,7 +31,6 @@
     "@nestjs/passport": "^6.1.0",
     "@nestjs/platform-express": "^6.0.0",
     "@nestjs/typeorm": "^6.1.1",
-    "@types/elasticsearch": "^5.0.34",
     "bcrypt": "^3.0.6",
     "bootstrap": "^4.3.1",
     "class-transformer": "^0.2.3",
@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^6.0.0",
+    "@types/elasticsearch": "^5.0.34",
     "@types/express": "^4.16.0",
     "@types/jest": "^23.3.13",
     "@types/node": "^10.12.18",

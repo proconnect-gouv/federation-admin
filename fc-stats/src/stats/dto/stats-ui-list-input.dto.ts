@@ -1,14 +1,20 @@
 import { IsOptional, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class StatsInputDTO {
+export class StatsUIListInputDTO {
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @Type(
+    /* istanbul ignore next */
+    () => Date,
+  )
   readonly start: Date;
 
   @IsOptional()
   @IsDate()
-  @Type(() => Date)
+  @Type(
+    /* istanbul ignore next */
+    () => Date,
+  )
   readonly stop: Date;
 }
