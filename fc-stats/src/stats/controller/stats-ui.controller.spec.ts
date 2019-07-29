@@ -1,13 +1,13 @@
 import { Test } from '@nestjs/testing';
-import { StatsController } from './stats.controller';
-import { StatsService } from './stats.service';
-import { StatsQueries } from './stats.queries';
+import { StatsUIController } from './stats-ui.controller';
+import { StatsService } from '../stats.service';
+import { StatsQueries } from '../stats.queries';
 import {
   ElasticsearchModule,
   ElasticsearchService,
 } from '@nestjs/elasticsearch';
 
-describe('StatsController', () => {
+describe('StatsUIController', () => {
   let statsController;
   const search = jest.fn();
   const elasticsearchService = {
@@ -23,13 +23,13 @@ describe('StatsController', () => {
         }),
       ],
       providers: [StatsService, StatsQueries],
-      controllers: [StatsController],
+      controllers: [StatsUIController],
     })
       .overrideProvider(ElasticsearchService)
       .useValue(elasticsearchService)
       .compile();
 
-    statsController = module.get<StatsController>(StatsController);
+    statsController = module.get<StatsUIController>(StatsUIController);
     jest.resetAllMocks();
   });
 
@@ -41,7 +41,7 @@ describe('StatsController', () => {
         stop: '',
       };
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.list(query);
       // Then
       expect(result).toEqual({});
     });
@@ -50,7 +50,7 @@ describe('StatsController', () => {
       // Given
       const query = {};
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.list(query);
       // Then
       expect(result).toEqual({});
     });
@@ -85,15 +85,17 @@ describe('StatsController', () => {
       // When
       const { stats } = await statsController.list(query);
       // Then
-      expect(stats).toEqual([{
-        id: 'foo',
-        fs: 'foo',
-        fi: 'bar',
-        count: 2,
-        typeAction: 'fizz',
-        action: 'buzz',
-        date: new Date('2019-03-01'),
-      }]);
+      expect(stats).toEqual([
+        {
+          id: 'foo',
+          fs: 'foo',
+          fi: 'bar',
+          count: 2,
+          typeAction: 'fizz',
+          action: 'buzz',
+          date: new Date('2019-03-01'),
+        },
+      ]);
     });
   });
 });

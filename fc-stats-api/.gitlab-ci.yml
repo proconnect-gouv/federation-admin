@@ -1,9 +1,0 @@
-test(fc-stats):
-  stage: test
-  image: node:8
-  dependencies:
-    - global-install
-  script:
-    - cd fc-stats
-    # Can't run all tests on CI yet, E2E tests need an elasticsearch instance/mock
-    - npm run test:unit

@@ -1,8 +1,8 @@
 import { IsOptional, IsArray } from 'class-validator';
 import { StatsDTO } from './stats.dto';
 
-export class StatsOutputDTO {
+export class StatsUIListOutputDTO {
   @IsOptional()
   @IsArray()
-  readonly stats?: Array<StatsDTO>;
+  readonly stats?: StatsDTO[];
 }

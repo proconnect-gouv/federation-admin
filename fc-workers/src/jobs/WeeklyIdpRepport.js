@@ -114,7 +114,7 @@ class WeeklyIdpRepport extends Job {
     const { idp, email } = input.get(schema, params);
     const { start, end } = WeeklyIdpRepport.getDateRange(new Date());
 
-    const url = `${config.getAPIRoot()}/totalByFi/${idp}/${start}/${end}`;
+    const url = `${config.getAPIRoot()}/totalByFi?fi=${idp}&start=${start}&stop=${end}`;
 
     // Action
     const request = await httpClient.get(url);
