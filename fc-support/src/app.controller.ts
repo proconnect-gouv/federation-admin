@@ -1,9 +1,9 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
 
 @Controller()
 export class AppController {
   @Get()
-  getHello(@Req() req): string {
-    return 'Hello ' + req.user.username;
+  public index(@Res() res) {
+    return res.redirect('/rnipp');
   }
 }

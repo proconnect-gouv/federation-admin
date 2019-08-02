@@ -1,0 +1,37 @@
+Code retour RNIPP : <strong><%= rnippResponse.code %></strong>
+<span data-toggle="tooltip" data-placement="right" data-html="true" data-container="body"
+    title="2 : demande identifiée sans divergence d'état civil<br/>
+    3 : demande identifiée avec divergence(s) d'état civil ou NIR<br/>
+    4 : demande non identifiée mais existence d'un seul écho<br/>
+    6 : demande non identifiée mais existence de plus d'un écho<br/>
+    7 : demande identifiée avec le nom d'usage uniquement<br/>
+    8 : demande non identifiée sans écho<br/>
+    9 : demande rejetée au contrôle en raison d'erreurs de syntaxe<br/>">
+    <i class="oi oi-info"></i>
+</span>
+
+<button type="button" class="btn btn-link italic" data-toggle="modal" data-target="#rnippModal">Détail</button>
+<div class="modal fade" tabindex="-1" role="dialog" id="rnippModal">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Retour brut du RNIPP</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="clipboard_text">
+				<pre><code id="xml-raw"><%= rnippResponse.raw %></code></pre>
+			</div>
+			<div class="modal-footer" style="justify-content:space-between;">
+				<a class="external-link" target="_blank" href="http://www.webtoolkitonline.com/xml-formatter.html">Formateur XML</a>
+
+				<button type="button" class="btn btn-primary copy-button" data-init="copyText" data-clipboard-target="#clipboard_text" title="xml copié !">
+						Copier le texte dans le presse papier
+				</button>
+
+				<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+			</div>
+		</div>
+	</div>
+</div>

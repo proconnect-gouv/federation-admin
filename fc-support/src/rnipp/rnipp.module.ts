@@ -1,0 +1,22 @@
+import { HttpModule, Module } from '@nestjs/common';
+import { RnippController } from './rnipp.controller';
+import { RnippService } from './rnipp.service';
+import { HttpConfigService } from 'src/config/http.service';
+import { RnippSerializer } from './rnippSerializer.service';
+import * as xml2js from 'xml2js';
+
+const xmlProvider = {
+  provide: 'Xml2js',
+  useValue: xml2js,
+};
+
+@Module({
+  imports: [
+    HttpModule.registerAsync({
+      useClass: HttpConfigService,
+    }),
+  ],
+  controllers: [RnippController],
+  providers: [RnippService, HttpConfigService, RnippSerializer, xmlProvider],
+})
+export class RnippModule {}

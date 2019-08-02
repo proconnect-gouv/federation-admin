@@ -1,0 +1,29 @@
+import $ from 'jquery';
+import 'bootstrap/dist/js/bootstrap';
+import { lazyInit } from './lazyinit';
+import { dateSinglePicker } from './dateSinglePicker';
+import { validateForm } from './validateForm';
+import { copyText } from './clipboard';
+import 'lightpick/css/lightpick.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/fonts/fontawesome-webfont.ttf';
+import 'font-awesome/css/font-awesome.css';
+import '../styles/main.less';
+
+
+const initMap = {
+  datePicker: dateSinglePicker,
+  validForm: validateForm,
+  copyText: copyText
+};
+
+$(document).ready(function() {
+  $('.nav-link[data-prefix]').each(function(index, link) {
+    var prefix = $(link).attr('data-prefix');
+    if (window.location.pathname.startsWith(prefix)) {
+      $(link).addClass('active');
+    }
+  });
+
+  lazyInit(initMap, 'body');
+});
