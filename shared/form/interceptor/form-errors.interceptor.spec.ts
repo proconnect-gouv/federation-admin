@@ -15,6 +15,7 @@ describe('FormErrorsInterceptor', () => {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue({
           body: dto,
+          csrfToken: jest.fn().mockReturnValue('ThIs_Is_A_cSrF_tOkEn'),
         }),
         getResponse: jest.fn().mockReturnValue(response),
       }),
@@ -58,6 +59,7 @@ describe('FormErrorsInterceptor', () => {
             age: ['Minimum'],
           },
           values: dto,
+          csrfToken: 'ThIs_Is_A_cSrF_tOkEn',
         });
         done();
       });
