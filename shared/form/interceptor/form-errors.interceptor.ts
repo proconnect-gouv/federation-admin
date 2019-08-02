@@ -9,7 +9,10 @@ export class FormErrorsInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> {
-    const dto = context.switchToHttp().getRequest().body;
+    const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
+    const dto = req.body;
+
     return next.handle().pipe(
       catchError(error => {
         // In case of validation error, we render the template with the errors and the DTO
@@ -27,10 +30,11 @@ export class FormErrorsInterceptor implements NestInterceptor {
             );
           }),
           map(errors => {
-            return context
-              .switchToHttp()
-              .getResponse()
-              .render(this.template, { errors, values: dto });
+            return res.render(this.template, {
+              errors,
+              values: dto,
+              csrfToken: req.csrfToken(),
+            });
           }),
         );
       }),
