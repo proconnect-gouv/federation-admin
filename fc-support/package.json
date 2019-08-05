@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --sync --require=ts-node/register --require=tsconfig-paths/register",
+    "migrations:run": "npm run typeorm migration:run",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
     "start:dev": "nodemon",
@@ -20,7 +21,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node ./node_modules/typeorm/cli.js --config src/config/database.ts"
+    "typeorm": "ts-node ../node_modules/typeorm/cli.js --config src/config/database.ts"
   },
   "dependencies": {
     "@fc/shared": "^0.0.1",
