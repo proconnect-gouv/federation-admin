@@ -21,3 +21,9 @@
 - stats.docker.dev-franceconnect.fr
 - exploitation.docker.dev-franceconnect.fr
 - support.docker.dev-franceconnect.fr
+
+
+## Variables d'env 
+    - (/fc-*/src/config)
+    - Utilisation de la lib nest-config ( d'où utilisation de fichier Typescript  cf: https://www.npmjs.com/package/nestjs-config )
+        
