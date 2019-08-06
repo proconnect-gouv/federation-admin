@@ -7,7 +7,7 @@ export default {
   clientSiret: process.env.RNIPP_CLIENT_SIRET || '',
   protocol: process.env.RNIPP_PROTOCOL || 'https',
   httpsAgentConfig: {
-    rejectUnauthorized: process.env.RNIPP_HTTPSAGENTCONFIG || false,
+    rejectUnauthorized: process.env.RNIPP_HTTPS_AGENT_CONFIG || false,
   },
 
   headers() {
