@@ -50,7 +50,7 @@ export class RnippService {
 
   private createRnippUrl(personData: Person): string {
     const protocol = this.config.get('rnipp.protocol');
-    // const hostname = this.config.get('rnipp.hostname');
+    const hostname = this.config.get('rnipp.hostname');
     const baseUrl = this.config.get('rnipp.baseUrl');
 
     const params = {
@@ -66,9 +66,9 @@ export class RnippService {
 
     Logger.debug(`Query for call rnipp API : ${query}`);
     Logger.debug(
-      `Url for call rnipp API : ${protocol}://rnipp.docker.dev-franceconnect.fr${baseUrl}&${query}`,
+      `Url for call rnipp API : ${protocol}://${hostname}${baseUrl}&${query}`,
     );
 
-    return `${protocol}://rnipp.docker.dev-franceconnect.fr${baseUrl}&${query}`;
+    return `${protocol}://${hostname}${baseUrl}&${query}`;
   }
 }
