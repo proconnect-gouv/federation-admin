@@ -7714,6 +7714,11 @@ nestjs-config@^1.4.0, nestjs-config@^1.4.1:
     reflect-metadata "^0.1.12"
     rxjs "^6.0.0"
 
+nestjs-typeorm-paginate@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/nestjs-typeorm-paginate/-/nestjs-typeorm-paginate-1.0.0.tgz#9505c14e4ec58fff3c103192debbf4ad5224af4e"
+  integrity sha512-oQnp+OnhoG7rglBSfFiacnwda+Ikaq9/JfIyUMHC0cSnr7/gmCYWxMcD3Tlai2s6ig5dQNghEka4GRkRJ815ZA==
+
 netmask@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
