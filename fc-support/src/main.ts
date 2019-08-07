@@ -49,9 +49,6 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Redirect to login if unauthorized
-  app.useGlobalFilters(new UnauthorizedExceptionFilter());
-
   // Cors
   // app.use(cors);
 
