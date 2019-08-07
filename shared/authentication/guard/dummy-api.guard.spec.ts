@@ -1,10 +1,10 @@
+import bcrypt from 'bcrypt';
 import { DummyApiGuard } from './dummy-api.guard';
-import { Reflector } from '@nestjs/core';
 import { ExecutionContext } from '@nestjs/common';
 
 describe('DummyApiGuard', () => {
   const config = {
-    key: 'foo',
+    key: '$2b$10$2XP.WZzsHirpnj2K17V1cujFvOuWvR0.nck6FU7dWhm9nzofc2NRe',
   };
 
   const configService = {
@@ -25,33 +25,33 @@ describe('DummyApiGuard', () => {
     getArgByIndex: jest.fn(),
   });
 
-  it('blocks the request if no key given', () => {
+  it('blocks the request if no key given', async () => {
     // Given
     const headers = {};
     const context = createContext(headers);
     const dummyApiGuard = new DummyApiGuard(configService);
     // When
-    const canActivate = dummyApiGuard.canActivate(context);
+    const canActivate = await dummyApiGuard.canActivate(context);
     // Then
     expect(canActivate).toBeFalsy();
   });
 
-  it('blocks the request if invalid key given', () => {
+  it('blocks the request if invalid key given', async () => {
     // Given
     const headers = { token: 'bar' };
     const context = createContext(headers);
     const dummyApiGuard = new DummyApiGuard(configService);
     // When
-    const canActivate = dummyApiGuard.canActivate(context);
+    const canActivate = await dummyApiGuard.canActivate(context);
     // Then
     expect(canActivate).toBeFalsy();
   });
 
-  it('lets the request if correct key given', () => {
+  it('lets the request if correct key given', async () => {
     // Given
     const headers = { token: 'foo' };
     const context = createContext(headers);
-    const dummyApiGuard = new DummyApiGuard(configService);
+    const dummyApiGuard = await new DummyApiGuard(configService);
     // When
     const canActivate = dummyApiGuard.canActivate(context);
     // Then
