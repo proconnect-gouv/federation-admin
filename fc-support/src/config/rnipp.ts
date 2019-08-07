@@ -8,8 +8,8 @@ export default {
   protocol: process.env.RNIPP_PROTOCOL || 'https',
   httpsAgentConfig: {
     rejectUnauthorized: process.env.RNIPP_HTTPS_AGENT_INSECURE || false,
-    ca: process.env.RNIPP_HTTPS_AGENT_CA || null,
-    key: process.env.RNIPP_HTTPS_AGENT_KEY || null,
-    cert: process.env.RNIPP_HTTPS_AGENT_CERT || null,
+    ca: process.env.RNIPP_HTTPS_AGENT_CA,
+    key: process.env.RNIPP_HTTPS_AGENT_KEY,
+    cert: process.env.RNIPP_HTTPS_AGENT_CERT,
   },
 };
