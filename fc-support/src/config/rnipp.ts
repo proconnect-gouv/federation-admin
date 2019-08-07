@@ -12,11 +12,4 @@ export default {
     key: process.env.RNIPP_HTTPS_AGENT_KEY,
     cert: process.env.RNIPP_HTTPS_AGENT_CERT,
   },
-
-  headers() {
-    return {
-      userId: this.get('rnipp.userId'),
-      clientSiret: this.get('rnipp.clientSiret'),
-    };
-  },
 };
