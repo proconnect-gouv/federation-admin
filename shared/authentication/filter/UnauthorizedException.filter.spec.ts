@@ -16,11 +16,12 @@ describe('UnauthorizedExceptionFilter', () => {
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
     };
-    const unauthorizedExceptionFilter = new UnauthorizedExceptionFilter();
+    const appRoot = '/foo/bar';
+    const exceptionFilter = new UnauthorizedExceptionFilter(appRoot);
 
-    unauthorizedExceptionFilter.catch(null, host as ArgumentsHost);
+    exceptionFilter.catch(null, host as ArgumentsHost);
 
     expect(redirect).toHaveBeenCalledTimes(1);
-    expect(redirect).toHaveBeenCalledWith('/login');
+    expect(redirect).toHaveBeenCalledWith('/foo/bar/login');
   });
 });

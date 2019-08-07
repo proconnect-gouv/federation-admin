@@ -4,6 +4,6 @@ import { Controller, Get, Res } from '@nestjs/common';
 export class AppController {
   @Get()
   async index(@Res() res) {
-    return res.redirect('/stats');
+    return res.redirect(`${res.locals.APP_ROOT}/stats`);
   }
 }

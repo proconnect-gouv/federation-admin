@@ -10,12 +10,16 @@ describe('AuthenticationController', () => {
       };
       const res = {
         redirect: jest.fn(),
+        locals: {
+          APP_ROOT: '/foo/bar',
+        },
       };
 
       authenticationController.logout(req, res);
 
       expect(req.logout).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
     });
   });
 });

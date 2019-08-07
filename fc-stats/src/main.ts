@@ -41,7 +41,9 @@ async function bootstrap() {
   app.use(passport.session());
 
   // Redirect to login if unauthorized
-  app.useGlobalFilters(new UnauthorizedExceptionFilter());
+  app.useGlobalFilters(
+    new UnauthorizedExceptionFilter(configService.get('app').app_root),
+  );
 
   // Get port from config
   const port = configService.get('http').port;

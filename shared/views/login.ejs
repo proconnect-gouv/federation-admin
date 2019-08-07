@@ -6,8 +6,8 @@
     <title>FC Exploitation</title>
 <body>
 <div class="container">
-    <form class="login-form" method="POST" action="/login">
-        <h2 class="login-form-heading"><img src="/images/FClogo.png" width="250px" alt=""></h2>
+    <form class="login-form" method="POST" action="<%= APP_ROOT %>/login">
+        <h2 class="login-form-heading"><img src="<%= APP_ROOT %>/images/FClogo.png" width="250px" alt=""></h2>
         <% if (messages.error) {%>
             <div class="alert alert-danger">
                 <%= messages.error %>
