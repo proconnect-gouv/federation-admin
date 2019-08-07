@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { resolve } from 'path';
 import { ConfigModule, ConfigService } from 'nestjs-config';
+import { AppContextMiddleware } from '@fc/shared/app-context/middleware/app-context.middleware';
 import { AuthenticationModule } from '@fc/shared/authentication/authentication.module';
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { RnippModule } from './rnipp/rnipp.module';
@@ -28,7 +29,12 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
     CsurfMiddleware.configure({});
     consumer
-      .apply(AuthenticatedMiddleware, RateLimitMiddleware, CsurfMiddleware)
+      .apply(
+        AppContextMiddleware,
+        AuthenticatedMiddleware,
+        RateLimitMiddleware,
+        CsurfMiddleware,
+      )
       .forRoutes(AppController, RnippController);
   }
 }

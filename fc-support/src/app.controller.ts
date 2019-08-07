@@ -4,6 +4,6 @@ import { Controller, Get, Res } from '@nestjs/common';
 export class AppController {
   @Get()
   public index(@Res() res) {
-    return res.redirect('/rnipp');
+    return res.redirect(`${res.locals.APP_ROOT}/rnipp`);
   }
 }

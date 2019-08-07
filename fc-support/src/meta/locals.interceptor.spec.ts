@@ -44,12 +44,14 @@ describe('LocalsInterceptor', () => {
       currentBranch,
       latestCommitShortHash: shortHash,
       latestCommitLongHash: longHash,
+      app_root: '/foo/bar',
     });
 
     await localsInterceptor.intercept(context, next);
 
     expect(configService.get).toBeCalledWith('app');
     expect(res.locals.APP_ENVIRONMENT).toBe('testing');
+    expect(res.locals.APP_ROOT).toBe('/foo/bar');
     expect(res.locals.COMMIT_URL_PREFIX).toBe(
       'https://gitlab.com/france-connect/FranceConnect/commit/',
     );

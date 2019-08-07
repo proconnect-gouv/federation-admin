@@ -1,5 +1,6 @@
 export default {
   environment: process.env.ENV || 'development',
+  app_root: process.env.APP_ROOT || '',
   commitUrlPrefix:
     process.env.COMMITS_URL_PREFIX ||
     'https://gitlab.com/france-connect/FranceConnect/commit/',

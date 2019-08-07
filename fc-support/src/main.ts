@@ -55,12 +55,14 @@ async function bootstrap() {
   // Cors
   // app.use(cors);
 
-  // Redirect to login if unauthorized
-  app.useGlobalFilters(new UnauthorizedExceptionFilter());
-
   // Get port from config
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('http').port;
+
+  // Redirect to login if unauthorized
+  app.useGlobalFilters(
+    new UnauthorizedExceptionFilter(configService.get('app').app_root),
+  );
 
   // Setup locals for all the routes
   const localsInterceptor = app.get<LocalsInterceptor>(LocalsInterceptor);
