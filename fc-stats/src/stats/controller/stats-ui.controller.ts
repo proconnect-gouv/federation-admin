@@ -25,10 +25,10 @@ export class StatsUIController {
     @Query() query: StatsUIListInputDTO,
   ): Promise<StatsUIListOutputDTO> {
     if (query.start && query.stop) {
-      const stats = await this.statsService.getEvents(
+      const { stats, meta } = await this.statsService.getEvents(
         query as StatsServiceParams,
       );
-      return { stats } as StatsUIListOutputDTO;
+      return { stats, meta } as StatsUIListOutputDTO;
     }
 
     return {};

@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { StatsQueries } from './stats.queries';
+import { fstat } from 'fs';
 
 describe('StatsQueries', () => {
   const START_DATE = new Date('2019-05-01');
@@ -32,6 +33,24 @@ describe('StatsQueries', () => {
       expect(result.body.query.bool.must[1].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
+    });
+
+    it('Should return a query with aggregation', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+      };
+      // When
+      const result = statsQueries.getEvents(params);
+
+      // Then
+      expect(result).toBeDefined(), expect(result.index).toBe('stats');
+      expect(result.body.aggs).toBeDefined();
+      expect(result.body.aggs.fi).toBeDefined();
+      expect(result.body.aggs.fs).toBeDefined();
+      expect(result.body.aggs.action).toBeDefined();
+      expect(result.body.aggs.typeAction).toBeDefined();
     });
   });
 
