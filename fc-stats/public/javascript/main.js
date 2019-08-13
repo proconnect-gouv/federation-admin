@@ -2,6 +2,8 @@ import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from './lazyinit';
 import { dateRangePicker } from './dateRangePicker'
+import { filterForm } from './filterForm'
+import { dropdown } from './dropdown'
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/fonts/fontawesome-webfont.ttf';
@@ -11,6 +13,8 @@ import '../style/main.less';
 
 const initMap = {
   datePicker: dateRangePicker,
+  filters: filterForm,
+  dropdown: dropdown,
 };
 
 $(document).ready(function() {

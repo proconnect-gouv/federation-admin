@@ -1,5 +1,12 @@
-import { IsOptional, IsDate } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsOptional,
+  IsDate,
+  IsString,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { FilterParamDTO } from './filter-param.dto';
 
 export class StatsUIListInputDTO {
   @IsOptional()
@@ -17,4 +24,15 @@ export class StatsUIListInputDTO {
     () => Date,
   )
   readonly stop: Date;
+
+  @IsOptional()
+  @IsString()
+  readonly action: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FilterParamDTO)
+  @Transform(value => value.map(FilterParamDTO.parse), { toClassOnly: true })
+  readonly filters: FilterParamDTO[];
 }

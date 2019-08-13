@@ -26,7 +26,6 @@ export function dateRangePicker(element) {
       }
     },
   };
-
   picker = new Lightpick(config);
   picker.submit = false;
 }

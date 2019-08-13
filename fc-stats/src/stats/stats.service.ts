@@ -6,6 +6,8 @@ import { StatsDTO } from './dto/stats.dto';
 import { StatsQueries } from './stats.queries';
 import { StatsServiceParams } from './interfaces/stats-service-params.interface';
 import { TotalByFIWeek } from './interfaces/total-by-fi-response.interface';
+import { StatsUIListOutputDTO } from './dto/stats-ui-list-output.dto';
+import { MetaDTO } from './dto/meta.dto';
 @Injectable()
 export class StatsService {
   constructor(
@@ -13,20 +15,49 @@ export class StatsService {
     private readonly statsQueries: StatsQueries,
   ) {}
 
-  async getEvents(params: StatsServiceParams): Promise<StatsDTO[]> {
+  async getEvents(params: StatsServiceParams): Promise<StatsUIListOutputDTO> {
     const query: SearchParams = this.statsQueries.getEvents(params);
     const data: SearchResponse<
       any
     > = await this.elasticsearchService.getClient().search(query);
+
     const esResponse: StatsDTO[] = this.getItems(data);
 
-    return esResponse;
+    /** Get filters menu data */
+    const total = data.hits.total;
+    const fsList = this.getAggregate(data, 'fs');
+    const fiList = this.getAggregate(data, 'fi');
+    const actionList = this.getAggregate(data, 'action');
+    const typeActionList = this.getAggregate(data, 'typeAction');
+
+    const meta: MetaDTO = {
+      total,
+      fsList,
+      fiList,
+      actionList,
+      typeActionList,
+    };
+
+    return {
+      stats: esResponse,
+      meta,
+    };
   }
 
   private getItems(response: SearchResponse<any>): StatsDTO[] {
     return response.hits.hits.map(item =>
       plainToClass(StatsDTO, { id: item._id, ...item._source }),
     );
+  }
+  // Get FI, FS, Action, Type Action list
+  private getAggregate(
+    response: SearchResponse<any>,
+    aggregateName: string,
+  ): string[] {
+    const aggregation = response.aggregations[aggregateName];
+    let aggregateKeys: string[] = [];
+    aggregateKeys = aggregation.buckets;
+    return aggregateKeys;
   }
 
   async getTotalByActionAndRange(params: StatsServiceParams): Promise<number> {

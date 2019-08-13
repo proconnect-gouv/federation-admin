@@ -6,6 +6,8 @@ import {
 import { StatsService } from './stats.service';
 import { StatsQueries } from './stats.queries';
 import { StatsDTO } from './dto/stats.dto';
+import { StatsUIListOutputDTO } from './dto/stats-ui-list-output.dto';
+import { MetaDTO } from './dto/meta.dto';
 
 describe('StatsService', () => {
   let statsService: StatsService;
@@ -32,7 +34,7 @@ describe('StatsService', () => {
   });
 
   describe('getEvents', () => {
-    it('call es service wih query', async () => {
+    it('call es service wih only range query params', async () => {
       // Given
       const params = {
         start: new Date('2019-01-01'),
@@ -57,15 +59,93 @@ describe('StatsService', () => {
             },
           ],
         },
+        aggregations: {
+          fi: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          fs: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          action: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          typeAction: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+        },
       };
       search.mockResolvedValueOnce(elasticResponse);
       // When
       const result = await statsService.getEvents(params);
       // Then
       expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result).toHaveLength(1);
-      expect(result[0] instanceof StatsDTO).toBe(true);
+      expect(result instanceof Object).toBe(true);
+      expect(search.mock.calls).toHaveLength(1);
+    });
+
+    it('call es service wih range and filter query params', async () => {
+      // Given
+      const params = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-06-01'),
+        filter: [{ key: 'fi', value: 'dgfip' }],
+      };
+      const elasticResponse = {
+        hits: {
+          hits: [
+            {
+              _index: 'stats',
+              _type: 'entry',
+              _id: 'foo',
+              _score: 1.42,
+              _source: {
+                fs: 'foo',
+                fi: 'bar',
+                count: 2,
+                typeAction: 'fizz',
+                action: 'buzz',
+                date: new Date('2019-03-01'),
+              },
+            },
+          ],
+        },
+        aggregations: {
+          fi: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          fs: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          action: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          typeAction: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+        },
+      };
+      search.mockResolvedValueOnce(elasticResponse);
+      // When
+      const result = await statsService.getEvents(params);
+      // Then
+      expect(result).toBeDefined();
+      expect(result instanceof Object).toBe(true);
       expect(search.mock.calls).toHaveLength(1);
     });
   });
