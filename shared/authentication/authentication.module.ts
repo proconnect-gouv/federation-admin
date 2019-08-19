@@ -8,6 +8,7 @@ import { LocalSerializer } from './passport/local.serializer';
 import { LocalAuthGuard } from './guard/local.guard';
 import * as passport from 'passport';
 import { RolesGuard } from './guard/roles.guard';
+import { TotpService } from './totp/totp.service';
 
 const authenticationServiceProvider = {
   provide: 'IAuthenticationService',
@@ -34,7 +35,8 @@ const passportProvider = {
     LocalAuthGuard,
     RolesGuard,
     passportProvider,
+    TotpService,
   ],
-  exports: [LocalSerializer, passportProvider],
+  exports: [LocalSerializer, passportProvider, TotpService],
 })
 export class AuthenticationModule {}

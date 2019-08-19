@@ -21,4 +21,7 @@ export class User {
 
   @Column({ nullable: true })
   passwordHash: string | undefined;
+
+  @Column({ nullable: true })
+  secret: string;
 }

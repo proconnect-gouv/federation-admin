@@ -13,6 +13,16 @@ export class FormErrorsInterceptor implements NestInterceptor {
     const res = context.switchToHttp().getResponse();
     const dto = req.body;
 
+    if (req.totp && req.totp === 'invalid') {
+      return new Observable(
+        res.render(this.template, {
+          errors: { _totp: ["Le TOTP saisi n'est pas valide"] },
+          values: dto,
+          csrfToken: req.csrfToken(),
+        }),
+      );
+    }
+
     return next.handle().pipe(
       catchError(error => {
         // In case of validation error, we render the template with the errors and the DTO
