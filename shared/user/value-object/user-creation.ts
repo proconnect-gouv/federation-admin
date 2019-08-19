@@ -6,5 +6,6 @@ export class UserCreation {
     public readonly email: string,
     public readonly password: string,
     public readonly roles: UserRole[],
+    public readonly secret: string,
   ) {}
 }

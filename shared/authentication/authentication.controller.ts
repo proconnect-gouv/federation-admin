@@ -13,8 +13,10 @@ import { LocalAuthGuard } from './guard/local.guard';
 export class AuthenticationController {
   @Get('login')
   @Render('login')
-  // tslint:disable-next-line:no-empty
-  public loginView() {}
+  public loginView(@Req() req) {
+    const csrfToken = req.csrfToken();
+    return { csrfToken };
+  }
 
   @Post('login')
   @UseGuards(new LocalAuthGuard())
