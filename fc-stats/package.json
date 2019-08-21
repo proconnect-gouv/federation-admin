@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@fc/shared": "^0.0.01",
+    "@nest-middlewares/csurf": "^6.0.0",
     "@nestjs/common": "^6.0.0",
     "@nestjs/core": "^6.0.0",
     "@nestjs/elasticsearch": "^6.0.1",
