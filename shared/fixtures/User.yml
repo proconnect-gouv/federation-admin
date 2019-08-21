@@ -44,6 +44,23 @@ items:
       - 'inactive_operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+  paul:
+    id: '0a0c748a-6ad1-4408-9d6f-1dbc163f2b26'
+    username: 'paul'
+    email: '{{internet.email}}'
+    roles:
+      - 'new_account'
+      - 'inactive_admin'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+  bob:
+    id: 'a8360632-0c24-4324-bc4a-f39087af98b5'
+    username: 'bob'
+    email: '{{internet.email}}'
+    roles:
+      - 'admin'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
   user{1..10}:
     username: '{{name.firstName}}'
     email: '{{internet.email}}'
