@@ -12,6 +12,7 @@
 					<%= messages.error %>
 				</div>
 			<% } %>
+      <input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
 			<label for="username" class="sr-only">Username</label>
 			<input type="text" name="username" class="form-control" placeholder="Username" required autofocus="">
 			<label for="password" class="sr-only">Password</label>

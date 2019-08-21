@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import { AppContextMiddleware } from '@fc/shared/app-context/middleware/app-context.middleware';
 import { AuthenticationModule } from '@fc/shared/authentication/authentication.module';
+import { AuthenticationController } from '@fc/shared/authentication/authentication.controller';
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { RnippModule } from './rnipp/rnipp.module';
 import { RnippController } from './rnipp/rnipp.controller';
@@ -36,5 +37,7 @@ export class AppModule implements NestModule {
         CsurfMiddleware,
       )
       .forRoutes(AppController, RnippController);
+
+    consumer.apply(CsurfMiddleware).forRoutes(AuthenticationController);
   }
 }
