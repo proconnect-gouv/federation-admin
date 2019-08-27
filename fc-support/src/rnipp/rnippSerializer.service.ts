@@ -88,15 +88,17 @@ export class RnippSerializer {
     return {
       identity: {
         gender: translationGenderFormRnipp,
-        familyName: _.get(
-          json,
-          `${IDENTIFICATION}.${FAMILY_NAME}`,
-          'Pas de nom de famille',
+        familyName: _.join(
+          _.get(
+            json,
+            `${IDENTIFICATION}.${FAMILY_NAME}`,
+            'Pas de nom de famille',
+          ),
+          ' ',
         ),
-        givenName: _.get(
-          json,
-          `${IDENTIFICATION}.${GIVEN_NAME}`,
-          'Pas de prénom',
+        givenName: _.join(
+          _.get(json, `${IDENTIFICATION}.${GIVEN_NAME}`, 'Pas de prénom'),
+          ' ',
         ),
         preferredUsername: _.get(
           json,

@@ -123,7 +123,9 @@ describe('RnippSerializer (e2e)', () => {
       });
 
       const expectedContraints = {
-        errors: ['familyName must be a string'],
+        errors: [
+          'familyName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
+        ],
       };
 
       try {
@@ -175,7 +177,9 @@ describe('RnippSerializer (e2e)', () => {
       });
 
       const expectedContraints = {
-        errors: ['givenName must be a string'],
+        errors: [
+          'givenName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
+        ],
       };
 
       try {
@@ -328,7 +332,7 @@ describe('RnippSerializer (e2e)', () => {
 
       const expectedContraints = {
         errors: [
-          'familyName must be a string',
+          'familyName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
           'birthdate must be a valid ISO 8601 date string',
           'birthPlace must match /^[0-9]{5}$/ regular expression',
           'birthCountry must match /^[0-9]{5}$/ regular expression',

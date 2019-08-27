@@ -54,8 +54,8 @@ export class RnippService {
     const baseUrl = this.config.get('rnipp.baseUrl');
 
     const params = {
-      nom: encodeURIComponent(personData.familyName),
-      prenoms: encodeURIComponent(personData.givenName),
+      nom: personData.familyName,
+      prenoms: personData.givenName,
       dateNaissance: personData.birthdate.replace(/\-/g, ''),
       sexe: personData.gender.charAt(0).toUpperCase(),
       codeLieuNaissance: personData.birthPlace

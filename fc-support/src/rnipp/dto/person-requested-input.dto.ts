@@ -1,22 +1,29 @@
-import { IsString, IsISO8601, Matches, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsISO8601,
+  Matches,
+  IsIn,
+  ValidationOptions,
+  ValidateIf,
+} from 'class-validator';
 
-import { ValidationOptions, ValidateIf } from 'class-validator';
+const NAME_REGEX = /^[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*$/;
 
 export class PersonRequestedDTO {
   @IsIn(['male', 'female'])
   @IsString()
   readonly gender: string;
 
-  @Matches(/^[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*$/)
+  @Matches(NAME_REGEX)
   @IsString()
   readonly familyName: string;
 
   @IsOptional()
-  @Matches(/^[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*$/)
+  @Matches(NAME_REGEX)
   @IsString()
   readonly preferredUsername: string;
 
-  @Matches(/^[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*$/)
+  @Matches(NAME_REGEX)
   @IsString()
   readonly givenName: string;
 
