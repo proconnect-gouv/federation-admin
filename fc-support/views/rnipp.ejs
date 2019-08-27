@@ -70,7 +70,7 @@
 							id="family-name"
 							name="familyName"
 							value="<%= (locals.person && person.requested.familyName) ? person.requested.familyName : '' %>"
-							pattern="[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*"
 							required
 						>
 						<div class="invalid-feedback">
@@ -85,7 +85,7 @@
 							id="preferred-username"
 							name="preferredUsername"
 							value="<%= (locals.person && person.requested.preferredUsername) ? person.requested.preferredUsername : '' %>"
-							pattern="[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*"
 						>
 						<div class="invalid-feedback">
 							Veuillez renseigner un nom d'usage
@@ -100,7 +100,7 @@
 							name="givenName"
 							placeholder="exemple : Jean Michel Pierre Marie"
 							value="<%= (locals.person && person.requested.givenName) ? person.requested.givenName : '' %>"
-							pattern="[a-zA-Z]+(-[a-zA-Z]+)*( [a-zA-Z\-]+)*"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*"
 							required
 						>
 						<div class="invalid-feedback">
