@@ -6,7 +6,7 @@ import {
   ValidationPipe,
   UseGuards,
 } from '@nestjs/common';
-import { StatsService } from '../stats.service';
+import { StatsService } from '../service/stats.service';
 import { StatsAPITotalActionInputDTO } from '../dto/stats-api-total-action-input.dto';
 import { StatsAPITotalActionOutputDTO } from '../dto/stats-api-total-action-output.dto';
 import { StatsAPITotalFIInputDTO } from '../dto/stats-api-total-fi-input.dto';

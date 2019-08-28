@@ -1,19 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchParams, SearchResponse } from 'elasticsearch';
+import * as ElasticsearchScrollStream from 'elasticsearch-scroll-stream';
+import { Readable } from 'stream';
 import { plainToClass } from 'class-transformer';
-import { StatsDTO } from './dto/stats.dto';
-import { StatsQueries } from './stats.queries';
-import { StatsServiceParams } from './interfaces/stats-service-params.interface';
-import { TotalByFIWeek } from './interfaces/total-by-fi-response.interface';
-import { StatsUIListOutputDTO } from './dto/stats-ui-list-output.dto';
-import { MetaDTO } from './dto/meta.dto';
+import { StatsDTO } from '../dto/stats.dto';
+import { StatsQueries } from '../stats.queries';
+import { StatsServiceParams } from '../interfaces/stats-service-params.interface';
+import { TotalByFIWeek } from '../interfaces/total-by-fi-response.interface';
+import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
+import { MetaDTO } from '../dto/meta.dto';
 @Injectable()
 export class StatsService {
   constructor(
     private readonly elasticsearchService: ElasticsearchService,
     private readonly statsQueries: StatsQueries,
   ) {}
+
+  streamEvents(params: StatsServiceParams): Readable {
+    const query: SearchParams = this.statsQueries.streamEvents(params);
+    const client = this.elasticsearchService.getClient();
+    const streamConfig = { objectMode: true };
+
+    const stream: Readable = new ElasticsearchScrollStream(
+      client,
+      query,
+      [],
+      streamConfig,
+    );
+
+    return stream;
+  }
 
   async getEvents(params: StatsServiceParams): Promise<StatsUIListOutputDTO> {
     const query: SearchParams = this.statsQueries.getEvents(params);

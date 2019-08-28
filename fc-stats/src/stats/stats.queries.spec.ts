@@ -1,6 +1,5 @@
 import { Test } from '@nestjs/testing';
 import { StatsQueries } from './stats.queries';
-import { fstat } from 'fs';
 
 describe('StatsQueries', () => {
   const START_DATE = new Date('2019-05-01');
@@ -14,6 +13,74 @@ describe('StatsQueries', () => {
     }).compile();
 
     statsQueries = await module.get<StatsQueries>(StatsQueries);
+  });
+
+  describe('pushFilterValue', () => {
+    it('Should return a new filter term query', () => {
+      // Given
+      const filters = [];
+      const key = 'foo';
+      const value = 'bar';
+      // When
+      statsQueries.pushFilterValue(filters, key, value);
+      // Then
+      expect(filters).toHaveLength(1);
+      expect(filters).toEqual([{ terms: { foo: ['bar'] } }]);
+    });
+    it('Should append values to existing filter term query', () => {
+      // Given
+      const filters = [];
+      const key = 'foo';
+      const value1 = 'bar';
+      const value2 = 'baz';
+      // When
+      statsQueries.pushFilterValue(filters, key, value1);
+      statsQueries.pushFilterValue(filters, key, value2);
+      // Then
+      expect(filters).toHaveLength(1);
+      expect(filters).toEqual([{ terms: { foo: ['bar', 'baz'] } }]);
+    });
+    it('Should append filters', () => {
+      // Given
+      const filters = [];
+      const key1 = 'foo';
+      const value1 = 'bar';
+      const value2 = 'baz';
+      const key2 = 'wizz';
+      const value3 = 'fizz';
+      const value4 = 'buzz';
+      // When
+      statsQueries.pushFilterValue(filters, key1, value1);
+      statsQueries.pushFilterValue(filters, key1, value2);
+      statsQueries.pushFilterValue(filters, key2, value3);
+      statsQueries.pushFilterValue(filters, key2, value4);
+      // Then
+      expect(filters).toHaveLength(2);
+      expect(filters).toEqual([
+        { terms: { foo: ['bar', 'baz'] } },
+        { terms: { wizz: ['fizz', 'buzz'] } },
+      ]);
+    });
+  });
+
+  describe('streamEvents', () => {
+    it('Should return a query', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+      };
+      // When
+      const result = statsQueries.streamEvents(params);
+      // Then
+      expect(result).toBeDefined(), expect(result.index).toBe('stats');
+      expect(result.body.query.bool.must[1].range.date.gte).toBe(
+        START_DATE.getTime(),
+      );
+      expect(result.body.query.bool.must[1].range.date.lte).toBe(
+        STOP_DATE.getTime(),
+      );
+    });
   });
 
   describe('getEvents', () => {

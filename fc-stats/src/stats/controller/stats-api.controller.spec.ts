@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { StatsAPIController } from './stats-api.controller';
-import { StatsService } from '../stats.service';
+import { StatsService } from '../service/stats.service';
 import { StatsQueries } from '../stats.queries';
 import {
   ElasticsearchModule,

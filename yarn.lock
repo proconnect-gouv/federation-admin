@@ -3230,6 +3230,11 @@ csurf@^1.10.0, csurf@^1.9.0:
     csrf "3.1.0"
     http-errors "~1.7.2"
 
+csv-stringify@^5.3.0:
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-5.3.3.tgz#c4725686a33db9f61e70d87af712285baefebe21"
+  integrity sha512-q8Qj+/lN74LRmG7Mg0LauE5WcnJOD5MEGe1gI57IYJCB61KWuEbAFHm1uIPDkI26aqElyBB57SlE2GGwq2EY5A==
+
 cypress@^3.2.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-3.4.0.tgz#8053ee107eb6309f26abd57e882d05578bdc3391"
@@ -3675,6 +3680,11 @@ ejs@^2.6.1, ejs@^2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.2.tgz#3a32c63d1cd16d11266cd4703b14fec4e74ab4f6"
   integrity sha512-PcW2a0tyTuPHz3tWyYqtK6r1fZ3gp+3Sop8Ph+ZYN81Ob5rwmbHEzaqs10N3BEsaGTkh/ooniXK+WwszGlc2+Q==
+
+elasticsearch-scroll-stream@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-scroll-stream/-/elasticsearch-scroll-stream-1.2.0.tgz#37d5a2603dff7885d8eda7cd2820ec08d7518657"
+  integrity sha512-74liORUT8IIsOzbGHOeJo2Fkx3dSmF6RXEy1Ga3AvgmoNuemdnotWcbord4kf5emheXziDmJnsrnD9PsTxo/qQ==
 
 elasticsearch@^16.1.1, elasticsearch@^16.3.0:
   version "16.3.0"
@@ -9346,7 +9356,7 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
-query-string@^6.8.1:
+query-string@^6.8.1, query-string@^6.8.2:
   version "6.8.2"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.8.2.tgz#36cb7e452ae11a4b5e9efee83375e0954407b2f6"
   integrity sha512-J3Qi8XZJXh93t2FiKyd/7Ec6GNifsjKXUsVFkSBj/kjLsDylWhnCz4NT1bkPcKotttPW+QbKGqqPH8OoI2pdqw==

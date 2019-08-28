@@ -13,154 +13,57 @@
 
             <div>
               <form id="search" action="<%= APP_ROOT %>/stats" method="get">
-                <div class="form-inline d-flex justify-content-center">
-                    <label class="p-1" for="start">Du</label>
-                    <input
-                      id="start"
-                      name="start"
-                      type="text"
-                      data-init="datePicker"
-                      data-secondField="stop"
-                      data-form="search"
-                      class="form-control mb-1"
-                      value="<%= REQ_QUERY.start %>">
-                
-                    <label class="p-1" for="stop">Au</label>
-                    <input
-                      id="stop"
-                      name="stop"
-                      type="text"
-                      value="<%= REQ_QUERY.stop %>"
-                      class="form-control mb-1"
-                    />
-                </div>
-                <div class="form-inline d-flex justify-content-center">
-                  <% if (locals.meta) { %>
-                  <!------------------ List des FS --------------------->
-                  <div id="fs-dropdown" class="dropdown m-3">
-                    <button class="btn btn-secondary dropdown-toggle" 
-                      data-init="dropdown" 
-                      type="button" id="dropdownMenuButton" 
-                      data-toggle="dropdown" 
-                      aria-haspopup="true" 
-                      aria-expanded="false">
-                      Filter par FS
-                    </button>
 
-                    <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton">
-                      <% locals.meta.fsList.forEach(function(fs){ %>
-                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                          <input 
-                            class="custom-control-input" 
-                            type="checkbox" 
-                            id="<%= fs.key %>" 
-                            data-init="filters" 
-                            value="fs:<%= fs.key %>" 
-                            name="filters[]" 
-                            data-form="search">
-                          <label 
-                            class="custom-control-label" 
-                            for="<%= fs.key %>"><%= fs.key %></label>
-                          <div class="dropdown-divider"></div>
-                        </div>
-                      <% }) %>
+                <div class="form-inline">
+
+                  <div class="form-group form-inline col-md-3">
+
+                      <label class="p-1" for="start">Du</label>
+                      <input
+                        id="start"
+                        name="start"
+                        type="text"
+                        data-init="datePicker"
+                        data-secondField="stop"
+                        data-form="search"
+                        class="form-control form-control-sm mb-1"
+                        value="<%= REQ_QUERY.start %>"
+                        style="width: 90px;"
+                        >
+
+                      <label class="p-1" for="stop">Au</label>
+                      <input
+                        id="stop"
+                        name="stop"
+                        type="text"
+                        value="<%= REQ_QUERY.stop %>"
+                        class="form-control  form-control-sm mb-1"
+                        style="width: 90px;"
+                      />
+                  </div>
+
+                    <div class="form-group col-md-7">
+                    <% if (locals.meta) { %>
+                      <%- include('partials/dropdown', { label: 'FI', key: 'fi', values: locals.meta.fiList }) %>
+                      <%- include('partials/dropdown', { label: 'FS', key: 'fs', values: locals.meta.fsList }) %>
+                      <%- include('partials/dropdown', { label: 'Type Action', key: 'typeAction', values: locals.meta.typeActionList }) %>
+                      <%- include('partials/dropdown', { label: 'Action', key: 'action', values: locals.meta.actionList }) %>
+                    <% } %>
+
+                      <button type="submit" id="bouton-filtrer" class="btn btn-sm btn-primary m-1">Filtrer</button>
+                      <a class="" href="<%= APP_ROOT %>/stats" title="Réinitialiser"><i class="fa fa-undo"></i></a>
+                      <% if (locals.meta) { %>
+                        &nbsp; <%= meta.total %> résultat(s)
+                      <% } %>
                     </div>
-                  </div>
 
-                  <!------------------ List des FI --------------------->
-                  <div id="fi-dropdown" class="dropdown m-3">
-                    <button class="btn btn-secondary dropdown-toggle" 
-                      type="button" 
-                      id="dropdownMenuButton" 
-                      data-toggle="dropdown" 
-                      aria-haspopup="true" 
-                      aria-expanded="false">
-                      Filter par FI
-                    </button>
-                    <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton">
-                      <% locals.meta.fiList.forEach(function(fi){ %>
-                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                          <input 
-                            class="custom-control-input" 
-                            type="checkbox" 
-                            id="<%= fi.key %>" 
-                            data-init="filters" 
-                            value="fi:<%= fi.key %>" 
-                            name="filters[]" 
-                            data-form="search">
-                          <label 
-                            class="custom-control-label" 
-                            for="<%= fi.key %>"><%= fi.key %></label>
-                          <div class="dropdown-divider"></div>
-                        </div>
-                      <% }) %>
+
+                    <% if (locals.stats && stats.length > 0) { %>
+                    <div class="col-md-2">
+                      <a class="btn btn-sm btn-outline-info" href="/stats/csv?<%= queryString.stringify(REQ_QUERY) %>">
+                        <i class="fa fa-file-excel-o"></i> Export CSV
+                      </a>
                     </div>
-                  </div>
-
-                  <!------------------ List des Actions --------------------->
-                  <div id="action-dropdown" class="dropdown m-3">
-                    <button class="btn btn-secondary dropdown-toggle" 
-                      type="button" 
-                      id="dropdownMenuButton" 
-                      data-toggle="dropdown" 
-                      aria-haspopup="true" 
-                      aria-expanded="false">
-                      Filter par Actions
-                    </button>
-                    <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton">
-                      <% locals.meta.typeActionList.forEach(function(action){ %>
-                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                          <input 
-                            class="custom-control-input" 
-                            type="checkbox" 
-                            id="<%= action.key %>" 
-                            data-init="filters" 
-                            value="action:<%= action.key %>" 
-                            name="filters[]" 
-                            data-form="search">
-                          <label 
-                            class="custom-control-label" 
-                            for="<%= action.key %>"><%= action.key %></label>
-                          <div class="dropdown-divider"></div>
-                        </div>
-                      <% }) %>
-                    </div>
-                  </div>
-
-                  <!------------------ List des Type d\'actions --------------------->
-                  <div id="type-action-dropdown" class="dropdown m-3">
-                    <button class="btn btn-secondary dropdown-toggle" 
-                      type="button" 
-                      id="dropdownMenuButton" 
-                      data-toggle="dropdown" 
-                      aria-haspopup="true" 
-                      aria-expanded="false">
-                      Filter par Type Action
-                    </button>
-                    <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton">
-                      <% locals.meta.actionList.forEach(function(typeAction){ %>
-                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                          <input 
-                            class="custom-control-input" 
-                            type="checkbox" 
-                            id="<%= typeAction.key %>" 
-                            data-init="filters" 
-                            value="typeAction:<%= typeAction.key %>" 
-                            name="filters[]" 
-                            data-form="search">
-                          <label 
-                            class="custom-control-label" 
-                            for="<%= typeAction.key %>"><%= typeAction.key %></label>
-                          <div class="dropdown-divider"></div>
-                        </div>
-                      <% }) %>
-                    </div>
-                  </div>
-
-                  <div style="float:right">
-                    <button type="submit" id="bouton-filtrer" class="btn btn-primary m-1">Filtrer</button>
-                    <a class="btn btn-danger m-1" href="<%= APP_ROOT %>/stats" role="button">Réinitialiser</a>
-                  </div>
                   <% } %>
                 </div>
               </form>
@@ -171,7 +74,8 @@
               <h2>Choisissez des dates</h2>
             </div>
             <% } else { %>
-            
+
+
               <table class="table table-hover table-light shadow-sm">
                 <thead class="thead-light">
                   <tr>

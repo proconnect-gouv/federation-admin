@@ -1,13 +1,14 @@
+import { Stream } from 'stream';
 import { Test } from '@nestjs/testing';
 import {
   ElasticsearchModule,
   ElasticsearchService,
 } from '@nestjs/elasticsearch';
 import { StatsService } from './stats.service';
-import { StatsQueries } from './stats.queries';
-import { StatsDTO } from './dto/stats.dto';
-import { StatsUIListOutputDTO } from './dto/stats-ui-list-output.dto';
-import { MetaDTO } from './dto/meta.dto';
+import { StatsQueries } from '../stats.queries';
+import { StatsDTO } from '../dto/stats.dto';
+import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
+import { MetaDTO } from '../dto/meta.dto';
 
 describe('StatsService', () => {
   let statsService: StatsService;
@@ -31,6 +32,42 @@ describe('StatsService', () => {
       .compile();
     statsService = await module.get<StatsService>(StatsService);
     jest.resetAllMocks();
+  });
+
+  describe('streamEvents', () => {
+    it('Should return a stream', () => {
+      // Given
+      const params = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-06-01'),
+      };
+      const elasticResponse = {
+        hits: {
+          hits: [
+            {
+              _index: 'stats',
+              _type: 'entry',
+              _id: 'foo',
+              _score: 1.42,
+              _source: {
+                fs: 'foo',
+                fi: 'bar',
+                count: 2,
+                typeAction: 'fizz',
+                action: 'buzz',
+                date: new Date('2019-03-01'),
+              },
+            },
+          ],
+        },
+      };
+      search.mockResolvedValueOnce(elasticResponse);
+      // When
+      const result = statsService.streamEvents(params);
+      // Then
+      expect(result).toBeDefined();
+      expect(result instanceof Stream).toBe(true);
+    });
   });
 
   describe('getEvents', () => {

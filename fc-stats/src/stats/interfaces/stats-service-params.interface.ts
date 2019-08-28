@@ -6,4 +6,6 @@ export interface StatsServiceParams {
   action?: string;
   fi?: string;
   filters?: FilterParamDTO[];
+  page?: number;
+  limit?: number;
 }
