@@ -1,0 +1,41 @@
+<%
+
+function itemIsChecked(key, item) {
+  return REQ_QUERY.filters && REQ_QUERY.filters.indexOf(`${key}:${item.key}`) > -1;
+}
+
+
+%>
+<div id="fs-dropdown" class="dropdown m-3">
+  <button class="btn btn-secondary btn-sm dropdown-toggle"
+    data-init="dropdown"
+    type="button" id="dropdownMenuButton"
+    data-toggle="dropdown"
+    aria-haspopup="true"
+    aria-expanded="false">
+    <%= label %>
+  </button>
+
+  <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton">
+    <% values.forEach(function(item){ %>
+      <div class="custom-control custom-checkbox my-1 mr-sm-2">
+        <input
+          class="custom-control-input"
+          type="checkbox"
+          id="<%= item.key %>"
+          data-init="filters"
+          value="<%= key %>:<%= item.key %>"
+          name="filters[]"
+          data-form="search"
+          <% if (itemIsChecked(key, item)) { %>
+          checked
+          <% } %>
+        >
+        <label
+          class="custom-control-label"
+          for="<%= item.key %>"><%= item.key %></label>
+        <div class="dropdown-divider"></div>
+      </div>
+    <% }) %>
+  </div>
+</div>

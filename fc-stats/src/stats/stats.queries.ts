@@ -1,189 +1,139 @@
 import { Injectable } from '@nestjs/common';
 import { SearchParams } from 'elasticsearch';
 import { StatsServiceParams } from './interfaces/stats-service-params.interface';
-import { FilterParamDTO } from './dto/filter-param.dto';
-import { fstat } from 'fs';
 
 @Injectable()
 export class StatsQueries {
-  createMustQueryParam(elements: any[], params: StatsServiceParams) {
-    const filters = [];
-    const { start, stop } = params;
-    const termsFSFilter = { fs: [] };
-    const termsFiFilter = { fi: [] };
-    const termsActionFilter = { action: [] };
-    const termsTypeActionFilter = { typeAction: [] };
-    const fs = (termsFSFilter.fs = []);
-    const fi = (termsFiFilter.fi = []);
-    const action = (termsActionFilter.action = []);
-    const typeAction = (termsTypeActionFilter.typeAction = []);
-    const range = {
-      range: {
-        date: {
-          gte: start.getTime(),
-          lte: stop.getTime(),
+  pushFilterValue(filters, key, value) {
+    // Get existing filter
+    const filter = filters.find(
+      item => item.terms && typeof item.terms[key] !== 'undefined',
+    );
+    if (filter) {
+      // And append value
+      filter.terms[key].push(value);
+    } else {
+      // Or create a new filter
+      filters.push({ terms: { [key]: [value] } });
+    }
+  }
+
+  createMustQueryParam(params: StatsServiceParams) {
+    const { filters, start, stop } = params;
+
+    // Apply base mandatory params
+    const must = [
+      {
+        term: { _type: 'entry' },
+      },
+      {
+        range: {
+          date: {
+            gte: start.getTime(),
+            lte: stop.getTime(),
+          },
         },
       },
-    };
-    const must = [];
+    ];
 
-    /** Get filters in url */
-    for (const [key, value] of Object.entries(params.filters)) {
-      filters.push(value);
+    // Apply all filters
+    if (filters) {
+      filters.forEach(filter =>
+        this.pushFilterValue(must, filter.key, filter.value),
+      );
     }
-    /**
-     * Get filters values
-     * Build all terms parts of the query
-     * for the must obect
-     */
-    filters.forEach(element => {
-      switch (element.key) {
-        case 'fs':
-          fs.push(element.value);
-          const termsFS = { terms: termsFSFilter };
-          must.push(termsFS);
-          break;
-        case 'fi':
-          fi.push(element.value);
-          const termsFI = { terms: termsFiFilter };
-          must.push(termsFI);
-          break;
-        case 'action':
-          action.push(element.value);
-          const termsAction = { terms: termsActionFilter };
-          must.push(termsAction);
-          break;
-        case 'typeAction':
-          typeAction.push(element.value);
-          const termsTypeAction = { terms: termsTypeActionFilter };
-          must.push(termsTypeAction);
-          break;
-        default:
-          break;
-      }
-    });
-    /** Build last must part of the query */
-    must.push(range);
 
     return must;
   }
 
-  getEvents(params: StatsServiceParams): SearchParams {
-    const elements: FilterParamDTO[] = [];
-    const { start, stop } = params;
+  streamEvents(params: StatsServiceParams): SearchParams {
     const index = 'stats';
-    const type = 'entry';
-    let query = {};
+    const must = this.createMustQueryParam(params);
 
-    if (params.filters) {
-      for (const key in params.filters) {
-        if (params.filters.hasOwnProperty(key)) {
-          elements[key] = params.filters[key];
-        }
-      }
-      const must = this.createMustQueryParam(elements, params);
-      /** Query to search if filter params */
-      return (query = {
-        index,
-        size: 100,
-        body: {
-          sort: [
-            { date: { order: 'asc' } },
-            { fi: { order: 'asc' } },
-            { fs: { order: 'asc' } },
-            { typeAction: { order: 'asc' } },
-            { action: { order: 'asc' } },
-          ],
-          query: {
-            bool: {
-              must,
+    const query = {
+      index,
+      scroll: '10s',
+      size: 100,
+      body: {
+        sort: [
+          { date: { order: 'asc' } },
+          { fi: { order: 'asc' } },
+          { fs: { order: 'asc' } },
+          { typeAction: { order: 'asc' } },
+          { action: { order: 'asc' } },
+        ],
+        query: {
+          bool: {
+            must,
+          },
+        },
+      },
+    };
+
+    return query;
+  }
+
+  getEvents(params: StatsServiceParams): SearchParams {
+    const { page, limit } = params;
+    const index = 'stats';
+
+    const must = this.createMustQueryParam(params);
+
+    const query = {
+      index,
+      from: page,
+      size: limit,
+      body: {
+        sort: [
+          { date: { order: 'asc' } },
+          { fi: { order: 'asc' } },
+          { fs: { order: 'asc' } },
+          { typeAction: { order: 'asc' } },
+          { action: { order: 'asc' } },
+        ],
+        query: {
+          bool: {
+            must,
+          },
+        },
+        aggs: {
+          fi: {
+            terms: {
+              field: 'fi',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
             },
           },
-          aggs: {
-            fi: {
-              terms: {
-                field: 'fi',
-                size: 0,
-              },
+          fs: {
+            terms: {
+              field: 'fs',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
             },
-            fs: {
-              terms: {
-                field: 'fs',
-                size: 0,
-              },
+          },
+          typeAction: {
+            terms: {
+              field: 'typeAction',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
             },
-            typeAction: {
-              terms: {
-                field: 'typeAction',
-                size: 0,
-              },
-            },
-            action: {
-              terms: {
-                field: 'action',
-                size: 0,
-              },
+          },
+          action: {
+            terms: {
+              field: 'action',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
             },
           },
         },
-      });
-    } else {
-      /** Default query */
-      return (query = {
-        index,
-        size: 100,
-        body: {
-          sort: [
-            { date: { order: 'asc' } },
-            { fi: { order: 'asc' } },
-            { fs: { order: 'asc' } },
-            { typeAction: { order: 'asc' } },
-            { action: { order: 'asc' } },
-          ],
-          query: {
-            bool: {
-              must: [
-                { term: { _type: type } },
-                {
-                  range: {
-                    date: {
-                      gte: start.getTime(),
-                      lte: stop.getTime(),
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            fi: {
-              terms: {
-                field: 'fi',
-                size: 0,
-              },
-            },
-            fs: {
-              terms: {
-                field: 'fs',
-                size: 0,
-              },
-            },
-            typeAction: {
-              terms: {
-                field: 'typeAction',
-                size: 0,
-              },
-            },
-            action: {
-              terms: {
-                field: 'action',
-                size: 0,
-              },
-            },
-          },
-        },
-      });
-    }
+      },
+    };
+
+    return query;
   }
 
   getTotalByActionAndRange(params: StatsServiceParams): SearchParams {

@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import { StatsService } from './stats.service';
+import { StatsService } from './service/stats.service';
+import { CsvService } from './service/csv.service';
 import { StatsQueries } from './stats.queries';
 import { StatsUIController } from './controller/stats-ui.controller';
 import { StatsAPIController } from './controller/stats-api.controller';
+import { StatsCSVController } from './controller/stats-csv.controller';
 import { ConfigService } from 'nestjs-config';
 
 @Module({
@@ -13,8 +15,8 @@ import { ConfigService } from 'nestjs-config';
       inject: [ConfigService],
     }),
   ],
-  providers: [StatsService, StatsQueries],
-  exports: [StatsService],
-  controllers: [StatsUIController, StatsAPIController],
+  providers: [StatsService, StatsQueries, CsvService],
+  exports: [StatsService, CsvService],
+  controllers: [StatsUIController, StatsAPIController, StatsCSVController],
 })
 export class StatsModule {}

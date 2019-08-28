@@ -6,7 +6,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { StatsService } from '../stats.service';
+import { StatsService } from '../service/stats.service';
 import { StatsUIListInputDTO } from '../dto/stats-ui-list-input.dto';
 import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
 import { StatsServiceParams } from '../interfaces/stats-service-params.interface';

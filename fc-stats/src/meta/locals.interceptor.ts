@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { ConfigService } from 'nestjs-config';
 import * as moment from 'moment';
+import * as queryString from 'query-string';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
@@ -35,6 +36,7 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.REQ_PARAMS = req.params;
     res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
+    res.locals.queryString = queryString;
 
     return next.handle();
   }

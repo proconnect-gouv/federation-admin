@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { StatsUIController } from './stats-ui.controller';
-import { StatsService } from '../stats.service';
+import { StatsService } from '../service/stats.service';
 import { StatsQueries } from '../stats.queries';
 import {
   ElasticsearchModule,
@@ -211,7 +211,7 @@ describe('StatsUIController', () => {
       expect(result).toEqual({});
     });
 
-    it('returns all the identity providers', async () => {
+    it('returns all the stats entries', async () => {
       // Given
       const elasticResponse = {
         hits: {
