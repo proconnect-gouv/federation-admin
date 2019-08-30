@@ -3235,6 +3235,11 @@ csv-stringify@^5.3.0:
   resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-5.3.3.tgz#c4725686a33db9f61e70d87af712285baefebe21"
   integrity sha512-q8Qj+/lN74LRmG7Mg0LauE5WcnJOD5MEGe1gI57IYJCB61KWuEbAFHm1uIPDkI26aqElyBB57SlE2GGwq2EY5A==
 
+cypress-file-upload@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-3.3.3.tgz#119188fa78e9cfc00904c52d76d4ca56d34950df"
+  integrity sha512-CmXGRMHonoyCa8EcF6jomxqMAe56HvKfnW7S69EmTga8ecYmvQUI6gYttcHO+5UTmFQOFl7xbABV3+AbnI4btA==
+
 cypress@^3.2.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-3.4.0.tgz#8053ee107eb6309f26abd57e882d05578bdc3391"
