@@ -36,11 +36,11 @@ export class RnippController {
     @Body() personRequested: PersonRequestedDTO,
     @Req() req,
   ): Promise<PersonFoundDTO | ErrorControllerInterface> {
+    const csrfToken = req.csrfToken();
     try {
       const rnipp: PersonFromRnipp = await this.rnippService.getJsonFromRnippApi(
         personRequested as Person,
       );
-      const csrfToken = req.csrfToken();
       return {
         person: {
           requested: personRequested,
@@ -53,18 +53,33 @@ export class RnippController {
         csrfToken,
       };
     } catch (error) {
-      return this.handleError(error);
+      return this.handleError(error, personRequested, csrfToken);
     }
   }
 
-  private async handleError(error: any): Promise<ErrorControllerInterface> {
+  private async handleError(
+    error: any,
+    personRequested: PersonRequestedDTO,
+    csrfToken: string,
+  ): Promise<ErrorControllerInterface> {
     if (error.errors) {
-      return { message: error.errors };
+      return {
+        person: {
+          requested: personRequested,
+        },
+        message: error.errors,
+        csrfToken,
+      };
     } else {
       return {
+        person: {
+          requested: personRequested,
+        },
         rawResponse: error.rawResponse,
+        rnippCode: error.rnippCode || '',
         statusCode: error.statusCode || 500,
         message: error.message,
+        csrfToken,
       };
     }
   }
