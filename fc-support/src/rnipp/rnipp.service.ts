@@ -30,12 +30,21 @@ export class RnippService {
         const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
           xmlFromRnipp,
         );
-        return {
-          personFoundByRnipp: user.identity,
-          rnippCode: user.rnippCode,
-          rawResponse: xmlFromRnipp,
-          statusCode: axiosResponse.status,
-        };
+        if (user.rnippCode === '2' || user.rnippCode === '3') {
+          return {
+            personFoundByRnipp: user.identity || {},
+            rnippCode: user.rnippCode,
+            rawResponse: xmlFromRnipp,
+            statusCode: axiosResponse.status,
+          };
+        } else {
+          throw {
+            rawResponse: xmlFromRnipp,
+            statusCode: axiosResponse.status,
+            message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+            rnippCode: user.rnippCode,
+          };
+        }
       }
 
       Logger.warn(`Response status is not ok. Xml => null`);

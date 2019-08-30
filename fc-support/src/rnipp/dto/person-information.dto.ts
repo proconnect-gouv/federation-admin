@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { ValidateNested, IsOptional } from 'class-validator';
 import { PersonGenericDTO } from './person-generic.dto';
 
 export class PersonInformation {
@@ -7,7 +7,8 @@ export class PersonInformation {
   @Type(() => PersonGenericDTO)
   public requested: PersonGenericDTO;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => PersonGenericDTO)
-  public found: PersonGenericDTO;
+  public found?: PersonGenericDTO;
 }

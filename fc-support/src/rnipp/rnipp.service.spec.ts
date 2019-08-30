@@ -21,6 +21,16 @@ describe('RnippService (e2e)', () => {
     serializeXmlFromRnipp: jest.fn(),
   };
 
+  const personData = {
+    gender: 'male',
+    familyName: 'string',
+    preferredUsername: 'string',
+    givenName: 'string',
+    birthdate: '1992-03-03',
+    birthPlace: 'string',
+    birthCountry: 'string',
+  };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [RnippService, HttpService, ConfigService, RnippSerializer],
@@ -47,7 +57,7 @@ describe('RnippService (e2e)', () => {
         config: {},
       };
 
-      const personData = {
+      const personParsedData = {
         identity: {
           gender: 'male',
           familyName: 'string',
@@ -57,21 +67,21 @@ describe('RnippService (e2e)', () => {
           birthPlace: 'string',
           birthCountry: 'string',
         },
-        rnippCode: 2,
+        rnippCode: '2',
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
       jest
         .spyOn(rnippSerializerMock, 'serializeXmlFromRnipp')
-        .mockImplementation(() => Promise.resolve(personData));
+        .mockImplementation(() => Promise.resolve(personParsedData));
 
       const person = await rnippService.getJsonFromRnippApi(
-        personData.identity,
+        personParsedData.identity,
       );
 
       expect(person).toEqual({
-        personFoundByRnipp: personData.identity,
-        rnippCode: personData.rnippCode,
+        personFoundByRnipp: personParsedData.identity,
+        rnippCode: personParsedData.rnippCode,
         rawResponse: result.data,
         statusCode: result.status,
       });
@@ -84,16 +94,6 @@ describe('RnippService (e2e)', () => {
         statusText: 'Not Ok',
         headers: {},
         config: {},
-      };
-
-      const personData = {
-        gender: 'male',
-        familyName: 'string',
-        preferredUsername: 'string',
-        givenName: 'string',
-        birthdate: '1992-03-03',
-        birthPlace: 'string',
-        birthCountry: 'string',
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
@@ -117,16 +117,6 @@ describe('RnippService (e2e)', () => {
         config: {},
       };
 
-      const personData = {
-        gender: 'male',
-        familyName: 'string',
-        preferredUsername: 'string',
-        givenName: 'string',
-        birthdate: '1992-03-03',
-        birthPlace: 'string',
-        birthCountry: 'string',
-      };
-
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
       try {
@@ -146,16 +136,6 @@ describe('RnippService (e2e)', () => {
         statusText: 'Not Ok',
         headers: {},
         config: {},
-      };
-
-      const personData = {
-        gender: 'male',
-        familyName: 'string',
-        preferredUsername: 'string',
-        givenName: 'string',
-        birthdate: '1992-03-03',
-        birthPlace: 'string',
-        birthCountry: 'string',
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));

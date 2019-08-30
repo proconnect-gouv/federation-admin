@@ -24,6 +24,12 @@ describe('RnippController', () => {
     birthCountry: '99100',
   };
 
+  const req = {
+    csrfToken: function csrfToken() {
+      return 'mygreatcsrftoken';
+    },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RnippController],
@@ -39,12 +45,6 @@ describe('RnippController', () => {
 
   describe('researchRnipp', () => {
     it('should return an object of person', async () => {
-      const req = {
-        csrfToken: function csrfToken() {
-          return 'mygreatcsrftoken';
-        },
-      };
-
       const mockedRnippService: PersonFromRnipp = {
         personFoundByRnipp: {
           gender: 'male',
@@ -105,13 +105,14 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        person: {
+          requested: identity,
+        },
         rawResponse: 'No Data from rnipp',
         statusCode: 500,
         message: '',
-      };
-
-      const req = {
-        csrfToken: 'myCsurfToken',
+        csrfToken: 'mygreatcsrftoken',
+        rnippCode: '',
       };
 
       rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
@@ -131,13 +132,14 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        person: {
+          requested: identity,
+        },
         rawResponse: 'component',
         statusCode: 403,
         message: 'message',
-      };
-
-      const req = {
-        csrfToken: 'myCsurfToken',
+        csrfToken: 'mygreatcsrftoken',
+        rnippCode: '',
       };
 
       rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
@@ -160,16 +162,16 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        person: {
+          requested: identity,
+        },
+        csrfToken: 'mygreatcsrftoken',
         message: [
           'familyName must be a string',
           'birthdate must be a valid ISO 8601 date string',
           'birthPlace must match /^[0-9]{5}$/ regular expression',
           'birthCountry must match /^[0-9]{5}$/ regular expression',
         ],
-      };
-
-      const req = {
-        csrfToken: 'myCsurfToken',
       };
 
       rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {

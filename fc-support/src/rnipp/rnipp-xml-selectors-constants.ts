@@ -4,12 +4,10 @@ export const BASEURL = 'BASE_URL';
 export const USER_ID = 'USER_ID';
 export const CLIENT_SIRET = 'CLIENT_SIRET';
 
-export const TYPE_REPONSE_IDENTIFICATION =
-  'IdentificationsIndividusCitoyens.TypeReponseIdentification[0]';
 export const IDENTIFICATION =
   'IdentificationsIndividusCitoyens.IdentificationIndividuCitoyen[0].SituationActuelle[0].Individu[0]';
 export const GENDER = 'Sexe[0]';
-export const FAMILY_NAME = 'Noms[0].NomFamille';
+export const FAMILY_NAME = 'Noms[0].NomFamille[0]';
 export const GIVEN_NAME = 'Prenoms[0].Prenom';
 export const PREFERED_NAME = '';
 export const BIRTH_DATE = 'Naissance[0].DateNaissance[0]';

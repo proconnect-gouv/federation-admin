@@ -57,6 +57,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['3'],
             },
           }),
       );
@@ -77,7 +78,29 @@ describe('RnippSerializer (e2e)', () => {
           birthCountry: '55555',
           birthPlace: '55555',
         },
-        rnippCode: 'Pas de rnipp code',
+        rnippCode: '3',
+      });
+    });
+
+    it('should return rnipp code with no user info if code is not 2 or 3', async () => {
+      mockedXmlService.parseString.mockImplementation(
+        (input, options, callback) =>
+          callback(null, {
+            IdentificationsIndividusCitoyens: {
+              TypeReponseIdentification: ['8'],
+            },
+          }),
+      );
+
+      mockedXmlService.processors.stripPrefix.mockImplementation(() => {
+        return '';
+      });
+
+      const result = await rnippSerializer.serializeXmlFromRnipp(
+        rawXml.xmlString,
+      );
+      expect(result).toMatchObject({
+        rnippCode: '8',
       });
     });
 
@@ -114,6 +137,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['2'],
             },
           }),
       );
@@ -123,9 +147,7 @@ describe('RnippSerializer (e2e)', () => {
       });
 
       const expectedContraints = {
-        errors: [
-          'familyName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
-        ],
+        errors: ['familyName must be a string'],
       };
 
       try {
@@ -168,6 +190,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['2'],
             },
           }),
       );
@@ -222,6 +245,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['2'],
             },
           }),
       );
@@ -273,6 +297,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['2'],
             },
           }),
       );
@@ -322,6 +347,7 @@ describe('RnippSerializer (e2e)', () => {
                   ],
                 },
               ],
+              TypeReponseIdentification: ['2'],
             },
           }),
       );
@@ -332,7 +358,7 @@ describe('RnippSerializer (e2e)', () => {
 
       const expectedContraints = {
         errors: [
-          'familyName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
+          'familyName must be a string',
           'birthdate must be a valid ISO 8601 date string',
           'birthPlace must match /^[0-9]{5}$/ regular expression',
           'birthCountry must match /^[0-9]{5}$/ regular expression',

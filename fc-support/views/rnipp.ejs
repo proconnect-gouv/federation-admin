@@ -9,10 +9,10 @@
 		<div class="row">
 			<div class="alert alert-danger col-sm-12">
 				<p> Cette fonctionnalité de vérification de l’identité pivot d'un usager
-						utilise des données à caractère personnel, protégées par la loi n°78-17 du
-						6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés,
-						modifiée par la loi n°2004-801 du 6 août 2004 relative à la protection des
-						personnes physiques à l'égard des traitements de données à caractère personnel.</p>
+					utilise des données à caractère personnel, protégées par la loi n°78-17 du
+					6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés,
+					modifiée par la loi n°2004-801 du 6 août 2004 relative à la protection des
+					personnes physiques à l'égard des traitements de données à caractère personnel.</p>
 			</div>
 			<div class="col-sm-6">
 				<h3>Rechercher un usager</h3>
@@ -22,11 +22,9 @@
 								<span aria-hidden="true">×</span>
 								<span class="sr-only">Fermer</span>
 						</button>
-							
-						Une erreur s'est produite lors de l'appel au RNIPP.<br>
-						<%=message%>
-						<% if (locals.rnippResponse) { %>
-						<% include partials/rnippRawResponse.ejs %>
+						<%=message%><br>
+						<% if (locals.rawResponse) { %>
+						<%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippCode, rnippRawResponse: rawResponse}); -%>
 						<% } %>
 					</div>
 				<% } %>
@@ -226,7 +224,7 @@
 					</div>
 					<hr/>
 					<div class="mb-2">
-						<% include partials/rnippRawResponse.ejs %>
+						<%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippResponse.code, rnippRawResponse: rnippResponse.raw}); -%>
 					</div>
 				<% } %>
 			</div>

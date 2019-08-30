@@ -46,15 +46,19 @@ export class RnippSerializer {
 
   private async handleResponse(json): Promise<ParsedData> {
     const formatedData: ParsedData = this.formatJson(json);
-    const rnippDto = new PersonRequestedDTO();
-    const validateFormatedData = plainToClassFromExist(
-      rnippDto,
-      formatedData.identity,
-    );
-    const errors = await validate(validateFormatedData);
-    // errors is an array of validation errors
-    if (errors.length > 0) {
-      throw errors;
+    if (formatedData.rnippCode === '2' || formatedData.rnippCode === '3') {
+      const rnippDto = new PersonRequestedDTO();
+      const validateFormatedData = plainToClassFromExist(
+        rnippDto,
+        formatedData.identity,
+      );
+      const errors = await validate(validateFormatedData);
+      // errors is an array of validation errors
+      if (errors.length > 0) {
+        throw errors;
+      } else {
+        return formatedData;
+      }
     } else {
       return formatedData;
     }
@@ -74,54 +78,63 @@ export class RnippSerializer {
   }
 
   private formatJson(json: any): ParsedData {
-    let translationGenderFormRnipp = _.get(
+    const rnippCodeFromXML: string = _.get(
       json,
-      `${IDENTIFICATION}.${GENDER}`,
-      'Pas de genre renseigné',
+      `${RNIPP_CODE}`,
+      'Pas de rnipp code',
     );
 
-    if (translationGenderFormRnipp === 'M') {
-      translationGenderFormRnipp = 'male';
-    } else {
-      translationGenderFormRnipp = 'female';
-    }
-    return {
-      identity: {
-        gender: translationGenderFormRnipp,
-        familyName: _.join(
-          _.get(
+    // check the error code return by RNIPP before retrieve user info
+    if (rnippCodeFromXML === '2' || rnippCodeFromXML === '3') {
+      let translationGenderFormRnipp = _.get(
+        json,
+        `${IDENTIFICATION}.${GENDER}`,
+        'Pas de genre renseigné',
+      );
+      if (translationGenderFormRnipp === 'M') {
+        translationGenderFormRnipp = 'male';
+      } else {
+        translationGenderFormRnipp = 'female';
+      }
+      return {
+        identity: {
+          gender: translationGenderFormRnipp,
+          familyName: _.get(
             json,
             `${IDENTIFICATION}.${FAMILY_NAME}`,
             'Pas de nom de famille',
           ),
-          ' ',
-        ),
-        givenName: _.join(
-          _.get(json, `${IDENTIFICATION}.${GIVEN_NAME}`, 'Pas de prénom'),
-          ' ',
-        ),
-        preferredUsername: _.get(
-          json,
-          `${IDENTIFICATION}.${PREFERED_NAME}`,
-          null,
-        ),
-        birthdate: _.get(
-          json,
-          `${IDENTIFICATION}.${BIRTH_DATE}`,
-          'Pas de date de naissance',
-        ),
-        birthCountry: _.get(
-          json,
-          `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
-          'Pas de pays de naissance',
-        ),
-        birthPlace: _.get(
-          json,
-          `${IDENTIFICATION}.${BIRTHPLACE_ZIPCODE}`,
-          'Pas de lieu de naissance',
-        ),
-      },
-      rnippCode: _.get(json, `${RNIPP_CODE}`, 'Pas de rnipp code'),
-    };
+          givenName: _.join(
+            _.get(json, `${IDENTIFICATION}.${GIVEN_NAME}`, 'Pas de prénom'),
+            ' ',
+          ),
+          preferredUsername: _.get(
+            json,
+            `${IDENTIFICATION}.${PREFERED_NAME}`,
+            null,
+          ),
+          birthdate: _.get(
+            json,
+            `${IDENTIFICATION}.${BIRTH_DATE}`,
+            'Pas de date de naissance',
+          ),
+          birthCountry: _.get(
+            json,
+            `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
+            'Pas de pays de naissance',
+          ),
+          birthPlace: _.get(
+            json,
+            `${IDENTIFICATION}.${BIRTHPLACE_ZIPCODE}`,
+            'Pas de lieu de naissance',
+          ),
+        },
+        rnippCode: rnippCodeFromXML,
+      };
+    } else {
+      return {
+        rnippCode: rnippCodeFromXML,
+      };
+    }
   }
 }
