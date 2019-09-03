@@ -127,8 +127,36 @@
 							</div>
 						</div>
 					</div>
+					<div class="form-group">
+						<div>Né en france</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="french"
+								name="birthCountry" 
+								value="99100"
+								required
+								<% if(locals.person && person.requested.birthCountry === '99100'){ %> checked <%} %>
+								checked
+							>
+							<label class="custom-control-label" for="french">Oui</label>
+						</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="no-french"
+								name="birthCountry" 
+								value="99999"
+								required
+								<% if(locals.person && person.requested.birthCountry === '99999'){ %> checked <%} %>
+							>
+							<label class="custom-control-label" for="no-french">Non</label>
+						</div>
+					</div>
 					<div class="form-group ">
-						<label for="birthplace" class="control-label">COG du lieu de naissance (laisser vide si né hors de France)</label>
+						<label for="birthplace" class="control-label">Code lieu de naissance (commune ou pays)</label>
 						<input
 							type="text"
 							class="form-control"
@@ -141,24 +169,7 @@
 							required
 						>
 						<div class="invalid-feedback">
-							Veuillez renseigner votre COG du lieu de naissance
-						</div>
-					</div>
-					<div class="form-group ">
-						<label for="birthcountry" class="control-label">COG du pays de naissance</label>
-						<input
-							type="text"
-							class="form-control"
-							id="birthcountry"
-							name="birthCountry"
-							placeholder="exemple : 99100 pour la France"
-							value="<%= (locals.person && person.requested.birthCountry) ? person.requested.birthCountry : '' %>"
-							pattern="[0-9]{5}"
-							title="Vous devez renseigner 5 nombres"
-							required
-						>
-						<div class="invalid-feedback">
-							Veuillez renseigner votre COG du pays de naissance
+							Veuillez renseigner le COG du lieu de naissance
 						</div>
 					</div>
 					<div class="form-group text-center">
@@ -211,7 +222,7 @@
 					<div class="mb-2">
 						COG du lieu de naissance
 						<br>
-						<% if (person.found.birthPlace) { %>
+						<% if (person.found.birthPlace && person.found.birthPlace !== '00000') { %>
 							<%=person.found.birthPlace%>
 						<% } %>
 					</div>

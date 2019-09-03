@@ -11,6 +11,27 @@ describe('RnippSerializer (e2e)', () => {
       stripPrefix: jest.fn(),
     },
   };
+
+  const personBornInFrance = {
+    gender: 'male',
+    familyName: 'rrr',
+    givenName: 'trete',
+    preferredUsername: '',
+    birthdate: '2019-07-02',
+    birthCountry: '99100',
+    birthPlace: '55555',
+  };
+
+  const personNotBornInFrance = {
+    gender: 'male',
+    familyName: 'rrr',
+    givenName: 'trete',
+    preferredUsername: '',
+    birthdate: '2019-07-02',
+    birthCountry: '99999',
+    birthPlace: '99350',
+  };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
@@ -24,7 +45,7 @@ describe('RnippSerializer (e2e)', () => {
   });
 
   describe('serializeXmlFromRnipp', () => {
-    it('should return a json with xml as template', async () => {
+    it('should return a json with xml as template (person who is born in France)', async () => {
       mockedXmlService.parseString.mockImplementation(
         (input, options, callback) =>
           callback(null, {
@@ -68,6 +89,7 @@ describe('RnippSerializer (e2e)', () => {
 
       const result = await rnippSerializer.serializeXmlFromRnipp(
         rawXml.xmlString,
+        personBornInFrance,
       );
       expect(result).toMatchObject({
         identity: {
@@ -75,10 +97,71 @@ describe('RnippSerializer (e2e)', () => {
           familyName: 'rrr',
           givenName: 'trete',
           birthdate: '2019-07-02',
-          birthCountry: '55555',
+          birthCountry: '99100',
           birthPlace: '55555',
         },
         rnippCode: '3',
+      });
+    });
+
+    describe('serializeXmlFromRnipp', () => {
+      it('should return a json with xml as template (person who in not born in France)', async () => {
+        mockedXmlService.parseString.mockImplementation(
+          (input, options, callback) =>
+            callback(null, {
+              IdentificationsIndividusCitoyens: {
+                IdentificationIndividuCitoyen: [
+                  {
+                    SituationActuelle: [
+                      {
+                        Individu: [
+                          {
+                            Noms: [{ NomFamille: ['rrr'] }],
+                            Prenoms: [{ Prenom: ['trete'] }],
+                            Naissance: [
+                              {
+                                DateNaissance: ['2019-07-02'],
+                                LieuNaissance: [
+                                  {
+                                    Localite: [
+                                      { _: '99350', $: { code: '99350' } },
+                                    ],
+                                  },
+                                ],
+                                NumeroActeNaissance: ['55555'],
+                              },
+                            ],
+                            Sexe: ['M'],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                TypeReponseIdentification: ['2'],
+              },
+            }),
+        );
+
+        mockedXmlService.processors.stripPrefix.mockImplementation(() => {
+          return '';
+        });
+
+        const result = await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+          personNotBornInFrance,
+        );
+        expect(result).toMatchObject({
+          identity: {
+            gender: 'male',
+            familyName: 'rrr',
+            givenName: 'trete',
+            birthdate: '2019-07-02',
+            birthCountry: '99350',
+            birthPlace: '00000',
+          },
+          rnippCode: '2',
+        });
       });
     });
 
@@ -98,6 +181,7 @@ describe('RnippSerializer (e2e)', () => {
 
       const result = await rnippSerializer.serializeXmlFromRnipp(
         rawXml.xmlString,
+        personBornInFrance,
       );
       expect(result).toMatchObject({
         rnippCode: '8',
@@ -151,7 +235,10 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
+        await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+          personBornInFrance,
+        );
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
@@ -206,7 +293,10 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
+        await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+          personBornInFrance,
+        );
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
@@ -259,68 +349,16 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
+        await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+          personBornInFrance,
+        );
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
     });
 
-    it('should return an array ( birthCountry & birthPlace ) of error when json from parse is malformed', async () => {
-      mockedXmlService.parseString.mockImplementation(
-        (input, options, callback) =>
-          callback(null, {
-            IdentificationsIndividusCitoyens: {
-              IdentificationIndividuCitoyen: [
-                {
-                  SituationActuelle: [
-                    {
-                      Individu: [
-                        {
-                          Noms: [{ NomFamille: ['familyName'] }],
-                          Prenoms: [{ Prenom: ['firstName'] }],
-
-                          Naissance: [
-                            {
-                              DateNaissance: ['2019-07-02'],
-                              LieuNaissance: [
-                                {
-                                  Localite: [{ _: '55555', $: { code: '4' } }],
-                                },
-                              ],
-                              NumeroActeNaissance: ['614'],
-                            },
-                          ],
-                          Sexe: ['female'],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-              TypeReponseIdentification: ['2'],
-            },
-          }),
-      );
-
-      mockedXmlService.processors.stripPrefix.mockImplementation(() => {
-        return '';
-      });
-
-      const expectedContraints = {
-        errors: [
-          'birthPlace must match /^[0-9]{5}$/ regular expression',
-          'birthCountry must match /^[0-9]{5}$/ regular expression',
-        ],
-      };
-
-      try {
-        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
-      } catch (error) {
-        expect(error).toEqual(expectedContraints);
-      }
-    });
-
-    it('should return an array ( birthCountry, birthdate, familyName ) of several error when json from parse is malformed', async () => {
+    it('should return an array ( birthdate, familyName ) of several error when json from parse is malformed', async () => {
       mockedXmlService.parseString.mockImplementation(
         (input, options, callback) =>
           callback(null, {
@@ -336,7 +374,13 @@ describe('RnippSerializer (e2e)', () => {
                           Naissance: [
                             {
                               DateNaissance: ['fgdgd'],
-                              LieuNaissance: [{ Localite: [{ _: 2 }] }],
+                              LieuNaissance: [
+                                {
+                                  Localite: [
+                                    { _: '55555', $: { code: '55555' } },
+                                  ],
+                                },
+                              ],
                               NumeroActeNaissance: ['55555'],
                             },
                           ],
@@ -360,13 +404,14 @@ describe('RnippSerializer (e2e)', () => {
         errors: [
           'familyName must be a string',
           'birthdate must be a valid ISO 8601 date string',
-          'birthPlace must match /^[0-9]{5}$/ regular expression',
-          'birthCountry must match /^[0-9]{5}$/ regular expression',
         ],
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
+        await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+          personBornInFrance,
+        );
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
