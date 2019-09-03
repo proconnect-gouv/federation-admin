@@ -29,6 +29,7 @@ export class RnippService {
         Logger.debug(`Xml => ${xmlFromRnipp}`);
         const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
           xmlFromRnipp,
+          personData,
         );
         if (user.rnippCode === '2' || user.rnippCode === '3') {
           return {
@@ -67,9 +68,7 @@ export class RnippService {
       prenoms: personData.givenName,
       dateNaissance: personData.birthdate.replace(/\-/g, ''),
       sexe: personData.gender.charAt(0).toUpperCase(),
-      codeLieuNaissance: personData.birthPlace
-        ? personData.birthPlace
-        : personData.birthCountry,
+      codeLieuNaissance: personData.birthPlace,
     };
     const query = queryString.stringify(params);
 

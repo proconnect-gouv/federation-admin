@@ -9,20 +9,23 @@ import {
   GIVEN_NAME,
   PREFERED_NAME,
   BIRTH_DATE,
-  BIRTH_COUNTRY,
   RNIPP_CODE,
-  BIRTHPLACE_ZIPCODE,
+  BIRTH_PLACE,
 } from './rnipp-xml-selectors-constants';
 
 import { ParsedData } from './interface/parsed-data.interface';
 import { validate } from 'class-validator';
 import { PersonRequestedDTO } from './dto/person-requested-input.dto';
+import { Person } from './interface/person.interface';
 
 @Injectable()
 export class RnippSerializer {
   public constructor(@Inject('Xml2js') private readonly xml2js) {}
 
-  public async serializeXmlFromRnipp(xmlData: string): Promise<ParsedData> {
+  public async serializeXmlFromRnipp(
+    xmlData: string,
+    personRequest: Person,
+  ): Promise<ParsedData> {
     Logger.debug(`Serializer xml ${xmlData}`);
     const stripNS = this.xml2js.processors.stripPrefix;
 
@@ -31,7 +34,7 @@ export class RnippSerializer {
         tagNameProcessors: [stripNS],
       });
 
-      const response = await this.handleResponse(json);
+      const response = await this.handleResponse(json, personRequest);
       return response;
     } catch (reason) {
       const constraints = reason.map(validationErrors => {
@@ -44,8 +47,11 @@ export class RnippSerializer {
     }
   }
 
-  private async handleResponse(json): Promise<ParsedData> {
-    const formatedData: ParsedData = this.formatJson(json);
+  private async handleResponse(
+    json,
+    personRequest: Person,
+  ): Promise<ParsedData> {
+    const formatedData: ParsedData = this.formatJson(json, personRequest);
     if (formatedData.rnippCode === '2' || formatedData.rnippCode === '3') {
       const rnippDto = new PersonRequestedDTO();
       const validateFormatedData = plainToClassFromExist(
@@ -77,7 +83,7 @@ export class RnippSerializer {
     });
   }
 
-  private formatJson(json: any): ParsedData {
+  private formatJson(json: any, personRequest: Person): ParsedData {
     const rnippCodeFromXML: string = _.get(
       json,
       `${RNIPP_CODE}`,
@@ -86,6 +92,8 @@ export class RnippSerializer {
 
     // check the error code return by RNIPP before retrieve user info
     if (rnippCodeFromXML === '2' || rnippCodeFromXML === '3') {
+      let birthCountry: string;
+      let birthPlace: string;
       let translationGenderFormRnipp = _.get(
         json,
         `${IDENTIFICATION}.${GENDER}`,
@@ -96,6 +104,23 @@ export class RnippSerializer {
       } else {
         translationGenderFormRnipp = 'female';
       }
+
+      if (personRequest.birthCountry === '99100') {
+        birthCountry = personRequest.birthCountry;
+        birthPlace = _.get(
+          json,
+          `${IDENTIFICATION}.${BIRTH_PLACE}`,
+          'Pas de pays de naissance',
+        );
+      } else {
+        birthCountry = _.get(
+          json,
+          `${IDENTIFICATION}.${BIRTH_PLACE}`,
+          'Pas de pays de naissance',
+        );
+        birthPlace = '00000';
+      }
+
       return {
         identity: {
           gender: translationGenderFormRnipp,
@@ -118,16 +143,8 @@ export class RnippSerializer {
             `${IDENTIFICATION}.${BIRTH_DATE}`,
             'Pas de date de naissance',
           ),
-          birthCountry: _.get(
-            json,
-            `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
-            'Pas de pays de naissance',
-          ),
-          birthPlace: _.get(
-            json,
-            `${IDENTIFICATION}.${BIRTHPLACE_ZIPCODE}`,
-            'Pas de lieu de naissance',
-          ),
+          birthCountry,
+          birthPlace,
         },
         rnippCode: rnippCodeFromXML,
       };

@@ -7,7 +7,6 @@ export class PersonInformation {
   @Type(() => PersonGenericDTO)
   public requested: PersonGenericDTO;
 
-  @IsOptional()
   @ValidateNested()
   @Type(() => PersonGenericDTO)
   public found?: PersonGenericDTO;
