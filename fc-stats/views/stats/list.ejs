@@ -60,7 +60,7 @@
 
                     <% if (locals.stats && stats.length > 0) { %>
                     <div class="col-md-2">
-                      <a class="btn btn-sm btn-outline-info" href="/stats/csv?<%= queryString.stringify(REQ_QUERY) %>">
+                      <a class="btn btn-sm btn-outline-info" href="<%= APP_ROOT %>/stats/csv?<%= queryString.stringify(REQ_QUERY) %>">
                         <i class="fa fa-file-excel-o"></i> Export CSV
                       </a>
                     </div>
