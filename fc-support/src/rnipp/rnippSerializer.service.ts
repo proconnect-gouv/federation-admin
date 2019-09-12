@@ -111,7 +111,7 @@ export class RnippSerializer {
         birthPlace = _.get(
           json,
           `${IDENTIFICATION}.${BIRTH_PLACE}`,
-          'Pas de pays de naissance',
+          'Pas de lieu de naissance',
         );
       } else {
         birthCountry = _.get(
