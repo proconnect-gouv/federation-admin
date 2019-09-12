@@ -12,5 +12,6 @@ export const GIVEN_NAME = 'Prenoms[0].Prenom';
 export const PREFERED_NAME = '';
 export const BIRTH_DATE = 'Naissance[0].DateNaissance[0]';
 export const BIRTH_PLACE = 'Naissance[0].LieuNaissance[0].Localite[0].$.code';
+export const BIRTH_COUNTRY = 'Naissance[0].LieuNaissance[0].Pays[0].$.code';
 export const RNIPP_CODE =
   'IdentificationsIndividusCitoyens.TypeReponseIdentification[0]';
