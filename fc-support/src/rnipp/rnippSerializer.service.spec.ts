@@ -123,7 +123,7 @@ describe('RnippSerializer (e2e)', () => {
                                 DateNaissance: ['2019-07-02'],
                                 LieuNaissance: [
                                   {
-                                    Localite: [
+                                    Pays: [
                                       { _: '99350', $: { code: '99350' } },
                                     ],
                                   },

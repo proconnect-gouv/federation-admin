@@ -11,6 +11,7 @@ import {
   BIRTH_DATE,
   RNIPP_CODE,
   BIRTH_PLACE,
+  BIRTH_COUNTRY,
 } from './rnipp-xml-selectors-constants';
 
 import { ParsedData } from './interface/parsed-data.interface';
@@ -115,7 +116,7 @@ export class RnippSerializer {
       } else {
         birthCountry = _.get(
           json,
-          `${IDENTIFICATION}.${BIRTH_PLACE}`,
+          `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
           'Pas de pays de naissance',
         );
         birthPlace = '00000';
