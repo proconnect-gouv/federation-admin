@@ -54,7 +54,6 @@ export class StatsService {
       actionList,
       typeActionList,
     };
-
     return {
       stats: esResponse,
       meta,
@@ -66,6 +65,7 @@ export class StatsService {
       plainToClass(StatsDTO, { id: item._id, ...item._source }),
     );
   }
+
   // Get FI, FS, Action, Type Action list
   private getAggregate(
     response: SearchResponse<any>,

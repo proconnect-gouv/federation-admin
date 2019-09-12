@@ -1,10 +1,7 @@
 <%
-
 function itemIsChecked(key, item) {
   return REQ_QUERY.filters && REQ_QUERY.filters.indexOf(`${key}:${item.key}`) > -1;
 }
-
-
 %>
 <div id="fs-dropdown" class="dropdown m-3">
   <button class="btn btn-secondary btn-sm dropdown-toggle"
@@ -33,7 +30,7 @@ function itemIsChecked(key, item) {
         >
         <label
           class="custom-control-label"
-          for="<%= item.key %>"><%= item.key %></label>
+          for="<%= item.key %>"><%= locals.helpers.getMapped(item.key) %></label>
         <div class="dropdown-divider"></div>
       </div>
     <% }) %>

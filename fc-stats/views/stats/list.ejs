@@ -10,7 +10,6 @@
         <div class="col-12">
             <p class="h2">Stats</p>
             <p><i>Mesure All the things!</i></p>
-
             <div>
               <form id="search" action="<%= APP_ROOT %>/stats" method="get">
 
@@ -95,8 +94,8 @@
                       <th scope="row"><%= moment(stat.date).format('DD/MM/YYYY') %></th>
                       <td><%= stat.fi %></td>
                       <td><%= stat.fs %></td>
-                      <td><%= stat.typeAction %></td>
-                      <td><%= stat.action %></td>
+                      <td><%= locals.helpers.getMapped(stat.typeAction) %></td>
+                      <td><%= locals.helpers.getMapped(stat.action) %></td>
                       <% if (!REQ_QUERY.filters) { %>
                       <td><%= stat.count %></td>
                       <% } %>
