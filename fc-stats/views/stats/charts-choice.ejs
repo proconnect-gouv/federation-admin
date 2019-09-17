@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <% include partials/head.ejs %>
+</head>
+<body>
+<div class="container">
+    <% include partials/header.ejs %>
+    <div class="row">
+        <div class="col-12">
+            <p class="h2">Stats</p>
+            <p><i>Mesure All the things!</i></p>
+
+            <div>
+              <form id="search" action="<%= APP_ROOT %>/stats/charts-show" method="get">
+
+                <div class="form-inline">
+                  <%- include('partials/charts-list') %>
+                  <div class="form-group form-inline col-md-3">
+                      <label class="p-1" for="start">Du</label>
+                      <input
+                        id="start"
+                        name="start"
+                        type="text"
+                        
+                        data-secondField="stop"
+                        data-form="search"
+                        class="form-control form-control-sm mb-1"
+                        value="<%= REQ_QUERY.start %>"
+                        style="width: 90px;"
+                        >
+
+                      <label class="p-1" for="stop">Au</label>
+                      <input
+                        id="stop"
+                        name="stop"
+                        type="text"
+                        value="<%= REQ_QUERY.stop %>"
+                        class="form-control  form-control-sm mb-1"
+                        style="width: 90px;"
+                      />
+                  </div>
+
+                  <div class="form-group col-md-5">
+                    <%- include('partials/dropdown', { label: 'FI', key: 'fi', values: locals.fiList }) %>
+                    <%- include('partials/dropdown', { label: 'FS', key: 'fs', values: locals.fsList }) %>
+                    <%- include('partials/dropdown', { label: 'Granularité', key: 'granularity', values: locals.granularity }) %>
+
+                    <button type="submit" id="bouton-filtrer" class="btn btn-sm btn-primary m-1 displayed-filter">Générer</button>
+                    <a id="reset-action" class="displayed-filter" href="<%= APP_ROOT %>/stats" title="Réinitialiser"><i class="fa fa-undo"></i></a>
+                    <% if (locals.meta) { %>
+                      &nbsp; <%= meta.total %> résultat(s)
+                    <% } %>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <% if (!REQ_QUERY.start || !REQ_QUERY.stop) { %>
+            <div class="d-flex justify-content-center">
+              <h2>Choisissez un graphique et des dates</h2>
+            </div>
+            <% } else { %>
+                <canvas id="bar-chart-grouped" width="800" height="450"></canvas>
+            <% } %>
+        </div>
+    </div>
+</div>
+</body>
+</html>

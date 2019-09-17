@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { SearchParams } from 'elasticsearch';
+import * as Moment from 'moment';
 import { StatsServiceParams } from './interfaces/stats-service-params.interface';
+import { StatsServiceParamsNoRange } from './interfaces/stats-service-params-no-range.interface';
 
 @Injectable()
 export class StatsQueries {
@@ -215,7 +217,116 @@ export class StatsQueries {
             aggs: {
               action: {
                 terms: {
-                  field: 'typeAction',
+                  field: 'action',
+                  size: 0,
+                },
+                aggs: {
+                  count: {
+                    sum: {
+                      field: 'count',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    return query;
+  }
+
+  getDataWithoutRange(): SearchParams {
+    const index = 'stats';
+
+    const query = {
+      index,
+      size: 0,
+      body: {
+        aggs: {
+          fi: {
+            terms: {
+              field: 'fi',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
+            },
+          },
+          fs: {
+            terms: {
+              field: 'fs',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
+            },
+          },
+          typeAction: {
+            terms: {
+              field: 'typeAction',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
+            },
+          },
+          action: {
+            terms: {
+              field: 'action',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
+            },
+          },
+        },
+      },
+    };
+
+    return query;
+  }
+
+  getTotalForActionsAndFiAndRangeByWeekChartTest(
+    params: StatsServiceParams,
+  ): SearchParams {
+    const fi = params.filters[0].value;
+    const { start, stop } = params;
+    const index = 'stats';
+    const type = 'entry';
+
+    const query = {
+      index,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            must: [
+              { term: { fi } },
+              { term: { _type: type } },
+              {
+                range: {
+                  date: {
+                    gte: start.getTime(),
+                    lte: stop.getTime(),
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          week: {
+            date_histogram: {
+              field: 'date',
+              interval: 'week',
+              min_doc_count: 0,
+              extended_bounds: {
+                min: start.getTime(),
+                max: stop.getTime(),
+              },
+            },
+            aggs: {
+              action: {
+                terms: {
+                  field: 'action',
                   size: 0,
                 },
                 aggs: {
