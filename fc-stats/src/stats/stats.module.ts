@@ -7,6 +7,8 @@ import { StatsUIController } from './controller/stats-ui.controller';
 import { StatsAPIController } from './controller/stats-api.controller';
 import { StatsCSVController } from './controller/stats-csv.controller';
 import { ConfigService } from 'nestjs-config';
+import { StatsChartsController } from './controller/charts/stats-charts.controller';
+import { ChartsService } from './service/charts/charts.service';
 
 @Module({
   imports: [
@@ -15,8 +17,13 @@ import { ConfigService } from 'nestjs-config';
       inject: [ConfigService],
     }),
   ],
-  providers: [StatsService, StatsQueries, CsvService],
-  exports: [StatsService, CsvService],
-  controllers: [StatsUIController, StatsAPIController, StatsCSVController],
+  providers: [StatsService, StatsQueries, CsvService, ChartsService],
+  exports: [StatsService, CsvService, ChartsService],
+  controllers: [
+    StatsUIController,
+    StatsAPIController,
+    StatsCSVController,
+    StatsChartsController,
+  ],
 })
 export class StatsModule {}

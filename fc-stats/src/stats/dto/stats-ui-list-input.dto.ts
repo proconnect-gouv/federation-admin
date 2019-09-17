@@ -30,6 +30,10 @@ export class StatsUIListInputDTO {
   readonly action: string;
 
   @IsOptional()
+  @IsString()
+  readonly chartList: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(

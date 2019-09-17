@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <% include partials/head.ejs %>
+</head>
+<body>
+<div class="container">
+    <% include partials/header.ejs %>
+    <div class="row">
+        <div class="col-12">
+            <p class="h2">Stats</p>
+            <p><i>Mesure All the things!</i></p>
+
+            <div>
+             <canvas id="bar-chart-grouped" width="800" height="450" data-init="filterChart"></canvas>
+        </div>
+    </div>
+</div>
+<script>
+    const labels = '<%- labelsArray %>';
+    const datasets = '<%- dataArray %>';
+    const titleText = '<%- titleText %>';
+    const MAPPINGS = {
+        action: {
+            rnippcheck: 'Redressement RNNIPP',
+            checkedtoken: 'Token vérifié',
+            authentication: 'Connexion',
+            eidas: 'Eidas',
+            consent: 'Consent',
+        },
+        typeAction: {
+            verification: 'Vérification',
+            rectifiedwithusenameonly: 'Redressement: avec le nom',
+            rectified: 'Redressement',
+            notrectifiedwithoneecho: 'Redressement : un écho',
+            divergence: 'Divergence',
+            rejectedsyntaxerrors: 'Rejeté: erreur de synthaxe',
+            notrectifiedwithmultipleecho: 'Pas de Redressement: plusieurs échos',
+            notrectifiednoecho: "Pas de Redressement : pas d'echo",
+            identityproviderchoice: "Choix du fournisseur d'identité",
+            initial: 'Initiale',
+            deactivateduserauthenticationattempt:
+            'Tentative de connexion avec un compte désactivé',
+            identityproviderauthentication: "Connexion au fournisseur d'identité",
+            newauthenticationquery: 'Nouvelle requête de connexion',
+            confirmAuthentication: 'Connexion confirmée',
+            conflict: 'Confilt',
+            userInfosWithoutEmailError:
+            "Information user ok, pas d'erreur sur l'email",
+            nonExistantProviderAuthenticationAttempt:
+            'Tentative de connexion à un fournisseur inexistant',
+            deactivatedProviderAuthenticationAttempt:
+            'Tentative de connexion avec un fournisseur désactivé',
+            deceasedperson: 'Personne décédée',
+            xmlokbutmissingdata: 'XML ok mais données manquantes',
+            cantcallrnipp: 'RNIPP injoignable',
+        },
+    };
+    
+    getMapped = function getMapped(key) {
+        console.log(MAPPINGS.action[key])
+      if (MAPPINGS.action[key] !== undefined) {
+        // tslint:disable-next-line: no-string-literal
+        console.log(MAPPINGS.action[key])
+        return MAPPINGS.action[key];
+      } else if (MAPPINGS.typeAction[key] !== undefined) {
+        return MAPPINGS.typeAction[key];
+      }
+      return key;
+    };
+
+    window.chartData = {
+        type: 'bar',
+        data: {
+            labels: JSON.parse(labels),
+            datasets: JSON.parse(datasets)
+        },
+        options: {
+            
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        
+                        const label = data.datasets[tooltipItem.datasetIndex].label || '';
+                       
+                        return getMapped(label);
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: titleText,
+                fontSize: 20
+            },
+            legend: {
+                labels:{
+                    fontSize: 16,
+                },
+            }
+        }
+    }
+</script>
+</body>
+</html>

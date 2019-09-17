@@ -109,4 +109,46 @@ export class StatsService {
 
     return weeks;
   }
+
+  async getDataWithoutRange(): Promise<any> {
+    const query: SearchParams = this.statsQueries.getDataWithoutRange();
+    const data: SearchResponse<
+      any
+    > = await this.elasticsearchService.getClient().search(query);
+
+    const esResponse = this.getItems(data);
+
+    const fsList = this.getAggregate(data, 'fs');
+    const fiList = this.getAggregate(data, 'fi');
+    const actionList = this.getAggregate(data, 'action');
+    const typeActionList = this.getAggregate(data, 'typeAction');
+
+    return {
+      fsList,
+      fiList,
+      actionList,
+      typeActionList,
+    };
+  }
+
+  async getTotalForActionsAndFiAndRangeByWeekChartTest(
+    params: StatsServiceParams,
+  ): Promise<TotalByFIWeek[]> {
+    const query: SearchParams = this.statsQueries.getTotalForActionsAndFiAndRangeByWeekChartTest(
+      params,
+    );
+    const data: SearchResponse<
+      any
+    > = await this.elasticsearchService.getClient().search(query);
+
+    const weeks: TotalByFIWeek[] = data.aggregations.week.buckets.map(week => ({
+      startDate: week.key,
+      events: week.action.buckets.map(event => ({
+        label: event.key,
+        count: event.count.value,
+      })),
+    }));
+
+    return weeks;
+  }
 }
