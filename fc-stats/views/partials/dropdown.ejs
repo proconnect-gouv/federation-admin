@@ -3,7 +3,7 @@ function itemIsChecked(key, item) {
   return REQ_QUERY.filters && REQ_QUERY.filters.indexOf(`${key}:${item.key}`) > -1;
 }
 %>
-<div id="<%= key %>-dropdown" class="dropdown m-3 displayed-filter">
+<div id="<%= key %>-dropdown" class="dropdown m-3">
   <button class="btn btn-secondary btn-sm dropdown-toggle"
     data-init="dropdown"
     type="button" id="dropdownMenuButton"
