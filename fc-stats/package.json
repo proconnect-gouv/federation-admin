@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --sync --require=ts-node/register --require=tsconfig-paths/register",
+    "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --require=ts-node/register --require=tsconfig-paths/register",
     "fixtures:es": "curl -XPUT http://elasticsearch:9200/_bulk --data-binary @fixtures/bulk.json",
     "migrations:run": "npm run typeorm migration:run",
     "format": "prettier --write \"src/**/*.ts\"",
