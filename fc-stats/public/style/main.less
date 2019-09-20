@@ -1,6 +1,8 @@
 @import './list';
 @import './login';
 @import './search';
+@import './modal';
+@import './constants.less';
 
 html, body {
     height: 100%;
@@ -17,14 +19,57 @@ body {
     height: 100%;
 }
 
-.logo {
-    padding: 10px;
+.logo img {
+  height: 30px;
+}
+
+.navbar {
+  background-color: white;
 }
 
 .header img {
     width: 100%;
 }
 
-.meta-information {
-    font-size: 0.7rem;
+.meta-information-container {
+  min-width: 250px;
+
+  .meta-information {
+    font-size: 0.8rem;
+  }
+}
+
+.fa-git-square {
+  font-size: 1.5rem;
+}
+
+.navbar {
+  background-color: white;
+}
+
+.pad-15 {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+#uppercase-icon,
+#number-icon, 
+#lowercase-icon, 
+#length-icon, 
+#special-character-icon {
+  &:before {
+    display: inline-block;
+    width: 1.2em;
+    content: "\f00d";
+    color: @red-color;
+  }
+  
+  &.valid-password {
+    &:before {
+      display: inline-block;
+      width: 1.2em;
+      content: "\f00c";
+      color: @green-color;
+    }
+  }
 }

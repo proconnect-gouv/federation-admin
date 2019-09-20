@@ -7,6 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as flash from 'express-flash';
 import * as Bundler from 'parcel-bundler';
+import * as methodOverride from 'method-override';
 
 import 'dotenv';
 import { ConfigService } from 'nestjs-config';
@@ -21,11 +22,17 @@ async function bootstrap() {
 
   // View engine initialization
   app.engine('ejs', require('ejs').renderFile);
-  app.set('views', [join(__dirname, '..', 'views')]);
+  app.set('views', [
+    join(__dirname, '..', 'views'),
+    join(__dirname, '../../shared', 'views'),
+  ]);
   app.setViewEngine('ejs');
 
   // Static files
   app.use(express.static('public'));
+
+  // override http method
+  app.use(methodOverride('_method'));
 
   // Flash messages
   app.use(flash());

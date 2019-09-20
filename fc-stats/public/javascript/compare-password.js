@@ -1,0 +1,32 @@
+export function comparePassword(element) {
+  const password = document.getElementById('password');
+
+  password.addEventListener('input', function() {
+    matcheRegexpInput(/(?=.*[A-Z])/,password.value, document.getElementById('uppercase-icon'));
+    matcheRegexpInput(/(?=.*[a-z])/,password.value, document.getElementById('lowercase-icon'));
+    matcheRegexpInput(/(?=.*[0-9])/,password.value, document.getElementById('number-icon'));
+    matcheRegexpInput(/(?=.*[@$!%*?&,;:])/,password.value, document.getElementById('special-character-icon'));
+    matcheRegexpInput(/[0-9A-Za-z@$!%*?&,;:]{8,}/,password.value, document.getElementById('length-icon'));
+  });
+
+
+  element.addEventListener('input', function () {
+    // check input pattern
+    if (password.value !== element.value) {
+      element.classList.remove('is-valid');
+      element.classList.add('is-invalid');
+    } else {
+      element.classList.remove('is-invalid');
+      element.classList.add('is-valid');
+    }
+
+  }, false);
+}
+
+function matcheRegexpInput(regexp, value, documentId) {
+  if(regexp.test(value)) {
+    documentId.classList.add('valid-password');
+  } else {
+    documentId.classList.remove('valid-password');
+  }
+}

@@ -9,6 +9,8 @@ import { ConfigService } from 'nestjs-config';
 import * as moment from 'moment';
 import * as queryString from 'query-string';
 import { MAPPINGS } from './mappings-data';
+import { errorCodeTranslations } from './error-code-translations';
+import { UserRole } from '@fc/shared/user/roles.enum';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
@@ -43,6 +45,16 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.queryString = queryString;
 
     res.locals.helpers.MAPPINGS = MAPPINGS;
+
+    res.locals.ERROR_CODE_TRANSLATIONS = errorCodeTranslations;
+
+    res.locals.USER_ROLES_OPTIONS = [
+      { label: 'Administrateur', value: UserRole.ADMIN },
+      { label: 'Exploitant', value: UserRole.OPERATOR },
+      { label: 'Nouvel utilisateur', value: UserRole.NEWUSER },
+      { label: 'Administrateur inactif', value: UserRole.INACTIVE_ADMIN },
+      { label: 'Exploitant inactif', value: UserRole.INACTIVE_OPERATOR },
+    ];
 
     res.locals.helpers.getMapped = function getMapped(key) {
       if (res.locals.helpers.MAPPINGS.action[key] !== undefined) {
