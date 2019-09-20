@@ -359,7 +359,7 @@ describe('AccountController', () => {
       );
       expect(req.flash).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/service-provider');
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
     });
     it("'should update a new user and redirect to the account page if the user has only the role admin", async () => {
       // setup
@@ -375,7 +375,7 @@ describe('AccountController', () => {
       );
       expect(req.flash).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account');
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
     });
     it("should fall back in the catch statement if user's updated password and password confirmation do not respect the dto", async () => {
       // setup

@@ -1,4 +1,5 @@
 export default {
+  appName: process.env.APP_NAME || 'FC_SUPPORT',
   environment: process.env.ENV || 'development',
   app_root: process.env.APP_ROOT || '',
   commitUrlPrefix:

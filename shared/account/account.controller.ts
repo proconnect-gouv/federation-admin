@@ -118,11 +118,7 @@ export class AccountController {
     }
     req.flash('success', `Le mot de passe a bien été mis à jour !`);
 
-    if (req.user.roles.includes('operator')) {
-      return res.redirect(`${res.locals.APP_ROOT}/service-provider`);
-    } else if (req.user.roles.includes('admin')) {
-      return res.redirect(`${res.locals.APP_ROOT}/account`);
-    }
+    return res.redirect(`${res.locals.APP_ROOT}/`);
   }
 
   @Delete(':id')

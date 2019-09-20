@@ -7,6 +7,8 @@ import {
 import { Observable } from 'rxjs';
 import { ConfigService } from 'nestjs-config';
 import * as moment from 'moment';
+import { UserRole } from '@fc/shared/user/roles.enum';
+import { errorCodeTranslations } from './error-code-translations';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
@@ -29,6 +31,16 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.GIT_CURRENT_BRANCH = appConfig.currentBranch;
     res.locals.GIT_LATEST_COMMIT_SHORT_HASH = appConfig.latestCommitShortHash;
     res.locals.GIT_LATEST_COMMIT_LONG_HASH = appConfig.latestCommitLongHash;
+
+    res.locals.ERROR_CODE_TRANSLATIONS = errorCodeTranslations;
+
+    res.locals.USER_ROLES_OPTIONS = [
+      { label: 'Administrateur', value: UserRole.ADMIN },
+      { label: 'Exploitant', value: UserRole.OPERATOR },
+      { label: 'Nouvel utilisateur', value: UserRole.NEWUSER },
+      { label: 'Administrateur inactif', value: UserRole.INACTIVE_ADMIN },
+      { label: 'Exploitant inactif', value: UserRole.INACTIVE_OPERATOR },
+    ];
 
     res.locals.CURRENT_USER = req.user;
 

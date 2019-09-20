@@ -9,6 +9,8 @@ import {
   Req,
 } from '@nestjs/common';
 
+import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
+import { UserRole } from '@fc/shared/user/roles.enum';
 import { RnippService } from './rnipp.service';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
 import { Person } from './interface/person.interface';
@@ -22,6 +24,7 @@ export class RnippController {
   public constructor(private readonly rnippService: RnippService) {}
 
   @Get('rnipp')
+  @Roles(UserRole.OPERATOR)
   @Render('rnipp')
   // tslint:disable-next-line: no-empty
   public async rnippView(@Req() req) {
@@ -30,6 +33,7 @@ export class RnippController {
   }
 
   @Post('research')
+  @Roles(UserRole.OPERATOR)
   @Render('rnipp')
   @UsePipes(new ValidationPipe({ transform: true }))
   public async researchRnipp(
