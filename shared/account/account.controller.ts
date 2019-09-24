@@ -151,7 +151,7 @@ export class AccountController {
   }
 
   @Get()
-  @Roles(UserRole.OPERATOR, UserRole.ADMIN)
+  @Roles(UserRole.OPERATOR, UserRole.ADMIN, UserRole.SECURITY)
   @Render('account/list')
   async list(
     @Req() req,

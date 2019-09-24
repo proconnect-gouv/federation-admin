@@ -31,7 +31,7 @@ items:
     username: 'jack'
     email: '{{internet.email}}'
     roles:
-      - 'operator'
+      - 'security'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
   pierre:

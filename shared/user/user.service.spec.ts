@@ -7,7 +7,6 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { UserCreation } from './value-object/user-creation';
 import { UserPasswordUpdate } from './value-object/user-password-update';
 import { UserRole } from './roles.enum';
-import * as generatePassword from 'generate-password';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -29,7 +28,12 @@ describe('UserService', () => {
 
   const user = {
     id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
-    roles: ['new_account', 'inactive_admin', 'inactive_operator'],
+    roles: [
+      'new_account',
+      'inactive_admin',
+      'inactive_operator',
+      'inactive_security',
+    ],
   };
 
   beforeEach(async () => {
@@ -71,7 +75,7 @@ describe('UserService', () => {
       const userEntityMock = new User();
       userEntityMock.passwordHash =
         '$2b$10$Dvb6R/8l5ntSJPxowMmEA.sJbZwTmPu1z0tHj5e6glb0s8Magc4we';
-      userEntityMock.roles = ['admin', 'operator'] as UserRole[];
+      userEntityMock.roles = ['admin', 'operator', 'security'] as UserRole[];
       userRepositoryMock.update.mockImplementation(() => Promise.resolve(true));
       const result = await userService.enrollUser(user, userPasswordUpdate);
       // assertion
@@ -83,7 +87,7 @@ describe('UserService', () => {
       const userPasswordUpdate = new UserPasswordUpdate('MyPasswordIsNotValid');
       const userEntityMock = new User();
       userEntityMock.passwordHash = '$2b$10$Dvb6R/8l5ntSJ';
-      userEntityMock.roles = ['admin', 'operator'] as UserRole[];
+      userEntityMock.roles = ['admin', 'operator', 'security'] as UserRole[];
       userRepositoryMock.update.mockImplementation(() =>
         Promise.reject(new Error('wrong budy')),
       );
@@ -150,7 +154,7 @@ describe('UserService', () => {
         'jean_moust',
         'jean@moust.lol',
         'georgesmoustaki',
-        [UserRole.ADMIN, UserRole.OPERATOR],
+        [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
         '1234',
       );
       await userService.createUser(userCreation);

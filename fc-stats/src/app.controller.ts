@@ -8,7 +8,10 @@ export class AppController {
       return res.redirect(`${res.locals.APP_ROOT}/account/enrollment`);
     } else if (req.user.roles.includes('operator')) {
       return res.redirect(`${res.locals.APP_ROOT}/stats`);
-    } else if (req.user.roles.includes('admin')) {
+    } else if (
+      req.user.roles.includes('admin') ||
+      req.user.roles.includes('security')
+    ) {
       return res.redirect(`${res.locals.APP_ROOT}/account`);
     }
   }
