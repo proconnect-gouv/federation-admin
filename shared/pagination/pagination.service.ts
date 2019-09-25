@@ -1,4 +1,4 @@
-import { Repository, BaseEntity } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   paginate,
   Pagination,
