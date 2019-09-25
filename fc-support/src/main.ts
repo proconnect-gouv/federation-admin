@@ -8,7 +8,6 @@ import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as flash from 'express-flash';
 import * as helmet from 'helmet';
-import * as Bundler from 'parcel-bundler';
 import * as methodOverride from 'method-override';
 
 import 'dotenv';
@@ -30,7 +29,7 @@ async function bootstrap() {
   app.setViewEngine('ejs');
 
   // Static files
-  app.use(express.static('public'));
+  app.use(express.static('dist/client'));
 
   // override http method
   app.use(methodOverride('_method'));
@@ -72,13 +71,6 @@ async function bootstrap() {
   // Setup locals for all the routes
   const localsInterceptor = app.get<LocalsInterceptor>(LocalsInterceptor);
   app.useGlobalInterceptors(localsInterceptor);
-
-  // Setup assets bundling
-  const file = join(__dirname, '..', 'public/javascript/main.js');
-  const bundler = new Bundler(file, {
-    outDir: './dist/client/',
-  });
-  app.use(bundler.middleware());
 
   // Setup roles-based security
   const rolesGuard = app.get<RolesGuard>(RolesGuard);
