@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <% include partials/head.ejs %>
+</head>
+<body>
+	<% include partials/header.ejs %>
+	<section class="container mt-5">
+		<div class="row">
+			<div class="alert alert-danger col-sm-12">
+				<p> Cette fonctionnalité de vérification de l’identité pivot d'un usager
+					utilise des données à caractère personnel, protégées par la loi n°78-17 du
+					6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés,
+					modifiée par la loi n°2004-801 du 6 août 2004 relative à la protection des
+					personnes physiques à l'égard des traitements de données à caractère personnel.</p>
+			</div>
+			<div class="col-sm-6">
+				<h3>Rechercher un usager</h3>
+				<% if (locals.message) { %>
+					<div id="message" class="alert alert-danger" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">×</span>
+								<span class="sr-only">Fermer</span>
+						</button>
+						<%=message%><br>
+						<% if (locals.rawResponse) { %>
+						<%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippCode, rnippRawResponse: rawResponse}); -%>
+						<% } %>
+					</div>
+				<% } %>
+				<form class="custom-validation" id="rnipp-form" name="rnipp-form" method="POST" action="<%= APP_ROOT %>/research" data-init="validateRnippForm" novalidate>
+					<div class="form-group">
+						<div>Genre</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="female"
+								name="gender"
+								value="female"
+								required
+								<% if(locals.person && person.requested.gender === 'female'){ %> checked <%} %>
+							>
+							<label class="custom-control-label" for="female">Féminin</label>
+						</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="male"
+								name="gender"
+								value="male"
+								required
+								<% if(locals.person && person.requested.gender === 'male'){ %> checked <%} %>
+							>
+							<label class="custom-control-label" for="male">Masculin</label>
+							<div class="invalid-feedback" style="margin: 0.15rem 0 0 1rem">
+								Vous devez choisir un genre
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="family-name" class="control-label">Nom</label>
+						<input
+							type="text"
+							class="form-control"
+							id="family-name"
+							name="familyName"
+							value="<%= (locals.person && person.requested.familyName) ? person.requested.familyName : '' %>"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+							required
+						>
+						<div class="invalid-feedback">
+							Veuillez renseigner un nom de famille
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="preferred-sername" class="control-label">Nom d'usage ( _Champ expérimental - Ne pas utiliser pour le support_)</label>
+						<input
+							type="text"
+							class="form-control"
+							id="preferred-username"
+							name="preferredUsername"
+							value="<%= (locals.person && person.requested.preferredUsername) ? person.requested.preferredUsername : '' %>"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+						>
+						<div class="invalid-feedback">
+							Veuillez renseigner un nom d'usage
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="given-name" class="control-label">Prénoms (séparés par des espaces)</label>
+						<input
+							type="text"
+							class="form-control"
+							id="given-name"
+							name="givenName"
+							placeholder="exemple : Jean Michel Pierre Marie"
+							value="<%= (locals.person && person.requested.givenName) ? person.requested.givenName : '' %>"
+							pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+							required
+						>
+						<div class="invalid-feedback">
+							Veuillez renseigner un prénom ou vos prénoms
+						</div>
+					</div>
+					<div class="form-group ">
+						<label for="birthdate" class="control-label">Date de naissance (format YYYY-mm-dd)</label>
+						<div class="input-group">
+							<input
+								type="text"
+								class="form-control datepicker"
+								id="birthdate"
+								name="birthdate"
+								placeholder="exemple : 1987-02-21"
+								value="<%= (locals.person && person.requested.birthdate) ? person.requested.birthdate : '' %>"
+								data-init="datePicker"
+								required
+								autocomplete="off"
+							>
+							<div class="input-group-append">
+									<span class="input-group-text fa fa-calendar" aria-hidden="true"></span>
+							</div>
+							<div class="invalid-feedback">
+								Veuillez renseigner une date au format YYY-mm-dd
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div>Né en france</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="french"
+								name="birthCountry"
+								value="99100"
+								required
+								<% if(locals.person && person.requested.birthCountry === '99100'){ %> checked <%} %>
+								checked
+							>
+							<label class="custom-control-label" for="french">Oui</label>
+						</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input
+								type="radio"
+								class="custom-control-input"
+								id="no-french"
+								name="birthCountry"
+								value="99999"
+								required
+								<% if(locals.person && person.requested.birthCountry === '99999'){ %> checked <%} %>
+							>
+							<label class="custom-control-label" for="no-french">Non</label>
+						</div>
+					</div>
+					<div class="form-group ">
+						<label for="birthplace" class="control-label">Code lieu de naissance (commune ou pays)</label>
+						<input
+							type="text"
+							class="form-control"
+							id="birthplace"
+							name="birthPlace"
+							placeholder="exemple : 92012 pour Boulogne-Billancourt"
+							value="<%= (locals.person && person.requested.birthPlace) ? person.requested.birthPlace : '' %>"
+							pattern="[0-9]{5}"
+							title="Vous devez renseigner 5 nombres"
+							required
+						>
+						<div class="invalid-feedback">
+							Veuillez renseigner le COG du lieu de naissance
+						</div>
+					</div>
+					<div class="form-group text-center">
+							<button id="btn-research" type="submit" class="btn btn-primary">Rechercher</button>
+					</div>
+					<input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
+				</form>
+			</div>
+			<div id="result" class="col-sm-6" >
+				<% if (locals.person && person.found) { %>
+					<h3>Résultat du redressement RNIPP</h3>
+					<div class="mb-2">
+						Genre
+						<br>
+						<% if (person.found.gender === 'male') { %>
+							Masculin
+						<% } %>
+						<% if (person.found.gender === 'female') { %>
+							Féminin
+						<% } %>
+					</div>
+					<div class="mb-2">
+						Nom
+						<br>
+						<% if (person.found.familyName) { %>
+							<%=person.found.familyName%>
+						<% } %>
+					</div>
+					<div class="mb-2">
+						Nom d'usage
+						<br>
+						<% if (person.found.preferredUsername) { %>
+							<%=person.found.preferredUsername%>
+						<% } %>
+					</div>
+					<div class="mb-2">
+						Prénoms
+						<br>
+						<% if (person.found.givenName) { %>
+							<%=person.found.givenName%>
+						<% } %>
+					</div>
+					<div class="mb-2">
+						Date de naissance
+						<br>
+						<% if (person.found.birthdate) { %>
+							<%=person.found.birthdate%>
+						<% } %>
+					</div>
+					<div class="mb-2">
+						COG du lieu de naissance
+						<br>
+						<% if (person.found.birthPlace && person.found.birthPlace !== '00000') { %>
+							<%=person.found.birthPlace%>
+						<% } %>
+            <% if (person.found.birthPlace === '00000') { %>
+              N/A
+            <% } %>
+					</div>
+					<div class="mb-2">
+						COG du pays de naissance
+						<br>
+						<% if (person.found.birthCountry) { %>
+							<%=person.found.birthCountry%>
+						<% } %>
+					</div>
+					<hr/>
+					<div class="mb-2">
+						<%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippResponse.code, rnippRawResponse: rnippResponse.raw}); -%>
+					</div>
+				<% } %>
+			</div>
+		</div>
+    <% if (locals.person) { %>
+    <script type="text/javascript">
+      const __RNIPP_DATA__ = <%- JSON.stringify(person.found) %>;
+    </script>
+     <% } %>
+	</section>

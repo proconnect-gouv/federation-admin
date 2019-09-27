@@ -15,8 +15,8 @@ import { AuthenticationModule } from '@fc/shared/authentication/authentication.m
 import { AuthenticationController } from '@fc/shared/authentication/authentication.controller';
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { TotpMiddleware } from '@fc/shared/authentication/middleware/totp.middleware';
-import { RnippModule } from './rnipp/rnipp.module';
-import { RnippController } from './rnipp/rnipp.controller';
+import { RnippModule } from '@fc/shared/rnipp/rnipp.module';
+import { RnippController } from '@fc/shared/rnipp/rnipp.controller';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { CsurfMiddleware } from '@nest-middlewares/csurf';
