@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
-import * as rawXml from '../../test/xmlMockedString.json';
+import { rawXml } from '../fixtures/xmlMockedString';
 import { PersonRequestedDTO } from './dto/person-requested-input.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { PersonFromRnipp } from './interface/personFromRnipp.interface';
