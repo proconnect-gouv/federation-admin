@@ -43,6 +43,7 @@ export class RnippController {
     const csrfToken = req.csrfToken();
     try {
       const rnipp: PersonFromRnipp = await this.rnippService.getJsonFromRnippApi(
+        req,
         personRequested as Person,
       );
       return {

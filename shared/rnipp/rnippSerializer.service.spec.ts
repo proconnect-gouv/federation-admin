@@ -19,6 +19,7 @@ describe('RnippSerializer (e2e)', () => {
     birthdate: '2019-07-02',
     birthCountry: '99100',
     birthPlace: '55555',
+    supportId: '1234567891234567',
   };
 
   const personNotBornInFrance = {
@@ -29,6 +30,7 @@ describe('RnippSerializer (e2e)', () => {
     birthdate: '2019-07-02',
     birthCountry: '99999',
     birthPlace: '99350',
+    supportId: '1234567891234567',
   };
 
   beforeEach(async () => {
@@ -98,6 +100,7 @@ describe('RnippSerializer (e2e)', () => {
           birthdate: '2019-07-02',
           birthCountry: '99100',
           birthPlace: '55555',
+          supportId: '1234567891234567',
         },
         rnippCode: '3',
       });
@@ -158,6 +161,7 @@ describe('RnippSerializer (e2e)', () => {
             birthdate: '2019-07-02',
             birthCountry: '99350',
             birthPlace: '00000',
+            supportId: '1234567891234567',
           },
           rnippCode: '2',
         });

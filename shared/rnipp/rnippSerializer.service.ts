@@ -146,6 +146,7 @@ export class RnippSerializer {
           ),
           birthCountry,
           birthPlace,
+          supportId: personRequest.supportId,
         },
         rnippCode: rnippCodeFromXML,
       };

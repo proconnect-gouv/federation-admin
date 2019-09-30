@@ -6,6 +6,7 @@ import { PersonRequestedDTO } from './dto/person-requested-input.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { PersonFromRnipp } from './interface/personFromRnipp.interface';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
+import { TraceService } from '@fc/shared/logger/trace.service';
 
 describe('RnippController', () => {
   let rnippController: RnippController;
@@ -22,6 +23,7 @@ describe('RnippController', () => {
     birthdate: '1992-03-03',
     birthPlace: '99100',
     birthCountry: '99100',
+    supportId: '1234567891234567',
   };
 
   const req = {
@@ -30,13 +32,19 @@ describe('RnippController', () => {
     },
   };
 
+  const loggerMock = {
+    supportRnippCall: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RnippController],
-      providers: [RnippService],
+      providers: [RnippService, TraceService],
     })
       .overrideProvider(RnippService)
       .useValue(rnippService)
+      .overrideProvider(TraceService)
+      .useValue(loggerMock)
       .compile();
 
     rnippController = module.get<RnippController>(RnippController);
@@ -54,6 +62,7 @@ describe('RnippController', () => {
           birthdate: '1992-03-03',
           birthPlace: '99100',
           birthCountry: '99100',
+          supportId: '1234567891234567',
         },
         rawResponse: rawXml.xmlString,
         rnippCode: 2,
@@ -70,6 +79,7 @@ describe('RnippController', () => {
             birthdate: '1992-03-03',
             birthPlace: '99100',
             birthCountry: '99100',
+            supportId: '1234567891234567',
           },
           found: {
             gender: 'male',
@@ -79,6 +89,7 @@ describe('RnippController', () => {
             birthdate: '1992-03-03',
             birthPlace: '99100',
             birthCountry: '99100',
+            supportId: '1234567891234567',
           },
         },
         rnippResponse: {
