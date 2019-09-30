@@ -5,6 +5,8 @@ import { RnippSerializer } from './rnippSerializer.service';
 import * as queryString from 'query-string';
 import { PersonFromRnipp } from './interface/personFromRnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
+import { TraceService } from '@fc/shared/logger/trace.service';
+import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
 
 @Injectable()
 export class RnippService {
@@ -12,11 +14,18 @@ export class RnippService {
     @InjectConfig() private readonly config,
     private readonly http: HttpService,
     private readonly serializer: RnippSerializer,
+    private readonly logger: TraceService,
   ) {}
 
   public async getJsonFromRnippApi(
+    req: any,
     personData: Person,
   ): Promise<PersonFromRnipp | any> {
+    this.logger.supportRnippCall({
+      action: LogActions.SUPPORT_RNIPP_CALL,
+      user: req.user.username,
+      motif: `ticket support : ${personData.supportId}`,
+    });
     Logger.debug(`Will get xml`);
 
     const rnippUrl: string = this.createRnippUrl(personData);

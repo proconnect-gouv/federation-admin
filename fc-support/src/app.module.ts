@@ -20,6 +20,7 @@ import { RnippController } from '@fc/shared/rnipp/rnipp.controller';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { CsurfMiddleware } from '@nest-middlewares/csurf';
+import { LoggerModule } from '@fc/shared/logger/logger.module';
 import * as otplib from 'otplib';
 
 const otplibProvider = {
@@ -32,6 +33,7 @@ const otplibProvider = {
     AuthenticationModule,
     AccountModule,
     RnippModule,
+    LoggerModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),

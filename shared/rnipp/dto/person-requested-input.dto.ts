@@ -37,6 +37,10 @@ export class PersonRequestedDTO {
   @Matches(/^[0-9]{5}$/)
   @IsString()
   readonly birthCountry: string;
+
+  @Matches(/^[0-9]{16}$/)
+  @IsString()
+  readonly supportId: string;
 }
 
 function IsOptional(validationOptions?: ValidationOptions) {
