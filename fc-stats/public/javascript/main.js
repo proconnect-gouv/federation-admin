@@ -10,7 +10,6 @@ import { chartsList } from './charts-list';
 import { paginationStyle } from './pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from './compare-password';
-import { compareDate } from './compare-date';
 import { removeItem }  from './confirm-form';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -29,7 +28,6 @@ const initMap = {
   validateEnrollment: validateEnrollment,
   comparePassword: comparePassword,
   removeItem: removeItem,
-  compareDate: compareDate,
 };
 
 $(document).ready(function() {
