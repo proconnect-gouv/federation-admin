@@ -6,4 +6,5 @@ export interface Person {
   readonly birthdate: string;
   readonly birthPlace: string;
   readonly birthCountry: string;
+  readonly supportId: string;
 }

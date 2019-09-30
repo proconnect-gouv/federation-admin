@@ -5,6 +5,7 @@ import { RnippService } from './rnipp.service';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { RnippSerializer } from './rnippSerializer.service';
+import { TraceService } from '@fc/shared/logger/trace.service';
 
 describe('RnippService (e2e)', () => {
   let rnippService: RnippService;
@@ -21,6 +22,10 @@ describe('RnippService (e2e)', () => {
     serializeXmlFromRnipp: jest.fn(),
   };
 
+  const loggerMock = {
+    supportRnippCall: jest.fn(),
+  };
+
   const personData = {
     gender: 'male',
     familyName: 'string',
@@ -29,11 +34,24 @@ describe('RnippService (e2e)', () => {
     birthdate: '1992-03-03',
     birthPlace: 'string',
     birthCountry: 'string',
+    supportId: '1234567891234567',
+  };
+
+  const req = {
+    user: {
+      email: 'email@IsEmail.fr',
+    },
   };
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [RnippService, HttpService, ConfigService, RnippSerializer],
+      providers: [
+        RnippService,
+        HttpService,
+        ConfigService,
+        RnippSerializer,
+        TraceService,
+      ],
     })
       .overrideProvider(HttpService)
       .useValue(httpService)
@@ -41,6 +59,8 @@ describe('RnippService (e2e)', () => {
       .useValue(configService)
       .overrideProvider(RnippSerializer)
       .useValue(rnippSerializerMock)
+      .overrideProvider(TraceService)
+      .useValue(loggerMock)
       .compile();
 
     rnippService = module.get<RnippService>(RnippService);
@@ -66,6 +86,7 @@ describe('RnippService (e2e)', () => {
           birthdate: '1992-03-03',
           birthPlace: 'string',
           birthCountry: 'string',
+          supportId: '1234567891234567',
         },
         rnippCode: '2',
       };
@@ -74,8 +95,10 @@ describe('RnippService (e2e)', () => {
       jest
         .spyOn(rnippSerializerMock, 'serializeXmlFromRnipp')
         .mockImplementation(() => Promise.resolve(personParsedData));
+      jest.spyOn(loggerMock, 'supportRnippCall');
 
       const person = await rnippService.getJsonFromRnippApi(
+        req,
         personParsedData.identity,
       );
 
@@ -97,9 +120,10 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+      jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(personData);
+        await rnippService.getJsonFromRnippApi(req, personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: result.data,
@@ -118,9 +142,10 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+      jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(personData);
+        await rnippService.getJsonFromRnippApi(req, personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: 'No Data from rnipp',
@@ -139,9 +164,10 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+      jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(personData);
+        await rnippService.getJsonFromRnippApi(req, personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: 'No Data from rnipp',
