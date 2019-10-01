@@ -12,35 +12,61 @@ describe('services/containers', () => {
   });
 
   describe('add', () => {
-    it('Should reference given object', () => {
+    it('Should reference instanciation function', () => {
       // Given
-      const service = { a: 'a' };
+      const service = () => 'foo';
       const container = new Container();
       // When
       container.add('myService', service);
       // Then
-      expect(container.services.myService).toBeDefined();
-      expect(container.services.myService).toBe(service);
+      expect(container.get('myService')).toBe('foo');
     });
-    it('Should throw if service name is already used', () => {
+
+    it('Should not instanciate at register time', () => {
       // Given
-      const service = { a: 'a' };
+      const spy = jest.fn();
+      const service = () => {
+        spy();
+        return 'foo';
+      };
       const container = new Container();
       // When
       container.add('myService', service);
       // Then
-      expect(() => {
-        container.add('myService', service);
-      }).toThrow();
+      expect(spy).not.toHaveBeenCalled();
     });
-    it('Should return the container', () => {
+
+    it('Should instanciate at get time', () => {
       // Given
-      const service = { a: 'a' };
+      const spy = jest.fn();
+      const service = () => {
+        spy();
+        return 'foo';
+      };
       const container = new Container();
       // When
-      const result = container.add('myService', service);
+      container.add('myService', service);
+      const result = container.get('myService');
       // Then
-      expect(result).toBe(container);
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBe('foo');
+    });
+
+    it('Should instanciate only one time', () => {
+      // Given
+      const spy = jest.fn();
+      const service = () => {
+        spy();
+        return Symbol('foo');
+      };
+      const container = new Container();
+      // When
+      container.add('myService', service);
+      const result1 = container.get('myService');
+      const result2 = container.get('myService');
+      // Then
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(result1).toBe(result2);
     });
   });
 
@@ -48,9 +74,10 @@ describe('services/containers', () => {
     it('Should return a registered service', () => {
       // Given
       const service = { a: 'a' };
+      const instanciator = () => service;
       const container = new Container();
       // When
-      container.add('myService', service);
+      container.add('myService', instanciator);
       const result = container.get('myService');
       // Then
       expect(result).toBe(service);
@@ -63,15 +90,34 @@ describe('services/containers', () => {
         container.get('myService');
       }).toThrow();
     });
+    it('Should return multiple services if an array is given', () => {
+      // Given
+      const fooService = Symbol('foo');
+      const barService = Symbol('bar');
+      const bazService = Symbol('baz');
+      const container = new Container();
+      // When
+      container.add('foo', () => fooService);
+      container.add('bar', () => barService);
+      container.add('baz', () => bazService);
+
+      const { foo, bar, baz } = container.get(['foo', 'bar', 'baz']);
+      // Then
+      expect(foo).toBe(fooService);
+      expect(bar).toBe(barService);
+      expect(baz).toBe(bazService);
+    });
   });
 
   describe('remove', () => {
     it('Should remove registred service from container', () => {
       // Given
       const service = { a: 'a' };
+      const instanciator = () => service;
       const container = new Container();
       // When
-      container.add('myService', service);
+      container.add('myService', instanciator);
+      container.get('myService');
       container.remove('myService');
       // Then
       expect(() => {
@@ -89,9 +135,11 @@ describe('services/containers', () => {
     it('Should return the container', () => {
       // Given
       const service = { a: 'a' };
+      const instanciator = () => service;
       const container = new Container();
       // When
-      container.add('myService', service);
+      container.add('myService', instanciator);
+      container.get('myService');
       const result = container.remove('myService');
       // Then
       expect(result).toBe(container);

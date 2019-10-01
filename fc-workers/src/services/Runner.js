@@ -26,7 +26,7 @@ class Runner {
   }
 
   handleError(error, jobName) {
-    const { logger } = this.container.services;
+    const logger = this.container.get('logger');
     logger.error(`An error occured: ${error.message}`);
     if (error.type === 'input') {
       logger.error(error.stack);
@@ -53,10 +53,11 @@ class Runner {
 
     try {
       if (params && params.help) {
-        return this.container.services.logger.log(this.jobs[jobName].usage());
+        return this.container.get('logger').log(this.jobs[jobName].usage());
       }
       const job = new this.jobs[jobName](this.container);
-      return job.run(params);
+
+      return job.run(params).catch(error => this.handleError(error, jobName));
     } catch (error) {
       return this.handleError(error, jobName);
     }

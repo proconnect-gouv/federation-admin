@@ -19,7 +19,8 @@ describe('PurgeES', () => {
 
   describe('handleProgress', () => {
     it('Should log progress', () => {
-      const container = { services: { logger: { info: jest.fn() } } };
+      const services = { logger: { info: jest.fn() } };
+      const container = { get: key => services[key] };
       const purgeES = new PurgeES(container);
       purgeES.recursiveDelete = jest.fn();
       const params = {
@@ -34,13 +35,14 @@ describe('PurgeES', () => {
       // When
       purgeES.handleProgress(params, bulk);
       // Then
-      expect(container.services.logger.info.mock.calls).toHaveLength(1);
-      expect(container.services.logger.info.mock.calls[0][0]).toBe(
+      expect(services.logger.info.mock.calls).toHaveLength(1);
+      expect(services.logger.info.mock.calls[0][0]).toBe(
         `[40%] Sent delete for 2 docs. Remaining docs: 6 / 10`
       );
     });
     it('Should call recursiveDelete', done => {
-      const container = { services: { logger: { info: jest.fn() } } };
+      const services = { logger: { info: jest.fn() } };
+      const container = { get: key => services[key] };
       const purgeES = new PurgeES(container);
       purgeES.recursiveDelete = jest.fn();
       const params = {
@@ -67,7 +69,8 @@ describe('PurgeES', () => {
       }, 50);
     });
     it('Should not call recursiveDelete', done => {
-      const container = { services: { logger: { info: jest.fn() } } };
+      const services = { logger: { info: jest.fn() } };
+      const container = { get: key => services[key] };
       const purgeES = new PurgeES(container);
       purgeES.recursiveDelete = jest.fn();
       const params = {
