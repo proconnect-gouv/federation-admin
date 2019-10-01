@@ -69,6 +69,7 @@ describe('StatsQueries', () => {
       const params = {
         start: START_DATE,
         stop: STOP_DATE,
+        columns: ['fi', 'fs', 'action', 'typeAction'],
       };
       // When
       const result = statsQueries.streamEvents(params);
@@ -89,6 +90,7 @@ describe('StatsQueries', () => {
       const params = {
         start: START_DATE,
         stop: STOP_DATE,
+        columns: ['fi', 'fs', 'action', 'typeAction'],
       };
       // When
       const result = statsQueries.getEvents(params);
@@ -107,6 +109,7 @@ describe('StatsQueries', () => {
       const params = {
         start: START_DATE,
         stop: STOP_DATE,
+        columns: ['fi', 'fs', 'action', 'typeAction'],
       };
       // When
       const result = statsQueries.getEvents(params);
@@ -114,6 +117,7 @@ describe('StatsQueries', () => {
       // Then
       expect(result).toBeDefined(), expect(result.index).toBe('stats');
       expect(result.body.aggs).toBeDefined();
+      expect(result.body.aggs.date).toBeDefined();
       expect(result.body.aggs.fi).toBeDefined();
       expect(result.body.aggs.fs).toBeDefined();
       expect(result.body.aggs.action).toBeDefined();
@@ -128,6 +132,7 @@ describe('StatsQueries', () => {
         action: 'foo',
         start: START_DATE,
         stop: STOP_DATE,
+        columns: ['fi', 'fs', 'action', 'typeAction'],
       };
       // When
       const result = statsQueries.getTotalByActionAndRange(params);
@@ -153,6 +158,7 @@ describe('StatsQueries', () => {
         fi: 'foo',
         start: START_DATE,
         stop: STOP_DATE,
+        columns: ['fi', 'fs', 'action', 'typeAction'],
       };
       // When
       const result = statsQueries.getTotalForActionsAndFiAndRangeByWeek(params);
@@ -168,6 +174,54 @@ describe('StatsQueries', () => {
       expect(result.body.query.bool.must[2].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
+    });
+  });
+
+  describe('generateGranularityAggregation', () => {
+    it('Should generate aggregation according to selected columns', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+        columns: ['fi', 'typeAction'],
+        granularity: 'day',
+      };
+      // When
+      const result = statsQueries.generateGranularityAggregation(params);
+      // Then
+      expect(result).toEqual({
+        date_histogram: {
+          field: 'date',
+          interval: 'day',
+        },
+        aggs: {
+          fi: {
+            terms: {
+              field: 'fi',
+              size: 0,
+              min_doc_count: 1,
+              order: { _term: 'asc' },
+            },
+            aggs: {
+              typeAction: {
+                terms: {
+                  field: 'typeAction',
+                  size: 0,
+                  min_doc_count: 1,
+                  order: { _term: 'asc' },
+                },
+                aggs: {
+                  count: {
+                    sum: {
+                      field: 'count',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
     });
   });
 });

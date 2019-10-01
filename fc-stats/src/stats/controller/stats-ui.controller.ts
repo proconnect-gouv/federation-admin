@@ -19,7 +19,7 @@ export class StatsUIController {
 
   @Get('stats')
   @Roles(UserRole.OPERATOR)
-  @Render('stats/list')
+  @Render('stats/index')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async list(
     @Query() query: StatsUIListInputDTO,
@@ -28,9 +28,9 @@ export class StatsUIController {
       const { stats, meta } = await this.statsService.getEvents(
         query as StatsServiceParams,
       );
-      return { stats, meta } as StatsUIListOutputDTO;
+      return { params: query, stats, meta } as StatsUIListOutputDTO;
     }
 
-    return {};
+    return { params: query };
   }
 }

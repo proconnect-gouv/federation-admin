@@ -1,0 +1,28 @@
+<table class="table table-hover table-light shadow-sm">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Date</th>
+      <% params.columns.forEach(function(column) { %>
+        <th scope="col"><%= locals.helpers.getMapped(locals.helpers.MAPPINGS.columns, column) %></th>
+      <% }) %>
+      <th scope="col">Compteur</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% stats.forEach(function(stat){ %>
+      <tr>
+        <th scope="row"><%= locals.formatDate(stat.date, params.granularity) %></th>
+        <% params.columns.forEach(function(column) { %>
+          <td>
+            <% if(typeof helpers.MAPPINGS[column] !== 'undefined') { %>
+              <%= helpers.getMapped(  helpers.MAPPINGS[column], stat[column]) %>
+            <% } else { %>
+              <%= stat[column] %>
+            <% } %>
+          </td>
+        <% }) %>
+        <td><%= stat.count %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>

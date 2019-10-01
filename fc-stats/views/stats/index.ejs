@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <% include partials/head.ejs %>
+</head>
+<body>
+<div class="container">
+    <% include partials/header.ejs %>
+    <div class="row">
+        <div class="col-12">
+            <p class="h2">Stats</p>
+            <p><i>Mesure All the things!</i></p>
+
+
+            <% include partials/form.ejs %>
+
+            <% if (!params.start || !params.stop) { %>
+            <div class="d-flex justify-content-center">
+              <h2>Choisissez des dates</h2>
+            </div>
+            <% } else { %>
+
+              <% if(REQ_QUERY.visualize === 'list') { %>
+                <% include partials/list.ejs %>
+              <% } else { %>
+                <% include partials/graph.ejs %>
+              <% } %>
+            <% } %>
+        </div>
+    </div>
+</div>
+</body>
+</html>

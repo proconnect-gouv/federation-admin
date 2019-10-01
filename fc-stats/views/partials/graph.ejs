@@ -1,0 +1,25 @@
+
+<div>
+ <canvas
+  id="bar-chart-grouped"
+  width="800"
+  height="450"
+  data-init="graph"
+  data-type="<%= params.visualize %>"
+  data-x="<%= params.visualize === 'pie' ? params.y : params.x %>"
+  data-y="<%= params.visualize === 'pie' ? params.x : params.y  %>"
+  ></canvas>
+</div>
+
+<script>
+    window.data = <%- JSON.stringify(
+      stats.map(item => ({
+        fi: item.fi,
+        fs: item.fs,
+        date: locals.formatDate(item.date, params.granularity),
+        action: locals.helpers.getMapped(locals.helpers.MAPPINGS.action, item.action),
+        typeAction: locals.helpers.getMapped(locals.helpers.MAPPINGS.typeAction, item.typeAction),
+        count: item.count,
+      }))
+    ) %>;
+</script>

@@ -38,7 +38,10 @@ export class StatsService {
       any
     > = await this.elasticsearchService.getClient().search(query);
 
-    const esResponse: StatsDTO[] = this.getItems(data);
+    const stats: StatsDTO[] = StatsService.aggregationsToDocuments(
+      params,
+      data.aggregations,
+    );
 
     /** Get filters menu data */
     const total = data.hits.total;
@@ -55,15 +58,44 @@ export class StatsService {
       typeActionList,
     };
     return {
-      stats: esResponse,
+      params,
+      stats,
       meta,
     };
   }
 
-  private getItems(response: SearchResponse<any>): StatsDTO[] {
-    return response.hits.hits.map(item =>
-      plainToClass(StatsDTO, { id: item._id, ...item._source }),
-    );
+  static aggregationsToDocuments(
+    params: StatsServiceParams,
+    aggregations: SearchResponse<any>,
+  ): StatsDTO[] {
+    const fields = params.columns.concat(['count']);
+    const docs = [];
+
+    StatsService.fetchSubAggregation(docs, aggregations, {}, 'date', fields);
+
+    return docs.map(item => plainToClass(StatsDTO, item));
+  }
+
+  static fetchSubAggregation(docs, data, doc, field, fields: string[]) {
+    const localFields = Array.from(fields);
+    const childField: string = localFields.shift();
+
+    if (childField) {
+      data[field].buckets.forEach(bucket => {
+        doc[field] = bucket.key_as_string || bucket.key;
+        const rs = StatsService.fetchSubAggregation(
+          docs,
+          bucket,
+          doc,
+          childField,
+          localFields,
+        );
+      });
+    } else {
+      doc[field] = data.count.value;
+      docs.push({ ...doc });
+      doc = {};
+    }
   }
 
   // Get FI, FS, Action, Type Action list
@@ -93,48 +125,6 @@ export class StatsService {
     params: StatsServiceParams,
   ): Promise<TotalByFIWeek[]> {
     const query: SearchParams = this.statsQueries.getTotalForActionsAndFiAndRangeByWeek(
-      params,
-    );
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
-
-    const weeks: TotalByFIWeek[] = data.aggregations.week.buckets.map(week => ({
-      startDate: week.key,
-      events: week.action.buckets.map(event => ({
-        label: event.key,
-        count: event.count.value,
-      })),
-    }));
-
-    return weeks;
-  }
-
-  async getDataWithoutRange(): Promise<any> {
-    const query: SearchParams = this.statsQueries.getDataWithoutRange();
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
-
-    const esResponse = this.getItems(data);
-
-    const fsList = this.getAggregate(data, 'fs');
-    const fiList = this.getAggregate(data, 'fi');
-    const actionList = this.getAggregate(data, 'action');
-    const typeActionList = this.getAggregate(data, 'typeAction');
-
-    return {
-      fsList,
-      fiList,
-      actionList,
-      typeActionList,
-    };
-  }
-
-  async getTotalForActionsAndFiAndRangeByWeekChartTest(
-    params: StatsServiceParams,
-  ): Promise<TotalByFIWeek[]> {
-    const query: SearchParams = this.statsQueries.getTotalForActionsAndFiAndRangeByWeekChartTest(
       params,
     );
     const data: SearchResponse<

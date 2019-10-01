@@ -1,7 +1,6 @@
 import { IsOptional, IsArray, ValidateNested } from 'class-validator';
-import { Type } from '@nestjs/common';
+import { Type, Transform } from 'class-transformer';
 import { SortParamDTO } from './stats-api-sort-param.dto';
-import { Transform } from 'stream';
 
 export class StatsUIListInputDTO {
   @IsOptional()
