@@ -25,7 +25,7 @@
               <div class="col-lg-10">
                 <input id="password" type="password" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].password && 'is-invalid' %>"
-                  name="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&,;:])[A-Za-z\d@$!%*?&,;:]{8,}$">
+                  name="password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])[\S]{8,}$">
                   <% if (locals.messages.errors && messages.errors[0].password) { %>
                     <div class="invalid-feedback">
                     <p>
@@ -41,7 +41,7 @@
                   <br>
                   <span id="lowercase-icon" class="fa">au moins une minuscule</span>
                   <br>
-                  <span id="special-character-icon" class="fa">au moins un caractère spécial ( @$!%*?&,;: )</span>
+                  <span id="special-character-icon" class="fa">au moins un caractère spécial</span>
                   <br>
                   <span id="number-icon" class="fa">au moins un chiffre</span>
                   <br>
