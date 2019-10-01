@@ -171,10 +171,12 @@ export class AccountController {
     return {
       users: users.items,
       totalUsers: users.totalItems,
-      pages: users.pageCount,
+      csrfToken,
       next: users.next,
       previous: users.previous,
-      csrfToken,
+      pageCount: users.pageCount,
+      page,
+      limit,
     };
   }
 }
