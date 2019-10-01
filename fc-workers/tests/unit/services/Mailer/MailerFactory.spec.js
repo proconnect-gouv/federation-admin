@@ -11,7 +11,8 @@ describe('services/Mailer/MailerFactory', () => {
     it('Should return an instance of given type', () => {
       // Given
       const type = 'log';
-      const container = { services: { config: {}, logger: {} } };
+      const services = { config: {}, logger: {} };
+      const container = { get: key => services[key] };
       // When
       const result = MailerFactory.get(type, container);
       // Then
@@ -20,7 +21,8 @@ describe('services/Mailer/MailerFactory', () => {
     it('Should return a singleton', () => {
       // Given
       const type = 'log';
-      const container = { config: {}, logger: {} };
+      const services = { config: {}, logger: {} };
+      const container = { get: key => services[key] };
       // When
       const resultA = MailerFactory.get(type, container);
       const resultB = MailerFactory.get(type);

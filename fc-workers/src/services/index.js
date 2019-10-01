@@ -6,5 +6,6 @@ export { default as Logger } from './Logger';
 export { default as Runner } from './Runner';
 export { default as Stats } from './Stats/Stats';
 export { MailerFactory } from './Mailer';
+export { default as FcDatabase } from './FcDatabase';
 
 export default Container;

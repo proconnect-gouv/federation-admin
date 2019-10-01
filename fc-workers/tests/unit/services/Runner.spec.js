@@ -41,6 +41,7 @@ describe('Runner', () => {
           logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
         },
       };
+      container.get = key => container.services[key];
       jest.spyOn(process, 'exit').mockImplementation(() => {});
       const runner = new Runner(container, jobs);
       // When
@@ -61,6 +62,7 @@ describe('Runner', () => {
           logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
         },
       };
+      container.get = key => container.services[key];
       const runner = new Runner(container, jobs);
       // When
       runner.run('wizz');
@@ -90,6 +92,7 @@ describe('Runner', () => {
       // Given
       const jobs = { foo: { usage: jest.fn(() => 'usage text') } };
       const container = { services: { logger: { log: jest.fn() } } };
+      container.get = key => container.services[key];
       const runner = new Runner(container, jobs);
       const params = { help: true };
       // When
@@ -162,6 +165,7 @@ describe('Runner', () => {
           logger: { error: jest.fn(), log: jest.fn(), debug: jest.fn() },
         },
       };
+      container.get = key => container.services[key];
       const jobs = { foo: 'foo' };
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
       const runner = new Runner(container, jobs);
@@ -195,6 +199,7 @@ describe('Runner', () => {
           logger: { error: jest.fn(), log: jest.fn(), debug: jest.fn() },
         },
       };
+      container.get = key => container.services[key];
       const jobs = { foo: 'foo' };
       const runner = new Runner(container, jobs);
       // When
@@ -215,6 +220,7 @@ describe('Runner', () => {
           logger: { error: jest.fn(), log: jest.fn(), debug: jest.fn() },
         },
       };
+      container.get = key => container.services[key];
       const jobs = { bar: { usage: jest.fn(() => 'usage text') } };
       const runner = new Runner(container, jobs);
       // When

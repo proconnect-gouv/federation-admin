@@ -16,8 +16,8 @@ class MailerFactory {
 
     if (!(instances[instanceType] instanceof classMap[instanceType])) {
       instances[instanceType] = new classMap[instanceType](
-        container.services.config,
-        container.services.logger
+        container.get('config'),
+        container.get('logger')
       );
     }
 

@@ -1,0 +1,73 @@
+import crypto from 'crypto';
+import Job from './Job';
+
+class IndexElasticStats extends Job {
+  static usage() {
+    return `
+      Usage:
+      > IndexElasticStats --count=<activeAccount|usersPerFsCount> --start=<date> --range=<day|week|month|year>
+    `;
+  }
+
+  static getMetricId(metric) {
+    const { key, date, range } = metric;
+
+    return crypto
+      .createHash('sha256')
+      .update([key, date, range].join('.'))
+      .digest('hex');
+  }
+
+  async getMetric(metric, params) {
+    const stats = this.container.get('stats');
+
+    switch (metric) {
+      case 'activeAccount':
+        return stats.getActiveAccountsByRange(params);
+      case 'usersPerFsCount':
+        const logger = this.container.get('logger');
+        logger.error('/!\\ Not implemented yet');
+        process.exit(1);
+    }
+  }
+
+  async run(params) {
+    const { logger, input, stats } = this.container.get([
+      'logger',
+      'input',
+      'stats',
+    ]);
+
+    logger.info(' * Input control');
+    const schema = {
+      count: { type: 'string', mandatory: true },
+      start: { type: 'date', mandatory: true },
+      range: { type: 'timeRange', mandatory: true },
+    };
+
+    const { count, start, range } = input.get(schema, params);
+
+    logger.info(' * Fecth data from logs');
+    const value = await this.getMetric(count, { start, range });
+
+    const doc = stats.createMetricDocument({
+      key: count,
+      value,
+      date: start,
+      range,
+    });
+
+    logger.info(' * Create a unique consistant id for idempotence');
+    const id = IndexElasticStats.getMetricId(doc);
+
+    logger.info(' * Save document to index');
+    await stats.index(doc, 'stats', 'metric', id);
+
+    logger.info(' * All done');
+  }
+}
+
+IndexElasticStats.description =
+  'Compute data from elastic and index it in stats elastic';
+
+export default IndexElasticStats;

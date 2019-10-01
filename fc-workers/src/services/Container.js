@@ -1,6 +1,7 @@
 class Container {
   constructor() {
     this.services = {};
+    this.instanciators = {};
   }
 
   /**
@@ -8,14 +9,21 @@ class Container {
    * @param {Object} instance Instance of the service
    * @returns {Container} container instance
    */
-  add(instanceName, instance) {
-    if (typeof this.services[instanceName] !== 'undefined') {
+  add(instanceName, instanciator) {
+    if (typeof this.instanciators[instanceName] !== 'undefined') {
       throw new Error('A service with this name already exists');
     }
 
-    this.services[instanceName] = instance;
+    this.instanciators[instanceName] = instanciator;
 
     return this;
+  }
+
+  getMultiples(names) {
+    return names.reduce((services, name) => {
+      services[name] = this.get(name);
+      return services;
+    }, {});
   }
 
   /**
@@ -23,11 +31,20 @@ class Container {
    * @returns {Object} service instance
    */
   get(instanceName) {
+    if (Array.isArray(instanceName)) {
+      return this.getMultiples(instanceName);
+    }
+
+    if (typeof this.instanciators[instanceName] === 'function') {
+      this.services[instanceName] = this.instanciators[instanceName].call();
+      delete this.instanciators[instanceName];
+    }
+
     if (typeof this.services[instanceName] !== 'undefined') {
       return this.services[instanceName];
     }
 
-    throw new Error('No service registred for this name');
+    throw new Error(`No service registred for this name: ${instanceName}`);
   }
 
   /**

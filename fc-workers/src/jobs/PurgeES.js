@@ -9,7 +9,7 @@ class PurgeES extends Job {
   }
 
   async getBulk(params) {
-    const { stats } = this.container.services;
+    const stats = this.container.get('stats');
     return stats.getIdsToDelete(params);
   }
 
@@ -26,7 +26,7 @@ class PurgeES extends Job {
   }
 
   async sendBulkQuery(query) {
-    return this.container.services.dataApi.bulk(query);
+    return this.container.get('dataApi').bulk(query);
   }
 
   handleProgress(params, bulk) {
@@ -37,10 +37,12 @@ class PurgeES extends Job {
     const progress =
       Math.round(((total - (bulk.total - length)) / total) * 10000) / 100;
 
-    this.container.services.logger.info(
-      `[${progress}%] Sent delete for ${length} docs. Remaining docs: ${bulk.total -
-        length} / ${total}`
-    );
+    this.container
+      .get('logger')
+      .info(
+        `[${progress}%] Sent delete for ${length} docs. Remaining docs: ${bulk.total -
+          length} / ${total}`
+      );
 
     if (length < bulk.total) {
       setTimeout(
