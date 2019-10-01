@@ -1,4 +1,13 @@
-<pagination data-init="paginationStyle" data-pages="<%= pages %>"  aria-label="Page navigation example">
-    <ul id="pagination-demo" class="pagination justify-content-center flex-wrap">    
-    </ul>
-</pagination>
+<% if(pageCount !== 1) { %>
+    <pagination class="pagination d-flex justify-content-center" 
+        data-init="paginationStyle" 
+        data-pages="<%= pageCount %>" 
+        data-limit="<%= limit %>"  
+        data-currentPge="<%= page %>"
+        data-previous="<%= previous %>"
+        data-next="<%= next %>"
+        aria-label="Page navigation example">    
+        <ul id="pagination-container" class="pagination justify-content-center flex-wrap">
+        </ul>
+    </pagination>
+<% } %>
