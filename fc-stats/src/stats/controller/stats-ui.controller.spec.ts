@@ -6,6 +6,7 @@ import {
   ElasticsearchModule,
   ElasticsearchService,
 } from '@nestjs/elasticsearch';
+import { aggregations } from '../../../fixtures/aggregation';
 
 describe('StatsUIController', () => {
   let statsController;
@@ -34,29 +35,31 @@ describe('StatsUIController', () => {
   });
 
   describe('list', () => {
-    it('Return empty object if empty parameters are provided', async () => {
+    it('Return only parameters if empty parameters are provided', async () => {
       // Given
       const query = {
         start: '',
         stop: '',
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
       const result = await statsController.list(query);
       // Then
-      expect(result).toEqual({});
+      expect(result).toEqual({ params: query });
     });
 
-    it('Return empty object if empty parameters and empty filter are provided', async () => {
+    it('Return only parameters if empty parameters and empty filter are provided', async () => {
       // Given
       const query = {
         start: '',
         stop: '',
+        columns: ['fs', 'fi', 'action', 'typeAction'],
         filters: [{}],
       };
       // When
       const result = await statsController.list(query);
       // Then
-      expect(result).toEqual({});
+      expect(result).toEqual({ params: query });
     });
 
     it('Should return stats and meta data', async () => {
@@ -64,6 +67,7 @@ describe('StatsUIController', () => {
       const query = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       const elasticResponse = {
         hits: {
@@ -85,6 +89,7 @@ describe('StatsUIController', () => {
           ],
         },
         aggregations: {
+          date: aggregations.date,
           fi: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -120,76 +125,19 @@ describe('StatsUIController', () => {
       const query = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
         filters: [{ key: 'fi', value: 'dgfip' }],
       };
       const elasticResponse = {
         hits: {
-          hits: [
-            {
-              _index: 'stats',
-              _type: 'entry',
-              _id: 'foo',
-              _score: null,
-              _source: {
-                fi: 'dgfip',
-                count: 1,
-                typeAction: 'initial',
-                action: 'authentication',
-                date: 1536278400000,
-                fs: 'Retraites et solidarité',
-              },
-              sort: [
-                1536278400000,
-                'dgfip',
-                'Retraites et solidarité',
-                'initial',
-                'authentication',
-              ],
-            },
-            {
-              _index: 'stats',
-              _type: 'entry',
-              _id: 'foo',
-              _score: null,
-              _source: {
-                fi: 'dgfip',
-                count: 1,
-                typeAction: 'rnippcheck',
-                action: 'rnippcheck',
-                date: 1536278400000,
-                fs: 'Recette NED Portail Grand Public',
-              },
-              sort: [
-                1536278400000,
-                'dgfip',
-                'Recette NED Portail Grand Public',
-                'rnippcheck',
-                'rnippcheck',
-              ],
-            },
-          ],
+          hits: [],
         },
         aggregations: {
-          fi: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          fs: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          action: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          typeAction: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
+          date: aggregations.date,
+          fi: { buckets: [] },
+          fs: { buckets: [] },
+          action: { buckets: [] },
+          typeAction: { buckets: [] },
         },
       };
 
@@ -197,9 +145,9 @@ describe('StatsUIController', () => {
       // When
       const result = await statsController.list(query);
       // Then
-      expect(result.stats.length).toEqual(2);
-      expect(result.stats[0].fi).toBe('dgfip');
-      expect(result.stats[1].fi).toBe('dgfip');
+      expect(result.stats.length).toEqual(32);
+      expect(result.stats[0].fi).toBe('ameli');
+      expect(result.stats[1].fi).toBe('ameli');
     });
 
     it('Return empty object if no parameters are provided', async () => {
@@ -208,7 +156,7 @@ describe('StatsUIController', () => {
       // When
       const result = await statsController.list(query);
       // Then
-      expect(result).toEqual({});
+      expect(result).toEqual({ params: {} });
     });
 
     it('returns all the stats entries', async () => {
@@ -233,24 +181,17 @@ describe('StatsUIController', () => {
           ],
         },
         aggregations: {
+          date: aggregations.date,
           fi: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           fs: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           action: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           typeAction: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
         },
@@ -259,21 +200,14 @@ describe('StatsUIController', () => {
       const query = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-05-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
-      const { stats } = await statsController.list(query);
+      const result = await statsController.list(query);
       // Then
-      expect(stats).toEqual([
-        {
-          id: 'foo',
-          fs: 'foo',
-          fi: 'bar',
-          count: 2,
-          typeAction: 'fizz',
-          action: 'buzz',
-          date: new Date('2019-03-01'),
-        },
-      ]);
+      expect(result.params).toEqual(query);
+      expect(Array.isArray(result.stats)).toBeTruthy();
+      expect(result.meta).toBeDefined();
     });
 
     it('returns all the service providers', async () => {
@@ -298,24 +232,17 @@ describe('StatsUIController', () => {
           ],
         },
         aggregations: {
+          date: aggregations.date,
           fi: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           fs: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           action: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
           typeAction: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [],
           },
         },
@@ -324,21 +251,14 @@ describe('StatsUIController', () => {
       const query = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-05-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
-      const { stats } = await statsController.list(query);
+      const result = await statsController.list(query);
       // Then
-      expect(stats).toEqual([
-        {
-          id: 'foo',
-          fs: 'foo',
-          fi: 'bar',
-          count: 2,
-          typeAction: 'fizz',
-          action: 'buzz',
-          date: new Date('2019-03-01'),
-        },
-      ]);
+      expect(result.params).toEqual(query);
+      expect(Array.isArray(result.stats)).toBeTruthy();
+      expect(result.meta).toBeDefined();
     });
   });
 });

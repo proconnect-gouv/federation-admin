@@ -32,4 +32,23 @@ export const MAPPINGS = {
     xmlokbutmissingdata: 'XML ok mais données manquantes',
     cantcallrnipp: 'RNIPP injoignable',
   },
+  granularity: {
+    day: 'Jour',
+    week: 'Semaine',
+    month: 'Mois',
+    year: 'Année',
+    all: 'Tout',
+  },
+  visualize: {
+    list: 'Liste',
+    bar: 'Histograme',
+    line: 'Courbe',
+    pie: 'Circulaire',
+  },
+  columns: {
+    fi: 'FI',
+    fs: 'FS',
+    action: 'Action',
+    typeAction: "Type d'action",
+  },
 };

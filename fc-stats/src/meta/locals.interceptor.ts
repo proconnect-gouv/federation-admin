@@ -58,12 +58,9 @@ export class LocalsInterceptor implements NestInterceptor {
       { label: 'Sécurité inactif', value: UserRole.INACTIVE_SECURITY },
     ];
 
-    res.locals.helpers.getMapped = function getMapped(key) {
-      if (res.locals.helpers.MAPPINGS.action[key] !== undefined) {
-        // tslint:disable-next-line: no-string-literal
-        return res.locals.helpers.MAPPINGS['action'][key];
-      } else if (res.locals.helpers.MAPPINGS.typeAction[key] !== undefined) {
-        return res.locals.helpers.MAPPINGS.typeAction[key];
+    res.locals.helpers.getMapped = function getMapped(mapping, key) {
+      if (typeof mapping[key] !== 'undefined') {
+        return mapping[key];
       }
       return key;
     };
@@ -74,6 +71,28 @@ export class LocalsInterceptor implements NestInterceptor {
         return res.locals.helpers.MAPPINGS['chartTitle'][key];
       }
       return key;
+    };
+
+    res.locals.formatDate = (date, granularity) => {
+      switch (granularity) {
+        case 'day':
+          return moment(date).format('YYYY/MM/DD');
+        case 'week':
+          return (
+            'du ' +
+            moment(date).format('MM/DD') +
+            ' au ' +
+            moment(date)
+              .add(7, 'days')
+              .format('YYYY/MM/DD')
+          );
+        case 'month':
+          return moment(date).format('YYYY/MM');
+        case 'year':
+          return moment(date).format('YYYY');
+        case 'all':
+          return 'Toute la période';
+      }
     };
 
     return next.handle();

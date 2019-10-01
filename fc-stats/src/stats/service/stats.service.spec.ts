@@ -6,9 +6,7 @@ import {
 } from '@nestjs/elasticsearch';
 import { StatsService } from './stats.service';
 import { StatsQueries } from '../stats.queries';
-import { StatsDTO } from '../dto/stats.dto';
-import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
-import { MetaDTO } from '../dto/meta.dto';
+import { aggregations } from '../../../fixtures/aggregation';
 
 describe('StatsService', () => {
   let statsService: StatsService;
@@ -40,6 +38,7 @@ describe('StatsService', () => {
       const params = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       const elasticResponse = {
         hits: {
@@ -76,6 +75,7 @@ describe('StatsService', () => {
       const params = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       const elasticResponse = {
         hits: {
@@ -97,6 +97,7 @@ describe('StatsService', () => {
           ],
         },
         aggregations: {
+          date: aggregations.date,
           fi: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -133,6 +134,7 @@ describe('StatsService', () => {
       const params = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
         filter: [{ key: 'fi', value: 'dgfip' }],
       };
       const elasticResponse = {
@@ -155,6 +157,7 @@ describe('StatsService', () => {
           ],
         },
         aggregations: {
+          date: aggregations.date,
           fi: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -194,6 +197,7 @@ describe('StatsService', () => {
         action: 'initial',
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       const elasticResponse = {
         hits: {
@@ -222,6 +226,7 @@ describe('StatsService', () => {
         fi: 'foo',
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       const elasticResponse = {
         hits: {
@@ -279,6 +284,22 @@ describe('StatsService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].events).toHaveLength(3);
       expect(result[0].events[0].count).toBe(9);
+    });
+  });
+
+  describe('aggregationsToDocuments', () => {
+    it('Should return flatten documents', () => {
+      // Given
+      const params = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-01-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
+      };
+      const aggs = aggregations;
+      // When
+      const result = StatsService.aggregationsToDocuments(params, aggs);
+      // Then
+      expect(Array.isArray(result)).toBeTruthy();
     });
   });
 });
