@@ -14,8 +14,8 @@ export = {
     resolve(__dirname, '../../../shared/!(node_modules)/**/*.entity{.ts,.js}'),
   ],
   migrations: [
-    join(__dirname, '../../migrations/*.ts'),
-    join(__dirname, '../../../shared/migrations/*.ts'),
+    join(__dirname, '../../migrations/*{.ts,.js}'),
+    join(__dirname, '../../../shared/migrations/*{.ts,.js}'),
   ],
   cli: {
     migrationsDir: 'migrations',
