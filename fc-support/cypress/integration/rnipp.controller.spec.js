@@ -197,7 +197,7 @@ describe('RnippController', () => {
       .click();
 
     // Should
-    cy.contains('Veuillez renseigner le numéro de ticket support').should('be.visible');
+    cy.contains('Veuillez renseigner un numéro de ticket valide (16 chiffres)').should('be.visible');
     cy.contains('Vous devez choisir un genre').should('be.visible');
     cy.contains('Veuillez renseigner un nom de famille').should('be.visible');
     cy.contains('Veuillez renseigner un prénom ou vos prénoms').should('be.visible');
@@ -230,7 +230,7 @@ describe('RnippController', () => {
       .click();
 
     // Should
-    cy.contains('Veuillez renseigner le numéro de ticket support').should('be.visible');
+    cy.contains('Veuillez renseigner un numéro de ticket valide (16 chiffres)').should('be.visible');
     cy.contains('Vous devez choisir un genre').should('be.visible');
     cy.contains('Veuillez renseigner un prénom ou vos prénoms').should('be.visible');
     cy.contains('Veuillez renseigner le COG du lieu de naissance').should('be.visible');

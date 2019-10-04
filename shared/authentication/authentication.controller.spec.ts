@@ -45,7 +45,7 @@ describe('AuthenticationController', () => {
 
       expect(req.logout).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/login');
     });
   });
 });

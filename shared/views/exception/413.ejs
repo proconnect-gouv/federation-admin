@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="<%= APP_ROOT %>/favicon.ico" />
+    <script src="<%= APP_ROOT %>/main.js"></script>
+    <link rel="stylesheet" href="<%= APP_ROOT %>/main.css"/>
+    <title>413 - Entité trop large</title>
+  </head>
+  <body id="generic-exception">
+    <% if (locals.CURRENT_USER !== undefined) { %>
+    <% include partials/header.ejs %>
+    <% } %>
+    <section class="container error_section">
+      <div class="card">
+        <div class="card-body">
+          <p class="error_section_subtitle">
+            Oops, il  semblerait que votre requête soit trop lourde<br>
+            Votre image doit être inférieure à 1mo
+          </p>
+          <h1 class="error_title">
+            413
+          </h1>
+          <a href="<%= APP_ROOT %>" title="Retourner sur la page d'accueil" class="btn">Page d'accueil</a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
