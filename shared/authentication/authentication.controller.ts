@@ -27,6 +27,6 @@ export class AuthenticationController {
   @Get('logout')
   public logout(@Req() req, @Res() res) {
     req.logout();
-    return res.redirect(`${res.locals.APP_ROOT}/`);
+    return res.redirect(`${res.locals.APP_ROOT}/login`);
   }
 }

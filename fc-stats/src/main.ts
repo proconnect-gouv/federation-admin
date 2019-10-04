@@ -10,10 +10,10 @@ import * as methodOverride from 'method-override';
 
 import 'dotenv';
 import { ConfigService } from 'nestjs-config';
-import { UnauthorizedExceptionFilter } from '@fc/shared/authentication/filter/UnauthorizedException.filter';
 import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RolesGuard } from '@fc/shared/authentication/guard/roles.guard';
+import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -46,10 +46,8 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Redirect to login if unauthorized
-  app.useGlobalFilters(
-    new UnauthorizedExceptionFilter(configService.get('app').app_root),
-  );
+  // Catch http exception
+  app.useGlobalFilters(new AllExceptionFilter(configService.get('app')));
 
   // Get port from config
   const port = configService.get('http').port;
