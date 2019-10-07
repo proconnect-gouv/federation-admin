@@ -19,6 +19,7 @@ import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.fi
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get<ConfigService>(ConfigService);
 
   // View engine initialization
   app.engine('ejs', require('ejs').renderFile);
@@ -41,14 +42,8 @@ async function bootstrap() {
   app.use(helmet());
 
   // Sessions initialization
-  app.use(
-    session({
-      secret: "le père Noël n'existe pas",
-      name: 'sessionId',
-      resave: true,
-      saveUninitialized: false,
-    }),
-  );
+  app.use(session(configService.get('session')));
+
   app.use(cookieParser());
 
   // Passport initialization
@@ -60,7 +55,6 @@ async function bootstrap() {
   // app.use(cors);
 
   // Get port from config
-  const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('http').port;
 
   // Catch http exception
