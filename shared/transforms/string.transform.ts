@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 export function toBoolean(value: string): boolean | undefined {
   switch (value) {
     case 'true':
