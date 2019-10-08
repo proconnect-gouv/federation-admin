@@ -149,24 +149,31 @@ class IndexElasticLogs extends Job {
     return IndexElasticLogs.addNAFI(IndexElasticLogs.removeId(doc));
   }
 
-  async createDocuments(docList, chunkLength) {
+  async createDocuments(docList, chunkLength, timePerRequest) {
     const statsService = this.container.get('stats');
     const chunks = _.chunk(docList, chunkLength);
 
     const queries = chunks.map(chunk =>
-      statsService.executeBulkQuery(
-        statsService.createBulkQuery(
-          chunk,
-          'index',
-          'stats',
-          'entry',
-          doc => doc.id,
-          IndexElasticLogs.formatDocument
-        )
+      statsService.createBulkQuery(
+        chunk,
+        'index',
+        'stats',
+        'entry',
+        doc => doc.id,
+        IndexElasticLogs.formatDocument
       )
     );
 
-    return Promise.all(queries);
+    const promises = queries.map((query, index) => {
+      const timeout = timePerRequest * index;
+      return new Promise(res => {
+        setTimeout(() => {
+          res(statsService.executeBulkQuery(query));
+        }, timeout);
+      });
+    });
+
+    return Promise.all(promises);
   }
 
   static getIndexationStats(indexationResults) {
@@ -213,7 +220,20 @@ class IndexElasticLogs extends Job {
      from ${data.hits.total} original events`);
 
     log.info(' * Post new entries to stats index');
-    const results = await this.createDocuments(docList, 1000);
+
+    const chunkSize = 1000;
+    const timePerRequest = 100;
+    const delay = Math.floor(
+      ((docList.length / chunkSize) * timePerRequest) / 1000
+    );
+    log.info(
+      `   > This will take at least ${delay} seconds, please hold on...`
+    );
+    const results = await this.createDocuments(
+      docList,
+      chunkSize,
+      timePerRequest
+    );
 
     log.info(
       `   > created ${IndexElasticLogs.getIndexationStats(results)} documents`

@@ -380,7 +380,7 @@ describe('IndexElasticLogs', () => {
   });
 
   describe('createDocuments', () => {
-    it('Should call executeQuery as many time as there are chunks', () => {
+    it('Should call executeQuery as many time as there are chunks', async () => {
       // Given
       const stats = {
         executeBulkQuery: jest.fn(),
@@ -394,10 +394,11 @@ describe('IndexElasticLogs', () => {
         { id: 'd', c: 4 },
       ];
       const chunkLength = 2;
+      const delay = 0;
       const job = new IndexElasticLogs(container);
       // When
       container.add('stats', () => stats);
-      job.createDocuments(docList, chunkLength);
+      await job.createDocuments(docList, chunkLength, delay);
       // Then
       expect(stats.createBulkQuery).toHaveBeenCalledTimes(2);
       expect(stats.executeBulkQuery).toHaveBeenCalledTimes(2);
