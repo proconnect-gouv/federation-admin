@@ -22,15 +22,13 @@ class Config {
   }
 
   getElastic() {
-    const { ES_HOST, ES_PORT } = this.config;
-
-    return { host: `${ES_HOST || 'localhost'}:${ES_PORT || '9200'}` };
+    const hosts = this.config.ES_STATS_HOSTS || 'localhost:9200';
+    return { hosts: hosts.split(',') };
   }
 
   getLogElastic() {
-    const { ES_LOG_HOST, ES_LOG_PORT } = this.config;
-
-    return { host: `${ES_LOG_HOST || 'localhost'}:${ES_LOG_PORT || '9200'}` };
+    const hosts = this.config.ES_LOGS_HOSTS || 'localhost:9200';
+    return { hosts: hosts.split(',') };
   }
 
   getMongo() {
