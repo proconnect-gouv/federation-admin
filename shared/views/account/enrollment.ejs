@@ -33,7 +33,7 @@
                       <%= error %>
                       <br>
                       <% }) %>
-                    </p>  
+                    </p>
                   </div>
                 <% } %>
                 <div class="mt-2">
@@ -57,9 +57,9 @@
                   class="form-control <%= locals.messages.errors && messages.errors[0].passwordConfirmation && 'is-invalid' %>"
                   name="passwordConfirmation" data-init="comparePassword">
                   <div class="invalid-feedback">
-                    <% if (locals.messages.errors && messages.errors[0].password) { %>
+                    <% if (locals.messages.errors && messages.errors[0].passwordConfirmation) { %>
                     <p>
-                      <% messages.errors[0].password.forEach((error) => { %>
+                      <% messages.errors[0].passwordConfirmation.forEach((error) => { %>
                       <%= error %>
                       <br>
                       <% }) %>

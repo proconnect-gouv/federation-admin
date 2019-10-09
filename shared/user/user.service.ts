@@ -3,11 +3,13 @@ import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UserCreation } from './value-object/user-creation';
-import { UserPasswordUpdate } from './value-object/user-password-update';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
+import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
+import { IUserService } from './interface/user-service.interface';
 
 @Injectable()
-export class UserService {
+export class UserService implements IUserService {
   private readonly SALT_ROUNDS = 10;
 
   constructor(
@@ -27,29 +29,44 @@ export class UserService {
     });
   }
 
-  async enrollUser(user, userPasswordUpdate: UserPasswordUpdate) {
-    const passwordHash = await bcrypt.hash(
-      userPasswordUpdate.password,
-      this.SALT_ROUNDS,
-    );
-
-    user.roles = user.roles
+  async enrollUser(
+    user,
+    enrollmentPassword: IEnrollUserDto,
+  ): Promise<UpdateResult> {
+    const roles = user.roles
       .filter(role => role !== 'new_account')
       .map(role => role.replace('inactive_', ''));
-
-    const userRepository = this.userRepository;
-    const userEntity = new User();
-    userEntity.passwordHash = passwordHash;
-    userEntity.roles = user.roles;
     try {
-      await userRepository.update(user.id, userEntity);
+      return await this.updatePassword(user, enrollmentPassword.password, {
+        roles,
+      });
     } catch (err) {
-      return err;
+      throw new Error('password could not be updated');
     }
-    return userEntity;
   }
 
-  async findByUsername(username: string): Promise<any> {
+  async updateUserAccount(
+    user,
+    data: IUserPasswordUpdateDTO,
+  ): Promise<UpdateResult> {
+    const isValidPassword = await this.compareHash(
+      data.currentPassword,
+      user.passwordHash,
+    );
+    if (isValidPassword) {
+      try {
+        return await this.updatePassword(user, data.password, {});
+      } catch (err) {
+        throw new Error('password could not be updated');
+      }
+    } else {
+      throw new Error(
+        'password could not be updated because old password is invalid',
+      );
+    }
+  }
+
+  async findByUsername(username: string): Promise<User> {
     return this.userRepository.findOne({ username });
   }
 
@@ -71,7 +88,25 @@ export class UserService {
     });
   }
 
-  async deleteUserById(id: string): Promise<any> {
+  async deleteUserById(id: string): Promise<DeleteResult> {
     return this.userRepository.delete({ id });
+  }
+
+  async updatePassword(
+    { username, id },
+    password,
+    userData,
+  ): Promise<UpdateResult> {
+    const newPasswordHash = await bcrypt.hash(password, this.SALT_ROUNDS);
+    let userEntity;
+    try {
+      userEntity = await this.findByUsername(username);
+      userEntity.passwordHash = newPasswordHash;
+      Object.assign(userEntity, userData);
+      await this.userRepository.update(id, userEntity);
+    } catch (err) {
+      throw new Error('password could not be updated');
+    }
+    return userEntity;
   }
 }

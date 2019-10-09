@@ -1,8 +1,9 @@
 @import './login';
 @import './list';
 @import './modal';
-@import './constants.less';
-@import '../../../shared/public/style/exception.less';
+@import './constants';
+@import '../../../shared/public/style/exception';
+@import '../../../shared/public/style/header';
 
 html, body {
     height: 100%;
@@ -15,32 +16,12 @@ body {
     background-image: url("../images/background.svg");
 }
 
-.logo img {
-  height: 30px;
-}
-
-.navbar {
-  background-color: white;
-}
-
 .header img {
-    width: 100%;
+  width: 100%;
 }
 
-.meta-information-container {
-  min-width: 250px;
-
-  .meta-information {
-    font-size: 0.8rem;
-  }
-}
-
-.fa-git-square {
-  font-size: 1.5rem;
-}
-
-.navbar {
-  background-color: white;
+.container {
+    height: 100%;
 }
 
 .pad-15 {
@@ -49,9 +30,9 @@ body {
 }
 
 #uppercase-icon,
-#number-icon, 
-#lowercase-icon, 
-#length-icon, 
+#number-icon,
+#lowercase-icon,
+#length-icon,
 #special-character-icon {
   &:before {
     display: inline-block;
@@ -59,7 +40,7 @@ body {
     content: "\f00d";
     color: @red-color;
   }
-  
+
   &.valid-password {
     &:before {
       display: inline-block;
