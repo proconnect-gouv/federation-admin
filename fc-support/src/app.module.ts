@@ -65,5 +65,9 @@ export class AppModule implements NestModule {
       path: '/account/:key',
       method: RequestMethod.DELETE,
     });
+    consumer.apply(TotpMiddleware).forRoutes({
+      path: '/account/update-account/:username',
+      method: RequestMethod.PATCH,
+    });
   }
 }

@@ -31,13 +31,7 @@
           </div>
         </div>
       </div>
-      <div class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-            aria-expanded="false"><%= CURRENT_USER.username %></a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="<%= APP_ROOT %>/logout">Déconnexion</a>
-        </div>
-      </div>
+      <% include partials/dropdownAccount.ejs %>
     </div>
   </div>
 </nav>

@@ -26,8 +26,8 @@ import { FormErrorsInterceptor } from '@fc/shared/form/interceptor/form-errors.i
 import { UserCreation } from '@fc/shared/user/value-object/user-creation';
 import { AccountService } from './account.service';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { UserPasswordUpdate } from '@fc/shared/user/value-object/user-password-update';
 import { TotpService } from '@fc/shared/authentication/totp/totp.service';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('account')
 export class AccountController {
@@ -108,16 +108,12 @@ export class AccountController {
     @Res() res,
   ) {
     try {
-      await this.userService.enrollUser(
-        req.user,
-        enrollUserDto as UserPasswordUpdate,
-      );
+      await this.userService.enrollUser(req.user, enrollUserDto);
     } catch (error) {
       req.flash('globalError', `L\'utilisateur n'a pas pu être mis à jour`);
       return res.redirect(`${res.locals.APP_ROOT}/account/enrollment`);
     }
     req.flash('success', `Le mot de passe a bien été mis à jour !`);
-
     return res.redirect(`${res.locals.APP_ROOT}/`);
   }
 
@@ -148,6 +144,50 @@ export class AccountController {
       req.flash('globalError', error);
       return res.status(500);
     }
+  }
+
+  @Get('me')
+  @Render('account/userAccount')
+  async showUserAccount(@Req() req) {
+    const csrfToken = req.csrfToken();
+    const {
+      user,
+      issuer,
+      secret,
+      QRCode,
+      step,
+      algorithm,
+    } = await this.totpService.generateTotpQRCode(req.user);
+    return {
+      csrfToken,
+      user,
+      issuer,
+      secret,
+      QRCode,
+      step,
+      algorithm,
+    };
+  }
+
+  @Patch('update-account/:username')
+  @Roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY)
+  @UseInterceptors(new FormErrorsInterceptor(`/account/me`))
+  async updateUserPassword(
+    @Body() updateAccountDto: UpdateAccountDto,
+    @Req() req,
+    @Res() res,
+  ) {
+    try {
+      await this.userService.updateUserAccount(req.user, updateAccountDto);
+    } catch (error) {
+      req.flash(
+        'globalError',
+        'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
+      );
+      return res.redirect(`${res.locals.APP_ROOT}/account/me`);
+    }
+    req.flash('success', `Le mot de passe a bien été mis à jour !`);
+    return res.redirect(`${res.locals.APP_ROOT}/`);
   }
 
   @Get()

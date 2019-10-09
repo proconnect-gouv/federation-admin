@@ -6,6 +6,7 @@ import { UserService } from '@fc/shared/user/user.service';
 import { User } from '@fc/shared/user/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EnrollUserDto } from './dto/enroll-user.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -26,6 +27,7 @@ describe('AccountController', () => {
     deleteUserById: jest.fn(),
     generateTmpPass: jest.fn(),
     enrollUser: jest.fn(),
+    updateUserAccount: jest.fn(),
   };
   const res = {
     redirect: jest.fn(),
@@ -40,21 +42,13 @@ describe('AccountController', () => {
     generateTotpQRCode: jest.fn(),
     generateTotpSecret: jest.fn(),
   };
-  const req = {
-    flash: jest.fn(),
-    user: {
-      id: '05e4fadf-fda6-4ad8-ae75-b7f315843827',
-      roles: [],
-    },
-    body: {
-      roles: ['admin', 'operator'],
-      secret: jest.fn(),
-    },
-    csrfToken: function csrfToken() {
-      return 'mygreatcsrftoken';
-    },
-  };
+  let req;
 
+  const updateAccountDto = new UpdateAccountDto(
+    'georgesmooustaki',
+    'MyPassword10!!',
+    'MyPassword10!!',
+  );
   const createUserDto = new CreateUserDto(
     'jean_moust',
     'jean@moust.lol',
@@ -101,6 +95,21 @@ describe('AccountController', () => {
 
     accountController = module.get<AccountController>(AccountController);
     service = await module.get<AccountService>(AccountService);
+
+    req = {
+      flash: jest.fn(),
+      user: {
+        id: '05e4fadf-fda6-4ad8-ae75-b7f315843827',
+        roles: [],
+      },
+      body: {
+        roles: ['admin', 'operator'],
+        secret: jest.fn(),
+      },
+      csrfToken: function csrfToken() {
+        return 'mygreatcsrftoken';
+      },
+    };
 
     jest.resetAllMocks();
     totpService.generateTotpQRCode.mockReturnValueOnce({
@@ -345,25 +354,9 @@ describe('AccountController', () => {
   });
 
   describe('Patch enrollment new User', () => {
-    it("'should update a new user and redirect to service-providers' page if the user has the role opreator", async () => {
+    it('should update a new user and redirect to the account page if the user has only the role admin', async () => {
       // setup
-      req.user.roles = ['operator'];
-      userService.enrollUser.mockImplementation(() => Promise.resolve(true));
-      // action
-      await accountController.enrollUser(enrollUserDto, req, res);
-      // assertion
-      expect(userService.enrollUser).toHaveBeenCalledTimes(1);
-      expect(userService.enrollUser).toHaveBeenCalledWith(
-        req.user,
-        enrollUserDto,
-      );
-      expect(req.flash).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledTimes(1);
-      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
-    });
-    it("'should update a new user and redirect to the account page if the user has only the role admin", async () => {
-      // setup
-      req.user.roles = ['admin'];
+      req.user.roles = ['new_account', 'inactive_admin'];
       userService.enrollUser.mockImplementation(() => Promise.resolve(true));
       // action
       await accountController.enrollUser(enrollUserDto, req, res);
@@ -433,6 +426,83 @@ describe('AccountController', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.redirect).toHaveBeenCalledTimes(0);
       expect(userService.deleteUserById).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('user account', () => {
+    describe('get account/me', () => {
+      it('showUserAccount', async () => {
+        // action
+        const {
+          user,
+          issuer,
+          secret,
+          QRCode,
+          step,
+          algorithm,
+          csrfToken,
+        } = await accountController.showUserAccount(req);
+        // assertion
+        expect(totpService.generateTotpQRCode).toHaveBeenCalledTimes(1);
+        expect(totpService.generateTotpQRCode).toHaveBeenCalledWith(req.user);
+        expect(user).toEqual('toto');
+        expect(issuer).toEqual('fce');
+        expect(secret).toEqual('KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD');
+        expect(QRCode).toEqual('base64ImageQRCode');
+        expect(step).toEqual(30);
+        expect(algorithm).toEqual('sha1');
+        expect(csrfToken).toEqual('mygreatcsrftoken');
+      });
+    });
+
+    describe('patch update-account/:username', () => {
+      it('updateUserAccount', async () => {
+        // setup
+        req.body = {
+          __csrf: 'mygreatcsrftoken',
+          currentPassword: 'MyPass10!!',
+          password: 'MyPass20!!',
+          passwordConfirmation: 'MyPass20!!',
+          _totp: 123456,
+        };
+        // action
+        await accountController.updateUserPassword(updateAccountDto, req, res);
+        // assert
+        expect(userService.updateUserAccount).toHaveBeenCalledTimes(1);
+        expect(userService.updateUserAccount).toHaveBeenCalledWith(
+          req.user,
+          updateAccountDto,
+        );
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'success',
+          `Le mot de passe a bien été mis à jour !`,
+        );
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
+      });
+
+      it('updateUserPassword', async () => {
+        // setup
+        userService.updateUserAccount = jest.fn(() => {
+          throw Error;
+        });
+        // action
+        await accountController.updateUserPassword(updateAccountDto, req, res);
+        // assert
+        expect(userService.updateUserAccount).toHaveBeenCalledTimes(1);
+        expect(userService.updateUserAccount).toHaveBeenCalledWith(
+          req.user,
+          updateAccountDto,
+        );
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'globalError',
+          'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
+        );
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/me');
+      });
     });
   });
 });

@@ -5,7 +5,7 @@ import { User } from './user.entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { UserCreation } from './value-object/user-creation';
-import { UserPasswordUpdate } from './value-object/user-password-update';
+import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { UserRole } from './roles.enum';
 
 describe('UserService', () => {
@@ -28,12 +28,16 @@ describe('UserService', () => {
 
   const user = {
     id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+    username: 'fred',
     roles: [
       'new_account',
       'inactive_admin',
       'inactive_operator',
       'inactive_security',
     ],
+    passwordHash:
+      // correspond à ce password : 'MyPass20!!'
+      '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
   };
 
   beforeEach(async () => {
@@ -66,34 +70,58 @@ describe('UserService', () => {
       expect(generatePasswordMock.generate).toHaveBeenCalledWith(args);
     });
   });
+
   describe('enrollUser', () => {
-    it('should update the user', async () => {
+    it('should call updatePassword', async () => {
       // setup
-      const userPasswordUpdate = new UserPasswordUpdate(
-        'MyPasswordIsValid10!!',
-      );
-      const userEntityMock = new User();
-      userEntityMock.passwordHash =
-        '$2b$10$Dvb6R/8l5ntSJPxowMmEA.sJbZwTmPu1z0tHj5e6glb0s8Magc4we';
-      userEntityMock.roles = ['admin', 'operator', 'security'] as UserRole[];
-      userRepositoryMock.update.mockImplementation(() => Promise.resolve(true));
-      const result = await userService.enrollUser(user, userPasswordUpdate);
+      const enrollmentPassword = {
+        password: 'MyPass10!!',
+        passwordConfirmation: 'MyPass10!!',
+      };
+      userService.updatePassword = jest.fn().mockReturnValueOnce({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: [
+          'new_account',
+          'inactive_admin',
+          'inactive_operator',
+          'inactive_security',
+        ],
+      });
+      const expectedRoles = ['admin', 'operator', 'security'];
+
+      // action
+      const result = await userService.enrollUser(user, enrollmentPassword);
+
       // assertion
-      expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
-      expect(result).toBeInstanceOf(User);
+      expect(userService.updatePassword).toHaveBeenCalledTimes(1);
+      expect(userService.updatePassword).toHaveBeenCalledWith(
+        user,
+        enrollmentPassword.password,
+        { roles: expectedRoles },
+      );
+      expect(result).toBeInstanceOf(Object);
     });
-    it('should not update the user', async () => {
+
+    it('should fall back in else statement', async () => {
       // setup
-      const userPasswordUpdate = new UserPasswordUpdate('MyPasswordIsNotValid');
-      const userEntityMock = new User();
-      userEntityMock.passwordHash = '$2b$10$Dvb6R/8l5ntSJ';
-      userEntityMock.roles = ['admin', 'operator', 'security'] as UserRole[];
-      userRepositoryMock.update.mockImplementation(() =>
-        Promise.reject(new Error('wrong budy')),
-      );
-      const result = await userService.enrollUser(user, userPasswordUpdate);
-      // assertion
-      expect(result).toBeInstanceOf(Error);
+      const enrollmentPassword = {
+        password: 'MyPass10!!',
+        passwordConfirmation: 'MyPass10!!',
+      };
+      userService.updatePassword = jest.fn().mockRejectedValue('false');
+
+      // action
+      try {
+        await userService.enrollUser(user, enrollmentPassword);
+      } catch (err) {
+        const message = err.message;
+
+        // assertion
+        expect(userService.updatePassword).toHaveBeenCalledTimes(1);
+        expect(message).toBeTruthy();
+      }
+      expect.hasAssertions();
     });
   });
   describe('compareHash', () => {
@@ -175,6 +203,136 @@ describe('UserService', () => {
       expect(userRepositoryMock.delete).toHaveBeenCalledWith(
         expectedRepositoryDeleteArguments,
       );
+    });
+  });
+
+  describe('updateUserAccount', () => {
+    it('should call updatePassword', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.updatePassword = jest.fn().mockResolvedValue(true);
+
+      // action
+      await userService.updateUserAccount(user, dataMock);
+
+      // assert
+      expect(userService.updatePassword).toHaveBeenCalledTimes(1);
+      expect(userService.updatePassword).toHaveBeenCalledWith(
+        user,
+        dataMock.password,
+        {},
+      );
+    });
+
+    it('should fall back in else statement', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.updatePassword = jest.fn().mockRejectedValue(false);
+
+      // action
+      try {
+        await userService.updateUserAccount(user, dataMock);
+      } catch (err) {
+        const message = err.message;
+
+        // assertion
+        expect(userService.updatePassword).toHaveBeenCalledTimes(1);
+        expect(message).toEqual('password could not be updated');
+      }
+      expect.hasAssertions();
+    });
+
+    it('should not call updatePassword', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      const userMock = {
+        passwordHash: 'y/cvxrzo6dRMIMD4dgdOGci',
+      };
+      userService.updatePassword = jest.fn().mockResolvedValue(true);
+
+      // action
+      try {
+        await userService.updateUserAccount(userMock, dataMock);
+      } catch (err) {
+        const message = err.message;
+
+        // assert
+        expect(userService.updatePassword).toHaveBeenCalledTimes(0);
+        expect(message).toEqual(
+          'password could not be updated because old password is invalid',
+        );
+      }
+      expect.hasAssertions();
+    });
+  });
+
+  describe('updatePassword', () => {
+    it('should update a user password', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.findByUsername = jest.fn().mockResolvedValue({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
+      });
+
+      // action
+      const result = await userService.updatePassword(
+        user,
+        dataMock.password,
+        dataMock,
+      );
+
+      // assert
+      expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Object);
+    });
+
+    it('should not update a user password', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.findByUsername = jest.fn().mockResolvedValue({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
+      });
+      userRepositoryMock.update = jest.fn().mockRejectedValueOnce(false);
+
+      // action
+      try {
+        await userService.updatePassword(user, dataMock.password, dataMock);
+      } catch (err) {
+        const message = err.message;
+
+        // assert
+        expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
+        expect(message).toEqual('password could not be updated');
+      }
+      expect.hasAssertions();
     });
   });
 });

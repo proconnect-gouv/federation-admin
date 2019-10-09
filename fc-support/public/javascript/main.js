@@ -13,7 +13,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/fonts/fontawesome-webfont.ttf';
 import 'font-awesome/css/font-awesome.css';
 import '../styles/main.less';
-
+import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAccountUpdate';
 
 const initMap = {
   datePicker: dateSinglePicker,
@@ -23,6 +23,7 @@ const initMap = {
   validateEnrollment: validateEnrollment,
   comparePassword: comparePassword,
   removeItem: removeItem,
+  validateAccountUpdate: validateAccountUpdate,
 };
 
 $(document).ready(function() {
