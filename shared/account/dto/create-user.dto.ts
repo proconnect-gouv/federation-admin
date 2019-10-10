@@ -11,7 +11,7 @@ import { IsCompliant } from '../validator/is-compliant.validator';
 export class CreateUserDto {
   @IsNotEmpty({ message: "Le nom d'utilisateur doit être renseigné" })
   @Matches(/^[A-Za-z0-9-]+$/, {
-    message: `Veuillez mettre un nom d'utilisateur ( Majuscule, minuscule, nombres et trait d'union )`,
+    message: `Veuillez mettre un nom d'utilisateur ( Majuscule, minuscule, nombres et trait d'union, sans espace)`,
   })
   readonly username: string;
 

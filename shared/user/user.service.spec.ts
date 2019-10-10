@@ -1,12 +1,12 @@
 import * as bcrypt from 'bcrypt';
-import { UserService } from './user.service';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { UserCreation } from './value-object/user-creation';
-import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
+import { User } from './user.entity';
+import { UserService } from './user.service';
 import { UserRole } from './roles.enum';
+import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
+import { ICreateUserDTO } from './interface/create-user-dto.interface';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -178,17 +178,60 @@ describe('UserService', () => {
 
   describe('createUser', () => {
     it('creates the user', async () => {
-      const userCreation = new UserCreation(
-        'jean_moust',
-        'jean@moust.lol',
-        'georgesmoustaki',
-        [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
-        '1234',
-      );
-      await userService.createUser(userCreation);
+      const userMock: ICreateUserDTO = {
+        username: 'jean_moust',
+        email: 'jean@moust.lol',
+        password: 'georgesmoustaki',
+        roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
+        secret: '1234',
+      };
+      await userService.createUser(userMock);
       expect(userRepositoryMock.save).toHaveBeenCalledTimes(1);
       const { passwordHash } = userRepositoryMock.save.mock.calls[0][0];
-      expect(bcrypt.compare(userCreation.password, passwordHash)).toBeTruthy();
+      expect(bcrypt.compare(userMock.password, passwordHash)).toBeTruthy();
+    });
+    it('does not create the user because of a database failure', async () => {
+      const userMock: ICreateUserDTO = {
+        username: 'jean_moust',
+        email: 'jean@moust.lol',
+        password: 'georgesmoustaki',
+        roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
+        secret: '1234',
+      };
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockImplementationOnce(() => Promise.resolve('toto'));
+      userRepositoryMock.save = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('The user could not be saved'));
+      try {
+        await userService.createUser(userMock);
+      } catch (err) {
+        const { message } = err;
+        expect(message).toEqual('The user could not be saved');
+      }
+      expect.hasAssertions();
+    });
+    it('does not create the user because of a bcrypt failure', async () => {
+      const userMock: ICreateUserDTO = {
+        username: 'jean_moust',
+        email: 'jean@moust.lol',
+        password: 'georgesmoustaki',
+        roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
+        secret: '1234',
+      };
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockRejectedValueOnce(
+          new Error('password hash could not be generated'),
+        );
+      try {
+        await userService.createUser(userMock);
+      } catch (err) {
+        const { message } = err;
+        expect(message).toEqual('password hash could not be generated');
+      }
+      expect.hasAssertions();
     });
   });
   describe('deleteUserById', () => {
