@@ -23,7 +23,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@fc/shared/user/user.entity';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { FormErrorsInterceptor } from '@fc/shared/form/interceptor/form-errors.interceptor';
-import { UserCreation } from '@fc/shared/user/value-object/user-creation';
 import { AccountService } from './account.service';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { TotpService } from '@fc/shared/authentication/totp/totp.service';
@@ -61,7 +60,7 @@ export class AccountController {
     req.body.roles.push('new_account');
     req.body.secret = this.totpService.generateTotpSecret();
     try {
-      await this.userService.createUser(createUserDto as UserCreation);
+      await this.userService.createUser(createUserDto);
     } catch (error) {
       req.flash('globalError', { code: '23505' });
       return res.redirect(`${res.locals.APP_ROOT}/account/create`);

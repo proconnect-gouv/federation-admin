@@ -1,12 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DeleteResult, UpdateResult } from 'typeorm';
 import { User } from './user.entity';
-import { UserCreation } from './value-object/user-creation';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
+import { ICreateUserDTO } from './interface/create-user-dto.interface';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -74,18 +74,25 @@ export class UserService implements IUserService {
     return bcrypt.compare(password, hash);
   }
 
-  async createUser(userCreation: UserCreation) {
-    const passwordHash = await bcrypt.hash(
-      userCreation.password,
-      this.SALT_ROUNDS,
-    );
-    return this.userRepository.save({
-      username: userCreation.username,
-      email: userCreation.email,
-      roles: userCreation.roles,
-      passwordHash,
-      secret: userCreation.secret,
-    });
+  async createUser(user: ICreateUserDTO): Promise<User> {
+    let passwordHash;
+    try {
+      passwordHash = await bcrypt.hash(user.password, this.SALT_ROUNDS);
+    } catch (err) {
+      throw new Error('password hash could not be generated');
+    }
+    try {
+      const { username, email, roles, secret } = user;
+      return this.userRepository.save({
+        passwordHash,
+        username,
+        email,
+        roles,
+        secret,
+      });
+    } catch (err) {
+      throw new Error('The user could not be saved');
+    }
   }
 
   async deleteUserById(id: string): Promise<DeleteResult> {
