@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 
 @Catch()
@@ -31,6 +32,8 @@ export class AllExceptionFilter implements ExceptionFilter {
       status === HttpStatus.FORBIDDEN ||
       status === HttpStatus.BAD_REQUEST
     ) {
+      Logger.error(exception);
+
       res.status(status).render(`exception/${status}.ejs`, {
         APP_ROOT: this.configuration.app_root,
         APP_ENVIRONMENT: this.configuration.environment,
@@ -42,6 +45,8 @@ export class AllExceptionFilter implements ExceptionFilter {
     } else if (status === HttpStatus.UNAUTHORIZED) {
       res.redirect(`${this.configuration.app_root}/login`);
     } else {
+      Logger.error(exception);
+
       res.status(status).json({
         statusCode: status,
         timestamp: Date.now(),
