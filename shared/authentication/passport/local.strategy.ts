@@ -2,6 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { IAuthenticationService } from '../authentication.service';
+import { User } from '../../user/user.entity';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -14,14 +15,19 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req, username: string, password: string, done) {
-    const user = await this.authenticationService.validateCredentials(
-      username,
-      password,
-    );
-    if (!user) {
-      req.flash('error', 'Invalid username or password.');
+  async validate(req, username: string, password: string): Promise<User> {
+    let user;
+    try {
+      user = await this.authenticationService.validateCredentials(
+        username,
+        password,
+      );
+    } catch (err) {
+      throw new Error('The user could be found due to a database error');
     }
-    done(null, user);
+    if (!user) {
+      req.flash('error', "Nom d'utilisateur ou mot de passe incorrect.");
+    }
+    return user;
   }
 }
