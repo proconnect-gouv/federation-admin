@@ -34,37 +34,37 @@ describe('StatsUIController', () => {
     jest.resetAllMocks();
   });
 
-  describe('list', () => {
+  describe('getEvents', () => {
     it('Return only parameters if empty parameters are provided', async () => {
       // Given
-      const query = {
+      const mockQuery = {
         start: '',
         stop: '',
         columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result).toEqual({ params: query });
+      expect(result).toEqual({ params: mockQuery });
     });
 
     it('Return only parameters if empty parameters and empty filter are provided', async () => {
       // Given
-      const query = {
+      const mockQuery = {
         start: '',
         stop: '',
         columns: ['fs', 'fi', 'action', 'typeAction'],
         filters: [{}],
       };
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result).toEqual({ params: query });
+      expect(result).toEqual({ params: mockQuery });
     });
 
     it('Should return stats and meta data', async () => {
       // Given
-      const query = {
+      const mockQuery = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
         columns: ['fs', 'fi', 'action', 'typeAction'],
@@ -114,7 +114,7 @@ describe('StatsUIController', () => {
       };
       search.mockResolvedValueOnce(elasticResponse);
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
       expect(result.stats).toBeDefined();
       expect(result.meta).toBeDefined();
@@ -122,7 +122,7 @@ describe('StatsUIController', () => {
 
     it('Should return a filtered query', async () => {
       // Given
-      const query = {
+      const mockQuery = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-06-01'),
         columns: ['fs', 'fi', 'action', 'typeAction'],
@@ -143,7 +143,7 @@ describe('StatsUIController', () => {
 
       search.mockResolvedValueOnce(elasticResponse);
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
       expect(result.stats.length).toEqual(32);
       expect(result.stats[0].fi).toBe('ameli');
@@ -152,9 +152,9 @@ describe('StatsUIController', () => {
 
     it('Return empty object if no parameters are provided', async () => {
       // Given
-      const query = {};
+      const mockQuery = {};
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
       expect(result).toEqual({ params: {} });
     });
@@ -197,15 +197,15 @@ describe('StatsUIController', () => {
         },
       };
       search.mockResolvedValueOnce(elasticResponse);
-      const query = {
+      const mockQuery = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-05-01'),
         columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result.params).toEqual(query);
+      expect(result.params).toEqual(mockQuery);
       expect(Array.isArray(result.stats)).toBeTruthy();
       expect(result.meta).toBeDefined();
     });
@@ -248,17 +248,131 @@ describe('StatsUIController', () => {
         },
       };
       search.mockResolvedValueOnce(elasticResponse);
-      const query = {
+      const mockQuery = {
         start: new Date('2019-01-01'),
         stop: new Date('2019-05-01'),
         columns: ['fs', 'fi', 'action', 'typeAction'],
       };
       // When
-      const result = await statsController.list(query);
+      const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result.params).toEqual(query);
+      expect(result.params).toEqual(mockQuery);
       expect(Array.isArray(result.stats)).toBeTruthy();
       expect(result.meta).toBeDefined();
+    });
+  });
+
+  /////////////////////////////////////////////////
+
+  describe('getMetrics', () => {
+    it('Return only parameters if empty parameters are provided', async () => {
+      // Given
+      const mockQuery = {
+        start: '',
+        stop: '',
+        columns: [],
+      };
+      // When
+      const result = await statsController.getMetrics(mockQuery);
+      // Then
+      expect(result).toEqual({ params: mockQuery });
+    });
+
+    it('Return only parameters if empty parameters and empty filter are provided', async () => {
+      // Given
+      const mockQuery = {
+        start: '',
+        stop: '',
+        columns: [],
+        filters: [{}],
+      };
+      // When
+      const result = await statsController.getMetrics(mockQuery);
+      // Then
+      expect(result).toEqual({ params: mockQuery });
+    });
+
+    it('Should return stats and meta data', async () => {
+      // Given
+      const mockQuery = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
+      };
+      const elasticResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                key: 'foo',
+                value: 42,
+                range: 'day',
+                date: new Date('2019-03-01'),
+              },
+            },
+          ],
+        },
+        aggregations: {
+          key: { buckets: [] },
+          range: { buckets: [] },
+        },
+      };
+      search.mockResolvedValueOnce(elasticResponse);
+      // When
+      const result = await statsController.getMetrics(mockQuery);
+      // Then
+      expect(result.stats).toBeDefined();
+      expect(result.meta).toBeDefined();
+    });
+
+    it('Should return a filtered query', async () => {
+      // Given
+      const mockQuery = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
+        filters: [{ key: 'fi', value: 'dgfip' }],
+      };
+      const elasticResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                key: 'foo',
+                value: 42,
+                range: 'day',
+                date: new Date('2019-03-01'),
+              },
+            },
+          ],
+        },
+        aggregations: {
+          key: { buckets: [] },
+          range: { buckets: [] },
+        },
+      };
+
+      search.mockResolvedValueOnce(elasticResponse);
+      // When
+      const result = await statsController.getMetrics(mockQuery);
+      // Then
+      expect(result.stats.length).toEqual(1);
+      expect(result.stats[0]).toEqual({
+        key: 'foo',
+        value: 42,
+        range: 'day',
+        date: new Date('2019-03-01'),
+      });
+    });
+
+    it('Return empty object if no parameters are provided', async () => {
+      // Given
+      const mockQuery = {};
+      // When
+      const result = await statsController.getMetrics(mockQuery);
+      // Then
+      expect(result).toEqual({ params: {} });
     });
   });
 });

@@ -1,6 +1,6 @@
 import { IsString, IsDate, IsInt } from 'class-validator';
 
-export class StatsDTO {
+export class EventDTO {
   @IsString()
   readonly id: string;
 

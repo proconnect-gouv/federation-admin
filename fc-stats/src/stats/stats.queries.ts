@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { SearchParams } from 'elasticsearch';
 import { StatsServiceParams } from './interfaces/stats-service-params.interface';
 
+const EVENTS_DOC_TYPE = 'entry';
+const METRIC_DOC_TYPE = 'metric';
+
 @Injectable()
 export class StatsQueries {
   pushFilterValue(filters, key, value) {
@@ -18,12 +21,12 @@ export class StatsQueries {
     }
   }
 
-  createMustQueryParam(params: StatsServiceParams) {
+  createMustQueryParam(type, params: StatsServiceParams) {
     const { filters, start, stop } = params;
 
     // Apply base mandatory params
     const must = [
-      { term: { _type: 'entry' } },
+      { term: { _type: type } },
       {
         range: {
           date: {
@@ -46,7 +49,7 @@ export class StatsQueries {
 
   streamEvents(params: StatsServiceParams): SearchParams {
     const index = 'stats';
-    const must = this.createMustQueryParam(params);
+    const must = this.createMustQueryParam(EVENTS_DOC_TYPE, params);
 
     const query = {
       index,
@@ -79,7 +82,7 @@ export class StatsQueries {
       terms: {
         field,
         size: 0,
-        min_doc_count: 1,
+        min_doc_count: 0,
         order: { _term: 'asc' },
       },
     };
@@ -158,7 +161,7 @@ export class StatsQueries {
         query: {
           bool: {
             // Main query
-            must: this.createMustQueryParam(params),
+            must: this.createMustQueryParam(EVENTS_DOC_TYPE, params),
           },
         },
         aggs: {
@@ -177,10 +180,38 @@ export class StatsQueries {
     return query;
   }
 
+  getMetrics(params: StatsServiceParams): SearchParams {
+    const { visualize, page, limit } = params;
+
+    const query = {
+      index: 'stats',
+      from: page,
+      size: visualize === 'list' ? limit : 1000,
+      body: {
+        sort: [
+          this.generateSort('date', 'asc'),
+          this.generateSort('key', 'asc'),
+          this.generateSort('range', 'asc'),
+        ],
+        query: {
+          bool: {
+            must: this.createMustQueryParam(METRIC_DOC_TYPE, params),
+          },
+        },
+        aggs: {
+          key: this.generateAggregation('key'),
+          range: this.generateAggregation('range'),
+        },
+      },
+    };
+
+    return query;
+  }
+
   getTotalByActionAndRange(params: StatsServiceParams): SearchParams {
     const { action, start, stop } = params;
     const index = 'stats';
-    const type = 'entry';
+    const type = EVENTS_DOC_TYPE;
 
     const query = {
       index,
@@ -220,7 +251,7 @@ export class StatsQueries {
   ): SearchParams {
     const { fi, start, stop } = params;
     const index = 'stats';
-    const type = 'entry';
+    const type = EVENTS_DOC_TYPE;
 
     const query = {
       index,

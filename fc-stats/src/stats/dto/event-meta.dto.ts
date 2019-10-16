@@ -1,6 +1,6 @@
 import { IsArray, IsNumber } from 'class-validator';
 
-export class MetaDTO {
+export class EventMetaDTO {
   @IsNumber()
   readonly total: number;
   @IsArray()

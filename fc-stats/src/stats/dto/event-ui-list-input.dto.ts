@@ -9,7 +9,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { FilterParamDTO } from './filter-param.dto';
 
-export class StatsUIListInputDTO {
+export class EventUIListInputDTO {
   @IsOptional()
   @IsDate()
   @Type(
@@ -27,11 +27,17 @@ export class StatsUIListInputDTO {
   readonly stop: Date;
 
   @IsOptional()
-  @Type(() => Number)
+  @Type(
+    /* istanbul ignore next */
+    () => Number,
+  )
   readonly limit?: number = 10;
 
   @IsOptional()
-  @Type(() => Number)
+  @Type(
+    /* istanbul ignore next */
+    () => Number,
+  )
   readonly page?: number = 0;
 
   @IsOptional()

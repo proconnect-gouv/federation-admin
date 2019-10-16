@@ -46,9 +46,15 @@ export const MAPPINGS = {
     pie: 'Circulaire',
   },
   columns: {
-    fi: 'FI',
-    fs: 'FS',
-    action: 'Action',
-    typeAction: "Type d'action",
+    events: {
+      fi: 'FI',
+      fs: 'FS',
+      action: 'Action',
+      typeAction: "Type d'action",
+    },
+    metrics: {
+      key: 'Clé',
+      range: 'Granularité',
+    },
   },
 };

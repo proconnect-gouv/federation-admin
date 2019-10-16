@@ -177,6 +177,38 @@ describe('StatsQueries', () => {
     });
   });
 
+  describe('getMetrics', () => {
+    it('Should limit the query to 1000 result for graph views', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+        columns: [],
+        visualize: 'bar',
+        limit: 20,
+      };
+      // When
+      const result = statsQueries.getMetrics(params);
+      // Then
+      expect(result.size).toBe(1000);
+    });
+
+    it('Should limit the query to given limit for graph views', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+        columns: [],
+        visualize: 'list',
+        limit: 20,
+      };
+      // When
+      const result = statsQueries.getMetrics(params);
+      // Then
+      expect(result.size).toBe(20);
+    });
+  });
+
   describe('generateGranularityAggregation', () => {
     it('Should generate aggregation according to selected columns', () => {
       // Given
@@ -199,7 +231,7 @@ describe('StatsQueries', () => {
             terms: {
               field: 'fi',
               size: 0,
-              min_doc_count: 1,
+              min_doc_count: 0,
               order: { _term: 'asc' },
             },
             aggs: {
@@ -207,7 +239,52 @@ describe('StatsQueries', () => {
                 terms: {
                   field: 'typeAction',
                   size: 0,
-                  min_doc_count: 1,
+                  min_doc_count: 0,
+                  order: { _term: 'asc' },
+                },
+                aggs: {
+                  count: {
+                    sum: {
+                      field: 'count',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+    it('Should generate a date_range aggregation if granularity is "all data"', () => {
+      // Given
+      const params = {
+        start: START_DATE,
+        stop: STOP_DATE,
+        columns: ['fi', 'typeAction'],
+        granularity: 'all',
+      };
+      // When
+      const result = statsQueries.generateGranularityAggregation(params);
+      // Then
+      expect(result).toEqual({
+        date_range: {
+          field: 'date',
+          ranges: [{ from: START_DATE }, { to: STOP_DATE }],
+        },
+        aggs: {
+          fi: {
+            terms: {
+              field: 'fi',
+              size: 0,
+              min_doc_count: 0,
+              order: { _term: 'asc' },
+            },
+            aggs: {
+              typeAction: {
+                terms: {
+                  field: 'typeAction',
+                  size: 0,
+                  min_doc_count: 0,
                   order: { _term: 'asc' },
                 },
                 aggs: {
