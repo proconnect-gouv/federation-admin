@@ -3,7 +3,7 @@
     <tr>
       <th scope="col">Date</th>
       <% params.columns.forEach(function(column) { %>
-        <th scope="col"><%= locals.helpers.getMapped(locals.helpers.MAPPINGS.columns, column) %></th>
+        <th scope="col"><%= helpers.getMapped(helpers.MAPPINGS.columns.events, column) %></th>
       <% }) %>
       <th scope="col">Compteur</th>
     </tr>
@@ -11,7 +11,7 @@
   <tbody>
     <% stats.forEach(function(stat){ %>
       <tr>
-        <th scope="row"><%= locals.formatDate(stat.date, params.granularity) %></th>
+        <th scope="row"><%= formatDate(stat.date, params.granularity) %></th>
         <% params.columns.forEach(function(column) { %>
           <td>
             <% if(typeof helpers.MAPPINGS[column] !== 'undefined') { %>

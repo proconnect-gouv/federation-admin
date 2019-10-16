@@ -1,0 +1,18 @@
+<table class="table table-hover table-light shadow-sm">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Date</th>
+      <th scope="col">Clé</th>
+      <th scope="col">Valeur</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% stats.forEach(function(stat){ %>
+      <tr>
+        <th scope="row"><%= formatDate(stat.date, stat.range) %></th>
+        <td><%= stat.key %></td>
+        <td><%= stat.value %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>

@@ -7,10 +7,24 @@ function computeFilterValues(items, key) {
   }));
 }
 
+// We need to sort ranges by meaning, not alpha.
+function sortRanges(rangeList) {
+  const sorted = [];
+  // For this we use mapping, wich is sorted.
+  Object.keys(locals.helpers.MAPPINGS.granularity).forEach(key => {
+    const item = rangeList.find(sub => sub.key === key);
+    if (item) {
+      sorted.push(item);
+    }
+  });
+
+  return sorted;
+}
+
 %>
 
 <div>
-  <form id="search" action="<%= APP_ROOT %>/stats" method="get">
+  <form id="search" action="<%= APP_ROOT %>/metrics" method="get">
 
     <div class="form-inline">
 
@@ -42,63 +56,43 @@ function computeFilterValues(items, key) {
 
         <div class="form-group col-md-7">
         <% if (locals.meta) { %>
-
-
-
-          <%- include('partials/dropdown', {
-            name: 'columns[]',
-            label: 'Colonnes',
-            key: 'columns[]',
-            type: 'multiple',
-            mapping: locals.helpers.MAPPINGS.columns,
-            values: Object.keys(locals.helpers.MAPPINGS.columns).map(item => ({ key: item, value: item })),
-          }) %>
-
-          <%- include('partials/dropdown', { name: 'filters[]', label: 'FI', key: 'fi', type: 'multiple', values: computeFilterValues(locals.meta.fiList, 'fi') }) %>
-          <%- include('partials/dropdown', { name: 'filters[]', label: 'FS', key: 'fs', type: 'multiple', values: computeFilterValues(locals.meta.fsList, 'fs') }) %>
-          <%- include('partials/dropdown', {
+          <%- include('../partials/dropdown', {
             name: 'filters[]',
-            label: 'Action',
-            key: 'action',
+            label: 'Clé',
+            key: 'key',
+            valueType: 'composed',
             type: 'multiple',
-            values: computeFilterValues(locals.meta.actionList, 'action'),
-            mapping: locals.helpers.MAPPINGS.action
+            values: computeFilterValues(locals.meta.keyList, 'key'),
           }) %>
-          <%- include('partials/dropdown', {
-            name: 'filters[]',
-            label: 'Type Action',
-            key: 'typeAction',
-            type: 'multiple',
-            values: computeFilterValues(locals.meta.typeActionList, 'typeAction'),
-            mapping: locals.helpers.MAPPINGS.typeAction
-          }) %>
-        <% } %>
-
-          <%- include('partials/dropdown', {
+          <% } %>
+          <%- include('../partials/dropdown', {
             name: 'visualize',
             label: 'Vue',
             key: 'visualize',
             type: 'unique',
+            valueType: 'plain',
             className: 'warning',
             mandatory: true,
             mapping: locals.helpers.MAPPINGS.visualize,
             values: Object.keys(locals.helpers.MAPPINGS.visualize).map(item => ({ key: item, value: item }))
           }) %>
 
-          <%- include('partials/dropdown', {
-            name: 'granularity',
+          <% if (locals.meta) { %>
+          <%- include('../partials/dropdown', {
+            name: 'filters[]',
             label: 'Grain',
-            key: 'granularity',
+            key: 'range',
             type: 'unique',
+            valueType: 'composed',
             className: 'warning',
             mandatory: true,
             mapping: locals.helpers.MAPPINGS.granularity,
-            values: Object.keys(locals.helpers.MAPPINGS.granularity).map(item => ({ key: item, value: item }))
+            values: sortRanges(computeFilterValues(locals.meta.rangeList, 'range'))
           }) %>
 
-
+          <% } %>
           <%
-            const columns = ['date', 'fi', 'fs', 'action', 'typeAction', 'count'];
+            const columns = ['date', 'key', 'range', 'value'];
             const columnValues = columns.map(item => ({key: item, value: item }));
            %>
 
@@ -110,13 +104,7 @@ function computeFilterValues(items, key) {
 
         <div class="col-md-2">
           <button type="submit" id="bouton-filtrer" class="btn btn-sm btn-primary m-1"><i class="fa fa-search"></i></button>
-          <a class="" href="<%= APP_ROOT %>/stats" title="Réinitialiser"><i class="fa fa-undo"></i></a>
-
-          <% if (locals.stats && stats.length > 0) { %>
-          <a class="btn btn-sm btn-outline-info" onclick="document.location = document.location.href.replace('/stats?', '/stats/csv?');">
-            <i class="fa fa-file-excel-o"></i> Export
-          </a>
-          <% } %>
+          <a class="" href="<%= APP_ROOT %>/metrics" title="Réinitialiser"><i class="fa fa-undo"></i></a>
         </div>
 
     </div>
@@ -137,39 +125,43 @@ function computeFilterValues(items, key) {
         <label>Paramètres graphique :</label>
 
         <% if (params.visualize === 'pie') { %>
-          <%- include('partials/dropdown', {
+          <%- include('../partials/dropdown', {
             name: 'x',
             label: 'comparer périodes ?',
             key: 'x',
             type: 'unique',
+            valueType: 'plain',
             className: 'warning',
             values: [{key: 'oui', value: 'date'}],
           }) %>
 
-          <%- include('partials/dropdown', {
+          <%- include('../partials/dropdown', {
             name: 'y',
             label: 'Valeur',
             key: 'y',
             type: 'unique',
+            valueType: 'plain',
             className: 'warning',
             values: columnValues,
           }) %>
 
         <% } else { %>
-          <%- include('partials/dropdown', {
+          <%- include('../partials/dropdown', {
             name: 'x',
             label: 'x',
             key: 'x',
             type: 'unique',
+            valueType: 'plain',
             className: 'warning',
             values: columnValues,
           }) %>
 
-          <%- include('partials/dropdown', {
+          <%- include('../partials/dropdown', {
             name: 'y',
             label: 'y',
             key: 'y',
             type: 'unique',
+            valueType: 'plain',
             className: 'warning',
             values: columnValues,
           }) %>

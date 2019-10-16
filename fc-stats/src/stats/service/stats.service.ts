@@ -4,12 +4,16 @@ import { SearchParams, SearchResponse } from 'elasticsearch';
 import * as ElasticsearchScrollStream from 'elasticsearch-scroll-stream';
 import { Readable } from 'stream';
 import { plainToClass } from 'class-transformer';
-import { StatsDTO } from '../dto/stats.dto';
+import { EventDTO } from '../dto/event.dto';
+import { MetricDTO } from '../dto/metric.dto';
 import { StatsQueries } from '../stats.queries';
 import { StatsServiceParams } from '../interfaces/stats-service-params.interface';
 import { TotalByFIWeek } from '../interfaces/total-by-fi-response.interface';
-import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
-import { MetaDTO } from '../dto/meta.dto';
+import { EventUIListOutputDTO } from '../dto/event-ui-list-output.dto';
+import { EventMetaDTO } from '../dto/event-meta.dto';
+import { MetricMetaDTO } from '../dto/metric-meta.dto';
+import { MetricUIListOutputDTO } from '../dto/metric-ui-list-output.dto';
+
 @Injectable()
 export class StatsService {
   constructor(
@@ -32,13 +36,33 @@ export class StatsService {
     return stream;
   }
 
-  async getEvents(params: StatsServiceParams): Promise<StatsUIListOutputDTO> {
+  async getMetrics(params: StatsServiceParams): Promise<MetricUIListOutputDTO> {
+    const query: SearchParams = this.statsQueries.getMetrics(params);
+    const data: SearchResponse<
+      any
+    > = await this.elasticsearchService.getClient().search(query);
+
+    const stats = data.hits.hits.map(doc =>
+      plainToClass(MetricDTO, doc._source),
+    );
+
+    /** Get filters menu data */
+    const meta: MetricMetaDTO = {
+      total: data.hits.total,
+      keyList: this.getAggregate(data, 'key'),
+      rangeList: this.getAggregate(data, 'range'),
+    };
+
+    return { params, stats, meta };
+  }
+
+  async getEvents(params: StatsServiceParams): Promise<EventUIListOutputDTO> {
     const query: SearchParams = this.statsQueries.getEvents(params);
     const data: SearchResponse<
       any
     > = await this.elasticsearchService.getClient().search(query);
 
-    const stats: StatsDTO[] = StatsService.aggregationsToDocuments(
+    const stats: EventDTO[] = StatsService.aggregationsToDocuments(
       params,
       data.aggregations,
     );
@@ -50,7 +74,7 @@ export class StatsService {
     const actionList = this.getAggregate(data, 'action');
     const typeActionList = this.getAggregate(data, 'typeAction');
 
-    const meta: MetaDTO = {
+    const meta: EventMetaDTO = {
       total,
       fsList,
       fiList,
@@ -67,13 +91,13 @@ export class StatsService {
   static aggregationsToDocuments(
     params: StatsServiceParams,
     aggregations: SearchResponse<any>,
-  ): StatsDTO[] {
+  ): EventDTO[] {
     const fields = params.columns.concat(['count']);
     const docs = [];
 
     StatsService.fetchSubAggregation(docs, aggregations, {}, 'date', fields);
 
-    return docs.map(item => plainToClass(StatsDTO, item));
+    return docs.map(item => plainToClass(EventDTO, item));
   }
 
   static fetchSubAggregation(docs, data, doc, field, fields: string[]) {

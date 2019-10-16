@@ -58,43 +58,44 @@ export class LocalsInterceptor implements NestInterceptor {
       { label: 'Sécurité inactif', value: UserRole.INACTIVE_SECURITY },
     ];
 
-    res.locals.helpers.getMapped = function getMapped(mapping, key) {
-      if (typeof mapping[key] !== 'undefined') {
-        return mapping[key];
-      }
-      return key;
-    };
+    res.locals.helpers.getMapped = LocalsInterceptor.getMapped;
 
-    res.locals.helpers.getChartTitle = function getChartTitle(key) {
-      if (res.locals.helpers.MAPPINGS.chartTitle[key] !== undefined) {
-        // tslint:disable-next-line: no-string-literal
-        return res.locals.helpers.MAPPINGS['chartTitle'][key];
-      }
-      return key;
-    };
-
-    res.locals.formatDate = (date, granularity) => {
-      switch (granularity) {
-        case 'day':
-          return moment(date).format('YYYY/MM/DD');
-        case 'week':
-          return (
-            'du ' +
-            moment(date).format('MM/DD') +
-            ' au ' +
-            moment(date)
-              .add(7, 'days')
-              .format('YYYY/MM/DD')
-          );
-        case 'month':
-          return moment(date).format('YYYY/MM');
-        case 'year':
-          return moment(date).format('YYYY');
-        case 'all':
-          return 'Toute la période';
-      }
-    };
+    res.locals.formatDate = LocalsInterceptor.formatDate;
 
     return next.handle();
+  }
+
+  static getMapped(mapping, key) {
+    if (typeof mapping[key] !== 'undefined') {
+      return mapping[key];
+    }
+    return key;
+  }
+
+  static formatDate(input, granularity) {
+    const date = moment(input);
+
+    if (!date.isValid()) {
+      throw Error(`Invalid date: <${input}>`);
+    }
+    switch (granularity) {
+      case 'day':
+        return date.format('DD/MM/YYYY');
+      case 'week':
+        return (
+          'du ' +
+          date.format('DD/MM') +
+          ' au ' +
+          date.add(7, 'days').format('DD/MM/YYYY')
+        );
+      case 'month':
+        return date.format('MMM YYYY');
+      case 'year':
+        return date.format('YYYY');
+      case 'all':
+        return 'Toute la période';
+      default:
+        throw Error('granularity should be one of day|week|month|year|all');
+    }
   }
 }

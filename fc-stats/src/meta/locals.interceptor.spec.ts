@@ -61,4 +61,89 @@ describe('LocalsInterceptor', () => {
     expect(res.locals.CURRENT_USER).toBe(req.user);
     expect(next.handle).toBeCalledTimes(1);
   });
+
+  describe('getMapped', () => {
+    it('Should return mapped value if mapped', () => {
+      // Given
+      const mapping = { foo: 'fooValue' };
+      // When
+      const result = LocalsInterceptor.getMapped(mapping, 'foo');
+      // Then
+      expect(result).toBe('fooValue');
+    });
+    it('Should return given key of not mapped', () => {
+      // Given
+      const mapping = { foo: 'fooValue' };
+      // When
+      const result = LocalsInterceptor.getMapped(mapping, 'bar');
+      // Then
+      expect(result).toBe('bar');
+    });
+  });
+
+  describe('formatDate', () => {
+    it('Should format day', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'day';
+      // When
+      const result = LocalsInterceptor.formatDate(date, granularity);
+      // then
+      expect(result).toBe('08/10/2019');
+    });
+    it('Should format week', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'week';
+      // When
+      const result = LocalsInterceptor.formatDate(date, granularity);
+      // then
+      expect(result).toBe('du 08/10 au 15/10/2019');
+    });
+    it('Should format month', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'month';
+      // When
+      const result = LocalsInterceptor.formatDate(date, granularity);
+      // then
+      expect(result).toBe('Oct 2019');
+    });
+    it('Should format year', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'year';
+      // When
+      const result = LocalsInterceptor.formatDate(date, granularity);
+      // then
+      expect(result).toBe('2019');
+    });
+    it('Should return a specific "all period" string', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'all';
+      // When
+      const result = LocalsInterceptor.formatDate(date, granularity);
+      // then
+      expect(result).toBe('Toute la période');
+    });
+    it('Should throw if not a valid granularity', () => {
+      // Given
+      const date = new Date('2019-10-08');
+      const granularity = 'foo';
+      // then
+      expect(() => LocalsInterceptor.formatDate(date, granularity)).toThrow(
+        'granularity should be one of day|week|month|year|all',
+      );
+    });
+    it('Should throw if not a valid date', () => {
+      // Given
+      const date = 'yolo';
+      const granularity = 'day';
+      // then
+      expect(() => LocalsInterceptor.formatDate(date, granularity)).toThrow(
+        'Invalid date: <yolo>',
+      );
+    });
+  });
 });

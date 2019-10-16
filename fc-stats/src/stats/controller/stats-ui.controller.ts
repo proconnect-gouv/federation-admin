@@ -7,8 +7,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { StatsService } from '../service/stats.service';
-import { StatsUIListInputDTO } from '../dto/stats-ui-list-input.dto';
-import { StatsUIListOutputDTO } from '../dto/stats-ui-list-output.dto';
+import { EventUIListInputDTO } from '../dto/event-ui-list-input.dto';
+import { EventUIListOutputDTO } from '../dto/event-ui-list-output.dto';
+import { MetricUIListInputDTO } from '../dto/metric-ui-list-input.dto';
+import { MetricUIListOutputDTO } from '../dto/metric-ui-list-output.dto';
 import { StatsServiceParams } from '../interfaces/stats-service-params.interface';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { UserRole } from '@fc/shared/user/roles.enum';
@@ -17,20 +19,35 @@ import { UserRole } from '@fc/shared/user/roles.enum';
 export class StatsUIController {
   constructor(private readonly statsService: StatsService) {}
 
-  @Get('stats')
+  @Get('events')
   @Roles(UserRole.OPERATOR)
-  @Render('stats/index')
+  @Render('events/index')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async list(
-    @Query() query: StatsUIListInputDTO,
-  ): Promise<StatsUIListOutputDTO> {
-    if (query.start && query.stop) {
-      const { stats, meta } = await this.statsService.getEvents(
-        query as StatsServiceParams,
-      );
-      return { params: query, stats, meta } as StatsUIListOutputDTO;
+  async getEvents(
+    @Query() params: EventUIListInputDTO,
+  ): Promise<EventUIListOutputDTO> {
+    const { start, stop } = params;
+
+    if (start && stop) {
+      return this.statsService.getEvents(params as StatsServiceParams);
     }
 
-    return { params: query };
+    return { params };
+  }
+
+  @Get('metrics')
+  @Roles(UserRole.OPERATOR)
+  @Render('metrics/index')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async getMetrics(
+    @Query() params: MetricUIListInputDTO,
+  ): Promise<MetricUIListOutputDTO> {
+    const { start, stop } = params;
+
+    if (start && stop) {
+      return this.statsService.getMetrics(params as StatsServiceParams);
+    }
+
+    return { params };
   }
 }

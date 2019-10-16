@@ -8,7 +8,7 @@ import { login, logout } from '../login.util';
 describe('Forbidden - error 403', () => {
   const option = {
     method: 'GET',
-    url: `${BASE_URL}/stats`,
+    url: `${BASE_URL}/events`,
     failOnStatusCode: false,
   };
 
@@ -16,7 +16,7 @@ describe('Forbidden - error 403', () => {
     login(USER_ONLY_ADMIN, USER_PASS);
 
     cy.visit(option);
-    cy.url().should('eq', `${BASE_URL}/stats`);
+    cy.url().should('eq', `${BASE_URL}/events`);
     cy.contains('Statistiques').should('be.visible');
     cy.get('nav').should('be.visible');
     cy.contains('Accès refusé').should('be.visible');

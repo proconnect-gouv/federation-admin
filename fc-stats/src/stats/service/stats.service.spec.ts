@@ -7,6 +7,8 @@ import {
 import { StatsService } from './stats.service';
 import { StatsQueries } from '../stats.queries';
 import { aggregations } from '../../../fixtures/aggregation';
+import { MetricDTO } from '../dto/metric.dto';
+import { MetricMetaDTO } from '../dto/metric-meta.dto';
 
 describe('StatsService', () => {
   let statsService: StatsService;
@@ -69,8 +71,54 @@ describe('StatsService', () => {
     });
   });
 
+  describe('getMetrics', () => {
+    it('Should call es service with only range query params', async () => {
+      // Given
+      const params = {
+        start: new Date('2019-01-01'),
+        stop: new Date('2019-06-01'),
+        columns: ['key', 'range'],
+      };
+      const elasticResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                key: 'foo',
+                value: 42,
+                range: 'day',
+                date: new Date('2019-03-01'),
+              },
+            },
+          ],
+        },
+        aggregations: {
+          key: {
+            buckets: [],
+          },
+          range: {
+            buckets: [],
+          },
+        },
+      };
+      search.mockResolvedValueOnce(elasticResponse);
+      // When
+      const result = await statsService.getMetrics(params);
+      // Then
+      expect(result).toBeDefined();
+      expect(result instanceof Object).toBe(true);
+      expect(search.mock.calls).toHaveLength(1);
+
+      const { stats } = result;
+      expect(Array.isArray(stats)).toBe(true);
+      expect(stats).toHaveLength(1);
+      expect(stats[0] instanceof MetricDTO).toBe(true);
+      expect(result.meta).toBeDefined();
+    });
+  });
+
   describe('getEvents', () => {
-    it('call es service wih only range query params', async () => {
+    it('Should call es service wih only range query params', async () => {
       // Given
       const params = {
         start: new Date('2019-01-01'),

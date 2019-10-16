@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <% include partials/head.ejs %>
+    <% include ../partials/head.ejs %>
 </head>
 <body>
 <div class="container">
-    <% include partials/header.ejs %>
+    <% include ../partials/header.ejs %>
     <div class="row">
         <div class="col-12">
             <p class="h2">Stats</p>
             <p><i>Mesure All the things!</i></p>
 
 
-            <% include partials/form.ejs %>
+            <% include ./form.ejs %>
 
             <% if (!params.start || !params.stop) { %>
             <div class="d-flex justify-content-center">
@@ -21,9 +21,9 @@
             <% } else { %>
 
               <% if(REQ_QUERY.visualize === 'list') { %>
-                <% include partials/list.ejs %>
+                <% include ./list.ejs %>
               <% } else { %>
-                <% include partials/graph.ejs %>
+                <% include ./graph.ejs %>
               <% } %>
             <% } %>
         </div>
