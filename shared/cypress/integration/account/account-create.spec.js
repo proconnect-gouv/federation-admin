@@ -1,28 +1,26 @@
 import {
   USER_ADMIN,
   USER_PASS,
-  BASE_URL,
   LIMIT_PAGE,
-} from '../util/constants.util';
-import { login, logout } from '../util/login.util';
-import { createUserAccount, createUserAndLogWith } from './account-create.util';
-import { deleteUser } from './account-delete.util';
-import { resetPostgres } from '../util/prepare.util';
-
-before(resetPostgres);
+} from '../../../../shared/cypress/integration/util/constants.util';
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
+import { createUserAccount, createUserAndLogWith } from '../../../../shared/cypress/integration/account/account-create.util';
+import { deleteUser } from '../../../../shared/cypress/integration/account/account-delete.util';
+import { resetPostgres } from '../../../../shared/cypress/integration/util/prepare.util';
 
 function logoutAndDeleteUser (username, basicConfiguration) {
   if(basicConfiguration.redirect) {
-    cy.visit(`${BASE_URL}/account`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account`);
     logout(username);
   }
   login(USER_ADMIN, USER_PASS);
-  cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+  cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
   deleteUser(username, basicConfiguration);
   logout(USER_ADMIN);
 }
 
 describe('Account', () => {
+  before(resetPostgres);
   describe('Create user', () => {
     const userInfo = {
       username: 'christophe',
@@ -49,7 +47,7 @@ describe('Account', () => {
     it('should be possible for an admin to create a new user with all the roles', () => {
       createUserAccount(userInfo ,basicConfiguration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
       cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
@@ -72,7 +70,7 @@ describe('Account', () => {
       const configuration = Object.assign({}, basicConfiguration, { adminRole: false, securityRole: false });
       createUserAccount(userInfo ,configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
       cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
@@ -91,7 +89,7 @@ describe('Account', () => {
       const configuration = Object.assign({}, basicConfiguration, { operatorRole: false, securityRole: false });
       createUserAccount(userInfo ,configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
       cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
@@ -110,7 +108,7 @@ describe('Account', () => {
       const configuration = Object.assign({}, basicConfiguration, { operatorRole: false, adminRole: false });
       createUserAccount(userInfo ,configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
       cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
@@ -131,7 +129,7 @@ describe('Account', () => {
 
       cy.contains('Le nom d\'utilisateur est déjà utilisé').should('be.visible');
 
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       deleteUser(userInfo.username, basicConfiguration);
       logout(USER_ADMIN);
     });
@@ -142,8 +140,9 @@ describe('Account', () => {
 
       cy.contains('Error - 500').should('be.visible');
 
-      cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('not.be.visible');
+      logout(USER_ADMIN);
     });
 
     describe('First user connection', () => {
@@ -152,8 +151,7 @@ describe('Account', () => {
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(userInfo, configuration);
 
-        cy.url().should('eq', `${BASE_URL}/service-provider`);
-        cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+        cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
         cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
           expect(roles).to.have.length(2);
           const firstRole = roles[0].textContent;
@@ -171,7 +169,7 @@ describe('Account', () => {
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(user, basicConfiguration);
 
-        cy.url().should('eq', `${BASE_URL}/account/enrollment`);
+        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
 
         cy.get('#password + div > span').then(checkPassword => {
           // use jquery's map to grab all of their classes
@@ -202,7 +200,7 @@ describe('Account', () => {
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(user, configuration);
 
-        cy.url().should('eq', `${BASE_URL}/account/enrollment`);
+        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
         cy.contains('Les mots de passe ne sont pas les mêmes.').should('be.visible');
 
         logoutAndDeleteUser(userInfo.username, configuration);
@@ -213,7 +211,7 @@ describe('Account', () => {
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(userInfo, configuration);
 
-        cy.url().should('eq', `${BASE_URL}/account/enrollment`);
+        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
         cy.contains('Le TOTP saisi n\'est pas valide').should('be.visible');
 
         logoutAndDeleteUser(userInfo.username, configuration);

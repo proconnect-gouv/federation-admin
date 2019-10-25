@@ -50,8 +50,8 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2').should(($divs) => {
       // Expect
-      expect($divs).to.have.length(8)
-      expect($divs.eq(0)).to.contain('Masculin')
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('Masculin');
       expect($divs.eq(1)).to.contain('JACK');
       expect($divs.eq(3)).to.contain('Pierre Paul');
       expect($divs.eq(4)).to.contain('1990-11-12');
@@ -102,8 +102,8 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2').should(($divs) => {
       // Expect
-      expect($divs).to.have.length(8)
-      expect($divs.eq(0)).to.contain('Masculin')
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('Masculin');
       expect($divs.eq(1)).to.contain('JACK');
       expect($divs.eq(3)).to.contain('René Françoise');
       expect($divs.eq(4)).to.contain('1990-11-12');
@@ -156,8 +156,8 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2').should(($divs) => {
       // Expect
-      expect($divs).to.have.length(8)
-      expect($divs.eq(0)).to.contain('Masculin')
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('Masculin');
       expect($divs.eq(1)).to.contain('JACK');
       expect($divs.eq(3)).to.contain('Pierre Paul');
       expect($divs.eq(4)).to.contain('1990-11-12');

@@ -1,14 +1,13 @@
 import {
-  BASE_URL,
   USER_ONLY_ADMIN,
   USER_PASS
-} from '../constants.util';
-import { login, logout } from '../login.util';
+} from '../../../../shared/cypress/integration/util/constants.util';
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
 
 describe('Forbidden - error 403', () => {
   const option = {
     method: 'GET',
-    url: `${BASE_URL}/events`,
+    url: `${Cypress.env('APP_FORBIDDEN_PAGE')}`,
     failOnStatusCode: false,
   };
 
@@ -16,8 +15,8 @@ describe('Forbidden - error 403', () => {
     login(USER_ONLY_ADMIN, USER_PASS);
 
     cy.visit(option);
-    cy.url().should('eq', `${BASE_URL}/events`);
-    cy.contains('Statistiques').should('be.visible');
+    cy.url().should('eq', `${Cypress.env('APP_FORBIDDEN_PAGE')}`);
+    cy.contains(USER_ONLY_ADMIN).should('be.visible');
     cy.get('nav').should('be.visible');
     cy.contains('Accès refusé').should('be.visible');
 

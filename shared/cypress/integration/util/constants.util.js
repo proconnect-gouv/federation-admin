@@ -1,4 +1,3 @@
-export const BASE_URL = 'https://exploitation.docker.dev-franceconnect.fr';
 export const USER_ONLY_ADMIN = 'bob';
 export const USER_ADMIN = 'jean_moust';
 export const USER_OPERATOR = 'jean_patoche';

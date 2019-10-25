@@ -1,2 +1,9 @@
 .idea
 node_modules
+
+# Cypress
+*/cypress/support
+*/cypress/plugins
+*/cypress/screeshots
+*/cypress/videos
+
