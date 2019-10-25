@@ -1,6 +1,6 @@
-import { USER_ADMIN } from '../util/constants.util';
-import { login, logout } from '../util/login.util';
-import { getTotp } from '../util/totp.util';
+import { USER_ADMIN } from '../../../../shared/cypress/integration/util/constants.util';
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
+import { getTotp } from '../../../../shared/cypress/integration/util/totp.util';
 
 export function createUserAccount(userInfo, basicConfiguration) {
   cy.contains('Comptes utilisateurs').click();

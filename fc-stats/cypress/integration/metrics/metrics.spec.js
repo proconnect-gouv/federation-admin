@@ -1,6 +1,6 @@
 import moment from 'moment';
-import { BASE_URL, USER_OPERATOR, USER_PASS } from '../constants.util';
-import { login } from '../login.util';
+import { USER_OPERATOR, USER_PASS } from '../../../../shared/cypress/integration/util/constants.util';
+import { login } from '../../../../shared/cypress/integration/util/login.util';
 
 const START = moment()
   .add(-3, 'month')
@@ -19,7 +19,7 @@ describe('Metrics visualisation UI', () => {
   });
 
   it('displays the metric page with result when data range is choosed', () => {
-    cy.visit(`${BASE_URL}/metrics?start=${START}&stop=${STOP}&visualize=list`);
+    cy.visit(`${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&visualize=list`);
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
     });
@@ -27,7 +27,7 @@ describe('Metrics visualisation UI', () => {
 
   it('displays the metric page with result when data filter key is choosed', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Aaccount&visualize=list`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Aaccount&visualize=list`,
     );
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
@@ -42,7 +42,7 @@ describe('Metrics visualisation UI', () => {
 
   it('displays the metric page with result when another filter key is choosed', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list`,
     );
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
@@ -58,7 +58,7 @@ describe('Metrics visualisation UI', () => {
 
   it('displays the metric page with result only with choosen granularity', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list&filters[]=range:week`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list&filters[]=range:week`,
     );
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
@@ -71,28 +71,28 @@ describe('Metrics visualisation UI', () => {
 
   it('displays bar chart page without JS error', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&visualize=bar&filters[]=range:week&x=date&y=fs`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&visualize=bar&filters[]=range:week&x=date&y=fs`,
     );
     cy.get('canvas[data-type=bar]');
   });
 
   it('displays line chart page without JS error', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&visualize=line&filters[]=range:week&x=date&y=fs`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&visualize=line&filters[]=range:week&x=date&y=fs`,
     );
     cy.get('canvas[data-type=line]');
   });
 
   it('displays pie chart page without JS error', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=range:week&x=date&y=fs`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=range:week&x=date&y=fs`,
     );
     cy.get('canvas[data-type=pie]');
   });
 
   it('Checks the choosen values in dropdowns', () => {
     cy.visit(
-      `${BASE_URL}/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=key:account&filters[]=key:disabled&filters[]=range:week&x=date&y=key`,
+      `${Cypress.env('BASE_URL')}/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=key:account&filters[]=key:disabled&filters[]=range:week&x=date&y=key`,
     );
     cy.get('#key-dropdown input[id="filters[]key:account"]').should('be.checked');
     cy.get('#key-dropdown input[id="filters[]key:disabled"]').should('be.checked');
@@ -115,7 +115,7 @@ describe('Metrics visualisation UI', () => {
   });
 
   it('UI controls are working', () => {
-    cy.visit(`${BASE_URL}/metrics`);
+    cy.visit(`${Cypress.env('BASE_URL')}/metrics`);
 
     cy.get('#start').click();
     cy.get('.lightpick__day:first').click();

@@ -1,17 +1,15 @@
 import {
 	USER_ADMIN,
 	USER_PASS,
-	BASE_URL,
 	LIMIT_PAGE,
-} from '../util/constants.util';
+} from '../../../../shared/cypress/integration/util/constants.util';
 import { deleteUser } from './account-delete.util';
 import { createUserAccount } from './account-create.util';
-import { login, logout } from '../util/login.util';
-import { resetPostgres } from '../util/prepare.util';
-
-before(resetPostgres);
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
+import { resetPostgres } from '../../../../shared/cypress/integration/util/prepare.util';
 
 describe('Account', () => {
+  before(resetPostgres);
 	describe('Delete user', () => {
 		const userInfo = {
 			username: 'cypress',
@@ -23,7 +21,7 @@ describe('Account', () => {
 			adminRole: true,
 			operatorRole: true,
 			_csrf: true,
-		}
+		};
 		beforeEach(() => {
 			login(USER_ADMIN, USER_PASS);
 		});
@@ -31,12 +29,12 @@ describe('Account', () => {
 		it('Should delete the user if confirm button is clicked and should be kept on the accounts list page after', () => {
 			createUserAccount(userInfo, basicConfiguration);
 
-			cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+			cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 			deleteUser(userInfo.username, basicConfiguration);
 
 			cy.contains(`Le compte ${userInfo.username} a été supprimé avec succès !`).should('be.visible');
-			cy.url().should('eq', `${BASE_URL}/account`);
-			cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+			cy.url().should('eq', `${Cypress.env('BASE_URL')}/account`);
+			cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 			cy.contains(`${userInfo.username}`).should('not.be.visible');
 
 			logout(USER_ADMIN);
@@ -47,10 +45,10 @@ describe('Account', () => {
 				basicConfiguration.confirmSuppression = false;
 				createUserAccount(userInfo, basicConfiguration);
 
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				deleteUser(userInfo.username, basicConfiguration);
 
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				cy.contains(`${userInfo.username}`).should('be.visible');
 
 				basicConfiguration.confirmSuppression = true;
@@ -61,7 +59,7 @@ describe('Account', () => {
 			it('If the csrf token is invalid', () => {
 				createUserAccount(userInfo, basicConfiguration);
 
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				cy.get(`form[data-element-title="${userInfo.username}"] input[name="_csrf"]`).then((user) => {
 					user[0].value ='obviouslyBadCSRF';
 				});
@@ -70,7 +68,7 @@ describe('Account', () => {
 
 				cy.contains('Error - 500').should('be.visible');
 
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				deleteUser(userInfo.username, basicConfiguration);
 				logout(USER_ADMIN);
 			});
@@ -78,7 +76,7 @@ describe('Account', () => {
 			it('If totp is not correct or empty', () => {
 				createUserAccount(userInfo, basicConfiguration);
 
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				cy.get(`form[data-element-title="${userInfo.username}"] button.btn-action-delete`).click();
 				cy.wait(500);
 				cy.contains(`Voulez-vous supprimer le compte ${userInfo.username} ?`);
@@ -88,7 +86,7 @@ describe('Account', () => {
 				cy.contains('Confirmer').click();
 				cy.wait(500);
 				cy.contains(`Le TOTP saisi n'est pas valide`).should('be.visible');
-				cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+				cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
 				cy.contains(`${userInfo.username}`).should('be.visible');
 
 				deleteUser(userInfo.username, basicConfiguration);

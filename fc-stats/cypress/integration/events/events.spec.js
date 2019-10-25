@@ -1,7 +1,6 @@
 import moment from 'moment';
-import { BASE_URL, USER_OPERATOR, USER_PASS } from '../constants.util';
-import { login } from '../login.util';
-
+import { USER_OPERATOR, USER_PASS } from '../../../../shared/cypress/integration/util/constants.util';
+import { login } from '../../../../shared/cypress/integration/util/login.util';
 
 const START = moment().add(-3, 'month').format('YYYY-MM-DD');
 const STOP = moment().add(3, 'month').format('YYYY-MM-DD');
@@ -16,14 +15,14 @@ describe('Events visualisation UI', () => {
     });
 
     it('displays the events page with result when data range is choosed', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`)
       cy.get('table th').then(table => {
         expect(table.length).to.be.greaterThan(0)
       });
     });
 
     it('displays the events page with result when data filter fi is choosed', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Adgfip&visualize=list&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Adgfip&visualize=list&granularity=month&x=date&y=fs`)
       cy.get('table th').then(table => {
         expect(table.length).to.be.greaterThan(0)
       });
@@ -31,9 +30,8 @@ describe('Events visualisation UI', () => {
       cy.get('tbody tr:last td').first().should('contain', 'dgfip')
     });
 
-
     it('displays the events page with result when another filter fi is choosed', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Aameli&visualize=list&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Aameli&visualize=list&granularity=month&x=date&y=fs`)
       cy.get('table th').then(table => {
         expect(table.length).to.be.greaterThan(0)
       });
@@ -42,22 +40,22 @@ describe('Events visualisation UI', () => {
     });
 
     it('displays bar chart page without JS error', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=bar&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=bar&granularity=month&x=date&y=fs`)
       cy.get('canvas[data-type=bar]');
     });
 
     it('displays line chart page without JS error', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=line&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=line&granularity=month&x=date&y=fs`)
       cy.get('canvas[data-type=line]');
     });
 
     it('displays pie chart page without JS error', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=pie&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=pie&granularity=month&x=date&y=fs`)
       cy.get('canvas[data-type=pie]');
     });
 
     it('UI controls are working', () => {
-      cy.visit(`${BASE_URL}/events`);
+      cy.visit(`${Cypress.env('BASE_URL')}/events`);
 
       cy.get('#start').click();
       cy.get('.lightpick__day:first').click();
@@ -86,7 +84,7 @@ describe('Events visualisation UI', () => {
 
 
     it('Checks the choosen values in dropdowns', () => {
-      cy.visit(`${BASE_URL}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Adgfip&filters%5B%5D=fi%3Aameli&visualize=bar&granularity=month&x=date&y=fs`)
+      cy.visit(`${Cypress.env('BASE_URL')}/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Adgfip&filters%5B%5D=fi%3Aameli&visualize=bar&granularity=month&x=date&y=fs`)
 
       cy.get('#fi-dropdown input[id="filters[]fi:ameli"]').should('be.checked');
       cy.get('#fi-dropdown input[id="filters[]fi:dgfip"]').should('be.checked');

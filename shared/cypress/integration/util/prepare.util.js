@@ -10,7 +10,7 @@ export function resetMongoFC() {
 }
 
 export function resetPostgres() {
-  const commandBase = `docker exec fc_exploitation_1 bash -c 'cd /var/www/app/fc-exploitation && `;
+  const commandBase = `docker exec fc_${Cypress.env('APP_NAME')}_1 bash -c 'cd /var/www/app/fc-exploitation && `;
 
   const commands = [
     'yarn typeorm schema:drop',
@@ -19,7 +19,7 @@ export function resetPostgres() {
   ];
 
   commands.forEach(command => {
-    console.log(`
+    cy.log(`
       Executing command:
       > ${commandBase} ${command}'
     `);

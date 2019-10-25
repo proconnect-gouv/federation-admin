@@ -1,21 +1,20 @@
 import {
-  BASE_URL,
   USER_OPERATOR,
   USER_PASS
-} from '../util/constants.util';
-import { login, logout } from '../util/login.util';
+} from '../../../../shared/cypress/integration/util/constants.util';
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
 
 describe('Page not found - error 404', () => {
   const option = {
     method: 'GET',
-    url: `${BASE_URL}/wrong-page`,
+    url: `${Cypress.env('BASE_URL')}/wrong-page`,
     failOnStatusCode: false,
   };
 
   it('Should display the page not found when we are not connected', () => {
     cy.visit(option);
-    cy.url().should('eq', `${BASE_URL}/wrong-page`);
-    cy.contains('Exploitation').should('not.exist');
+    cy.url().should('eq', `${Cypress.env('BASE_URL')}/wrong-page`);
+    cy.contains(USER_OPERATOR).should('not.exist');
     cy.contains('Oops, la page est introuvable...').should('be.visible');
 
     cy
@@ -30,8 +29,8 @@ describe('Page not found - error 404', () => {
     login(USER_OPERATOR, USER_PASS);
 
     cy.visit(option);
-    cy.url().should('eq', `${BASE_URL}/wrong-page`);
-    cy.contains('Exploitation').should('be.visible');
+    cy.url().should('eq', `${Cypress.env('BASE_URL')}/wrong-page`);
+    cy.contains(USER_OPERATOR).should('be.visible');
     cy.get('nav').should('be.visible');
     cy.contains('Oops, la page est introuvable...').should('be.visible');
 

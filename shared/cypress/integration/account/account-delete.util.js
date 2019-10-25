@@ -1,5 +1,5 @@
-import { SECRET_TOTP } from '../util/constants.util';
-import { getTotp } from '../util/totp.util';
+import { SECRET_TOTP } from '../../../../shared/cypress/integration/util/constants.util';
+import { getTotp } from '../../../../shared/cypress/integration/util/totp.util';
 
 export function deleteUser(username, basicConfiguration) {
   cy.get(

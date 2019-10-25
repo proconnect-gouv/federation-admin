@@ -1,13 +1,12 @@
-import { getTotp } from '../util/totp.util';
-import { USER_ADMIN, USER_PASS, BASE_URL, LIMIT_PAGE } from '../util/constants.util';
-import { login, logout } from '../util/login.util';
+import { getTotp } from '../../../../shared/cypress/integration/util/totp.util';
+import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../../../shared/cypress/integration/util/constants.util';
+import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
 import { createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
-import { resetPostgres } from '../util/prepare.util';
-
-before(resetPostgres);
+import { resetPostgres } from '../../../../shared/cypress/integration/util/prepare.util';
 
 describe('Update account', () => {
+  before(resetPostgres);
   const userInfo = {
     username: 'thomas',
     email: 'thomas@email.com',
@@ -29,11 +28,11 @@ describe('Update account', () => {
   });
 
   afterEach(() => {
-    cy.visit(`${BASE_URL}/account`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account`);
     logout(userInfo.username);
 
     login(USER_ADMIN, USER_PASS);
-    cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
     deleteUser(userInfo.username, basicConfiguration);
     logout(USER_ADMIN);
   });
@@ -69,7 +68,7 @@ describe('Update account', () => {
     cy.contains(
       'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
     );
-    cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad new password to update his password', () => {
@@ -85,7 +84,7 @@ describe('Update account', () => {
       cy.get('#_totp').type(token);
     });
     cy.contains('Mettre à jour mon mot de passe').click();
-    cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad password confirmation to update his password', () => {
@@ -101,7 +100,7 @@ describe('Update account', () => {
       cy.get('#_totp').type(token);
     });
     cy.contains('Mettre à jour mon mot de passe').click();
-    cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad totp to update his password', () => {
@@ -114,6 +113,6 @@ describe('Update account', () => {
     cy.get('#_totp').type(123456);
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains("Le TOTP saisi n'est pas valide");
-    cy.visit(`${BASE_URL}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
   });
 });
