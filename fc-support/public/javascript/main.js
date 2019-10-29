@@ -17,7 +17,7 @@ import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAcco
 
 const initMap = {
   datePicker: dateSinglePicker,
-  validForm: validateForm,
+  validateRnippForm: validateForm,
   copyText: copyText,
   paginationStyle: paginationStyle,
   validateEnrollment: validateEnrollment,
