@@ -1,7 +1,7 @@
 export default {
   appName: process.env.APP_NAME || 'FC_STATS',
   environment: process.env.ENV || 'development',
-  app_root: process.env.APP_ROOT || 'https://stats.docker.dev-franceconnect.fr',
+  app_root: process.env.APP_ROOT || '',
   commitUrlPrefix:
     process.env.COMMITS_URL_PREFIX ||
     'https://gitlab.com/france-connect/FranceConnect/commit/',
