@@ -84,7 +84,7 @@ describe('LocalsInterceptor', () => {
   describe('formatDate', () => {
     it('Should format day', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'day';
       // When
       const result = LocalsInterceptor.formatDate(date, granularity);
@@ -93,7 +93,7 @@ describe('LocalsInterceptor', () => {
     });
     it('Should format week', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'week';
       // When
       const result = LocalsInterceptor.formatDate(date, granularity);
@@ -102,7 +102,7 @@ describe('LocalsInterceptor', () => {
     });
     it('Should format month', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'month';
       // When
       const result = LocalsInterceptor.formatDate(date, granularity);
@@ -111,7 +111,7 @@ describe('LocalsInterceptor', () => {
     });
     it('Should format year', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'year';
       // When
       const result = LocalsInterceptor.formatDate(date, granularity);
@@ -120,7 +120,7 @@ describe('LocalsInterceptor', () => {
     });
     it('Should return a specific "all period" string', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'all';
       // When
       const result = LocalsInterceptor.formatDate(date, granularity);
@@ -129,7 +129,7 @@ describe('LocalsInterceptor', () => {
     });
     it('Should throw if not a valid granularity', () => {
       // Given
-      const date = new Date('2019-10-08');
+      const date = '2019-10-08T12:34:56.000Z';
       const granularity = 'foo';
       // then
       expect(() => LocalsInterceptor.formatDate(date, granularity)).toThrow(

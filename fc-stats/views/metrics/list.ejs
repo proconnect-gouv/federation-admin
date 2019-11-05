@@ -10,7 +10,7 @@
     <% stats.forEach(function(stat){ %>
       <tr>
         <th scope="row"><%= formatDate(stat.date, stat.range) %></th>
-        <td><%= stat.key %></td>
+        <td><%= helpers.getMapped(helpers.MAPPINGS.metrics, stat.key)  %></td>
         <td><%= stat.value %></td>
       </tr>
       <% }) %>

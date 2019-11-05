@@ -65,14 +65,18 @@ export class LocalsInterceptor implements NestInterceptor {
     return next.handle();
   }
 
-  static getMapped(mapping, key) {
+  static getMapped(mapping: object, key: string): string {
     if (typeof mapping[key] !== 'undefined') {
       return mapping[key];
     }
     return key;
   }
 
-  static formatDate(input, granularity) {
+  static formatDate(input: string, granularity: string): string {
+    if (granularity === 'all') {
+      return 'Toute la période';
+    }
+
     const date = moment(input);
 
     if (!date.isValid()) {
@@ -92,8 +96,6 @@ export class LocalsInterceptor implements NestInterceptor {
         return date.format('MMM YYYY');
       case 'year':
         return date.format('YYYY');
-      case 'all':
-        return 'Toute la période';
       default:
         throw Error('granularity should be one of day|week|month|year|all');
     }
