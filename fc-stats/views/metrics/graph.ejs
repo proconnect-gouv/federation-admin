@@ -15,7 +15,7 @@
     window.data = <%- JSON.stringify(
       stats.map(item => ({
         date: locals.formatDate(item.date, item.range),
-        key: item.key,
+        key: helpers.getMapped(helpers.MAPPINGS.metrics, item.key),
         range: item.range,
         count: item.value,
       }))

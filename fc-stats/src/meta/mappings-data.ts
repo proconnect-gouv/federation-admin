@@ -32,6 +32,12 @@ export const MAPPINGS = {
     xmlokbutmissingdata: 'XML ok mais données manquantes',
     cantcallrnipp: 'RNIPP injoignable',
   },
+  metrics: {
+    account: 'Comptes',
+    activeAccount: 'Comptes actifs',
+    disabled: 'Comptes désactivés',
+    registration: 'Comptes créés',
+  },
   granularity: {
     day: 'Jour',
     week: 'Semaine',
