@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
-import { HttpConfigService } from 'src/config/http.service';
+import { HttpConfigService } from '@fc/shared/config/http.service';
 import { RnippSerializer } from './rnippSerializer.service';
 import * as xml2js from 'xml2js';
 import { TraceService } from '@fc/shared/logger/trace.service';
