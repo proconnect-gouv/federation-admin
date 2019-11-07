@@ -20,7 +20,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node ../node_modules/typeorm/cli.js --config src/config/database.ts"
+    "typeorm": "ts-node ../node_modules/typeorm/cli.js --config src/config/database.ts",
+    "console": "node dist/console.js",
+    "console:dev": "ts-node -r tsconfig-paths/register src/console.ts"
   },
   "dependencies": {
     "@fc/shared": "^0.0.1",
@@ -36,6 +38,7 @@
     "chart.js": "^2.8.0",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
+    "commander": "^4.0.0",
     "cookie-parser": "^1.4.4",
     "csv-stringify": "^5.3.0",
     "dotenv": "^8.0.0",
@@ -50,6 +53,7 @@
     "moment": "^2.24.0",
     "mongodb": "^3.2.7",
     "nestjs-config": "^1.4.0",
+    "nestjs-console": "^1.2.0",
     "pg": "^7.11.0",
     "popper.js": "^1.15.0",
     "query-string": "^6.8.2",

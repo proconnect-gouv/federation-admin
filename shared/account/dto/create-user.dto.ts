@@ -3,7 +3,9 @@ import {
   IsNotEmpty,
   IsEmail,
   ArrayNotEmpty,
+  ArrayUnique,
   IsString,
+  IsEnum,
   Matches,
 } from 'class-validator';
 import { IsCompliant } from '../validator/is-compliant.validator';
@@ -24,6 +26,11 @@ export class CreateUserDto {
   readonly password: string;
 
   @ArrayNotEmpty({ message: 'Veuillez renseigner au moins un rôle' })
+  @ArrayUnique()
+  @IsEnum(UserRole, {
+    each: true,
+    message: 'Veuillez renseigner des rôles valides',
+  })
   readonly roles: UserRole[];
 
   @IsString()

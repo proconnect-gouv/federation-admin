@@ -12,6 +12,10 @@ const generatePasswordProvider = {
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   providers: [UserService, generatePasswordProvider],
-  exports: [UserService, TypeOrmModule.forFeature([User])],
+  exports: [
+    UserService,
+    TypeOrmModule.forFeature([User]),
+    generatePasswordProvider,
+  ],
 })
 export class UserModule {}
