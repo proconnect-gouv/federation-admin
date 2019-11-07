@@ -34,13 +34,12 @@ class Config {
   getMongo() {
     const {
       FC_DB_HOSTS,
-      FC_DB_PORT,
       FC_DB_USER,
       FC_DB_PASSWORD,
       FC_DB_DATABASE,
     } = this.config;
 
-    return `mongodb://${FC_DB_USER}:${FC_DB_PASSWORD}@${FC_DB_HOSTS}:${FC_DB_PORT}/${FC_DB_DATABASE}`;
+    return `mongodb://${FC_DB_USER}:${FC_DB_PASSWORD}@${FC_DB_HOSTS}/${FC_DB_DATABASE}`;
   }
 }
 
