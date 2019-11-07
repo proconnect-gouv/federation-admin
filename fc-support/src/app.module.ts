@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConsoleModule } from 'nestjs-console';
 import { resolve } from 'path';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import { AppContextMiddleware } from '@fc/shared/app-context/middleware/app-context.middleware';
@@ -14,6 +15,7 @@ import { AccountController } from '@fc/shared/account/account.controller';
 import { AuthenticationModule } from '@fc/shared/authentication/authentication.module';
 import { AuthenticationController } from '@fc/shared/authentication/authentication.controller';
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
+import { CliModule } from '@fc/shared/cli/cli.module';
 import { TotpMiddleware } from '@fc/shared/authentication/middleware/totp.middleware';
 import { RnippModule } from '@fc/shared/rnipp/rnipp.module';
 import { RnippController } from '@fc/shared/rnipp/rnipp.controller';
@@ -32,6 +34,8 @@ const otplibProvider = {
   imports: [
     AuthenticationModule,
     AccountModule,
+    ConsoleModule,
+    CliModule,
     RnippModule,
     LoggerModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),

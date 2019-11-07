@@ -7,6 +7,7 @@ import {
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CsurfMiddleware } from '@nest-middlewares/csurf';
+import { ConsoleModule } from 'nestjs-console';
 import { resolve } from 'path';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import { AppContextMiddleware } from '@fc/shared/app-context/middleware/app-context.middleware';
@@ -16,6 +17,7 @@ import { AuthenticationModule } from '@fc/shared/authentication/authentication.m
 import { AuthenticationController } from '@fc/shared/authentication/authentication.controller';
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { TotpMiddleware } from '@fc/shared/authentication/middleware/totp.middleware';
+import { CliModule } from '@fc/shared/cli/cli.module';
 import { StatsModule } from './stats/stats.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import * as otplib from 'otplib';
@@ -29,6 +31,8 @@ const otplibProvider = {
   imports: [
     AuthenticationModule,
     AccountModule,
+    ConsoleModule,
+    CliModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),
