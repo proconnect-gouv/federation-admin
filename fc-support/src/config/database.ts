@@ -11,7 +11,10 @@ export = {
   synchronize: (process.env.DB_SYNCHRONIZE || 'false') === 'true',
   entities: [
     resolve(__dirname, '../**/*.entity{.ts,.js}'),
-    resolve(__dirname, '../../../shared/!(node_modules)/**/*.entity{.ts,.js}'),
+    resolve(
+      __dirname,
+      '../../../shared/!(node_modules)/**/*.sql.entity{.ts,.js}',
+    ),
   ],
   migrations: [
     join(__dirname, '../../migrations/*{.ts,.js}'),
