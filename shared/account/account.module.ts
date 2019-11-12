@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '@fc/shared/user/user.entity';
+import { User } from '@fc/shared/user/user.sql.entity';
 import { FormModule } from '@fc/shared/form/form.module';
 import { AccountController } from './account.controller';
 import { UserModule } from '@fc/shared/user/user.module';

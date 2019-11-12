@@ -3,7 +3,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { UserService } from '@fc/shared/user/user.service';
-import { User } from '@fc/shared/user/user.entity';
+import { User } from '@fc/shared/user/user.sql.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EnrollUserDto } from './dto/enroll-user.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';

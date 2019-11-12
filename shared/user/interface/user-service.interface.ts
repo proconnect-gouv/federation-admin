@@ -1,5 +1,5 @@
 import { DeleteResult, UpdateResult } from 'typeorm';
-import { User } from '../user.entity';
+import { User } from '../user.sql.entity';
 import { ICreateUserDTO } from './create-user-dto.interface';
 import { IEnrollUserDto } from './enroll-user-dto.interface';
 import { IUserPasswordUpdateDTO } from './user-password-update-dto.interface';

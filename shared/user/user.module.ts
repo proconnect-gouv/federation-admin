@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user.entity';
+import { User } from './user.sql.entity';
 import { UserService } from './user.service';
 import * as generatePassword from 'generate-password';
 

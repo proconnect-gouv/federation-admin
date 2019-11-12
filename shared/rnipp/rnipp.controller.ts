@@ -46,6 +46,7 @@ export class RnippController {
         req,
         personRequested as Person,
       );
+
       return {
         person: {
           requested: personRequested,

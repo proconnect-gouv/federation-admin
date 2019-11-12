@@ -5,6 +5,7 @@ import { HttpConfigService } from '@fc/shared/config/http.service';
 import { RnippSerializer } from './rnippSerializer.service';
 import * as xml2js from 'xml2js';
 import { TraceService } from '@fc/shared/logger/trace.service';
+import { CitizenModule } from '@fc/shared/citizen/citizen.module';
 
 const xmlProvider = {
   provide: 'Xml2js',
@@ -16,6 +17,7 @@ const xmlProvider = {
     HttpModule.registerAsync({
       useClass: HttpConfigService,
     }),
+    CitizenModule,
   ],
   controllers: [RnippController],
   providers: [

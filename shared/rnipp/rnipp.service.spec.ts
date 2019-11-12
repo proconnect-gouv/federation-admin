@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { RnippSerializer } from './rnippSerializer.service';
 import { TraceService } from '@fc/shared/logger/trace.service';
+import { CitizenService } from '@fc/shared/citizen/citizen.service';
 
 describe('RnippService (e2e)', () => {
   let rnippService: RnippService;
@@ -24,6 +25,11 @@ describe('RnippService (e2e)', () => {
 
   const loggerMock = {
     supportRnippCall: jest.fn(),
+  };
+
+  const citizenMock = {
+    getCitizenHash: jest.fn(),
+    findByHash: jest.fn(),
   };
 
   const personData = {
@@ -51,6 +57,7 @@ describe('RnippService (e2e)', () => {
         ConfigService,
         RnippSerializer,
         TraceService,
+        CitizenService,
       ],
     })
       .overrideProvider(HttpService)
@@ -61,6 +68,8 @@ describe('RnippService (e2e)', () => {
       .useValue(rnippSerializerMock)
       .overrideProvider(TraceService)
       .useValue(loggerMock)
+      .overrideProvider(CitizenService)
+      .useValue(citizenMock)
       .compile();
 
     rnippService = module.get<RnippService>(RnippService);

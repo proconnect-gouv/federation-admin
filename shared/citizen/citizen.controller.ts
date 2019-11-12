@@ -61,7 +61,12 @@ export class CitizenController {
 
     // If found
     if (citizenAccount) {
-      this.citizenService.setActive(citizenHash, citizenIdentity.active);
+      this.citizenService.setActive(
+        citizenHash,
+        citizenIdentity.active,
+        citizenIdentity.supportId,
+        req.user,
+      );
       return res.json({
         active: citizenIdentity.active,
         lastConnection: this.getLastConnection(citizenAccount),
@@ -71,6 +76,7 @@ export class CitizenController {
     // Else
     this.citizenService.createBlockedCitizen(
       citizenIdentity as CitizenIdentityDTO,
+      req.user,
     );
     return res.json({ active: false, lastConnection: null });
   }

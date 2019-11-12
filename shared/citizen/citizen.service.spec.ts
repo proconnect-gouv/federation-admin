@@ -3,9 +3,10 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { CitizenService } from './citizen.service';
-import { Citizen } from './citizen.entity';
+import { Citizen } from './citizen.mongodb.entity';
 import { ConfigService } from 'nestjs-config';
 import * as crypto from 'crypto';
+import { TraceService } from '@fc/shared/logger/trace.service';
 
 describe('CitizenService', () => {
   let module: TestingModule;
@@ -27,15 +28,27 @@ describe('CitizenService', () => {
     useValue: crypto,
   };
 
+  const loggerProvider = {
+    supportUserAcountStatus: jest.fn(),
+  };
+
+  const LogActions = {
+    ACTIVATE_ACCOUNT: 'activate_account',
+    DESACTIVATE_ACCOUNT: 'desactivate_account',
+    CREATE_BLOCKED_ACCOUNT: 'create_blocked_account',
+  };
+
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [TypeOrmModule.forFeature([Citizen], 'fc-mongo')],
-      providers: [CitizenService, Repository, cryptoProvider],
+      providers: [CitizenService, Repository, cryptoProvider, TraceService],
     })
       .overrideProvider(getRepositoryToken(Citizen, 'fc-mongo'))
       .useValue(citizenRepository)
       .overrideProvider(ConfigService)
       .useValue(configServiceMock)
+      .overrideProvider(TraceService)
+      .useValue(loggerProvider)
       .compile();
 
     citizenService = await module.get<CitizenService>(CitizenService);
@@ -64,6 +77,7 @@ describe('CitizenService', () => {
         gender: 'gender',
         birthPlace: 99,
         birthCountry: 99,
+        supportId: '1234567891011121',
       };
       // When
       const result = citizenService.getCitizenHash(citizen);
@@ -80,6 +94,7 @@ describe('CitizenService', () => {
         gender: 'gender',
         birthPlace: 99,
         birthCountry: 99,
+        supportId: '1234567891011121',
       };
       // When
       const result = citizenService.getCitizenHash(citizen);
@@ -89,10 +104,14 @@ describe('CitizenService', () => {
   });
 
   describe('setActive', () => {
-    it('Should update existing citizen', async () => {
+    it('Should desactivate existing citizen', async () => {
       // Given
       const hash = 'foo';
       const active = false;
+      const supportId = '1234567891011121';
+      const user = {
+        username: 'Toto',
+      };
       citizenRepository.findOne.mockResolvedValueOnce({
         id: 'foobar',
         identityHash: hash,
@@ -100,17 +119,61 @@ describe('CitizenService', () => {
         updatedAt: '2019-01-03T12:34:56.000Z',
       });
       // When
-      await citizenService.setActive(hash, active);
+      await citizenService.setActive(hash, active, supportId, user);
       // Then
       expect(citizenRepository.findOne).toHaveBeenCalledTimes(1);
       expect(citizenRepository.findOne).toHaveBeenCalledWith({
         identityHash: hash,
       });
+      expect(loggerProvider.supportUserAcountStatus).toHaveBeenCalledTimes(1);
+      expect(loggerProvider.supportUserAcountStatus).toHaveBeenCalledWith({
+        action: LogActions.DESACTIVATE_ACCOUNT,
+        user: user.username,
+        motif: `ticket support : ${supportId}`,
+        accountId: 'foobar',
+      });
       expect(citizenRepository.save).toHaveBeenCalledTimes(1);
       expect(citizenRepository.save).toHaveBeenCalledWith({
         id: 'foobar',
         identityHash: hash,
+        active,
+        updatedAt: '2019-01-03T12:34:56.000Z',
+      });
+    });
+    it('Should activate existing citizen', async () => {
+      // Given
+      const hash = 'foo';
+      const active = true;
+      const supportId = '1234567891011121';
+      const user = {
+        username: 'Toto',
+      };
+
+      citizenRepository.findOne.mockResolvedValueOnce({
+        id: 'foobar',
+        identityHash: hash,
         active: false,
+        updatedAt: '2019-01-03T12:34:56.000Z',
+      });
+      // When
+      await citizenService.setActive(hash, active, supportId, user);
+      // Then
+      expect(citizenRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(citizenRepository.findOne).toHaveBeenCalledWith({
+        identityHash: hash,
+      });
+      expect(loggerProvider.supportUserAcountStatus).toHaveBeenCalledTimes(1);
+      expect(loggerProvider.supportUserAcountStatus).toHaveBeenCalledWith({
+        action: LogActions.ACTIVATE_ACCOUNT,
+        user: user.username,
+        motif: `ticket support : ${supportId}`,
+        accountId: 'foobar',
+      });
+      expect(citizenRepository.save).toHaveBeenCalledTimes(1);
+      expect(citizenRepository.save).toHaveBeenCalledWith({
+        id: 'foobar',
+        identityHash: hash,
+        active,
         updatedAt: '2019-01-03T12:34:56.000Z',
       });
     });
@@ -126,14 +189,24 @@ describe('CitizenService', () => {
         gender: 'gender',
         birthPlace: 99,
         birthCountry: 99,
+        supportId: '1234567891011121',
       };
       const identityHash = 'myHash';
       const id = 'myLegacyId';
+      const req = {
+        user: { username: 'Toto' },
+      };
       citizenService.getCitizenHash = () => identityHash;
       citizenService.generateLegacyAccountId = () => id;
       // When
-      await citizenService.createBlockedCitizen(citizen);
+      await citizenService.createBlockedCitizen(citizen, req.user);
       // Then
+      expect(loggerProvider.supportUserAcountStatus).toHaveBeenCalledWith({
+        action: LogActions.CREATE_BLOCKED_ACCOUNT,
+        user: req.user.username,
+        motif: `ticket support : ${citizen.supportId}`,
+        accountId: 'myLegacyId',
+      });
       expect(citizenRepository.save).toHaveBeenCalledTimes(1);
       expect(citizenRepository.save).toHaveBeenCalledWith({
         id,
