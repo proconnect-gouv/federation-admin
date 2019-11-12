@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  HttpService,
-  Logger,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, HttpService, Logger } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { Person } from './interface/person.interface';
 import { RnippSerializer } from './rnippSerializer.service';
@@ -15,7 +9,6 @@ import { TraceService } from '@fc/shared/logger/trace.service';
 import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
 import { CitizenService } from '@fc/shared/citizen/citizen.service';
 import { CitizenIdentityDTO } from '@fc/shared/citizen/dto/citizen-identity.dto';
-import { CitizenAccountDTO } from 'citizen/dto/citizen-account.dto';
 
 @Injectable()
 export class RnippService {
