@@ -5,6 +5,7 @@ import { LoggerService } from './logger.service';
 
 export interface ITraceService {
   supportRnippCall(log: ITrace): void;
+  supportUserAcountStatus(log: ITrace): void;
 }
 
 @Injectable()
@@ -14,6 +15,10 @@ export class TraceService extends LoggerService implements ITraceService {
   }
 
   public supportRnippCall(log: ITrace) {
+    this.info(log);
+  }
+
+  public supportUserAcountStatus(log: ITrace) {
     this.info(log);
   }
 }

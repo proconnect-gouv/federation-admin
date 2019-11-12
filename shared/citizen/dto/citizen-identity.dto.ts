@@ -22,6 +22,9 @@ export class CitizenIdentityDTO {
   @IsString()
   gender: string;
 
+  @IsString()
+  supportId: string;
+
   @IsNumber()
   @Type(
     /* istanbul ignore next */

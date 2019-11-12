@@ -41,6 +41,7 @@ describe('CitizenController', () => {
         gender: 'gender',
         birthPlace: 99,
         birthCountry: 99,
+        supportId: '1234567891234567',
       };
 
       citizenService.getCitizenHash.mockReturnValueOnce('foo');
@@ -70,6 +71,7 @@ describe('CitizenController', () => {
         gender: 'gender',
         birthPlace: 99,
         birthCountry: 99,
+        supportId: '1234567891234567',
       };
       citizenService.getCitizenHash.mockReturnValueOnce('foo');
       citizenService.findByHash.mockResolvedValueOnce(false);
@@ -92,6 +94,7 @@ describe('CitizenController', () => {
         birthPlace: 99,
         birthCountry: 99,
         active: false,
+        supportId: '1234567891234567',
       };
       const hash = 'myCitizenHash';
       citizenService.getCitizenHash.mockReturnValueOnce(hash);
@@ -101,7 +104,12 @@ describe('CitizenController', () => {
         active: true,
         updatedAt: '2019-01-03T12:34:56.000Z',
       });
-      const req = { totp: 'valid' };
+      const req = {
+        totp: 'valid',
+        user: {
+          username: 'Toto',
+        },
+      };
       const res = { json: jest.fn() };
       // When
       await citizenController.patchCitizenStatus(body, req, res);
@@ -118,7 +126,12 @@ describe('CitizenController', () => {
       expect(citizenService.findByHash).toHaveBeenCalledWith(hash);
 
       expect(citizenService.setActive).toHaveBeenCalledTimes(1);
-      expect(citizenService.setActive).toHaveBeenCalledWith(hash, false);
+      expect(citizenService.setActive).toHaveBeenCalledWith(
+        hash,
+        false,
+        body.supportId,
+        req.user,
+      );
     });
 
     it('Should create a new blocked citizen', async () => {
@@ -131,11 +144,12 @@ describe('CitizenController', () => {
         birthPlace: 99,
         birthCountry: 99,
         active: false,
+        supportId: '1234567891234567',
       };
       const hash = 'myCitizenHash';
       citizenService.getCitizenHash.mockReturnValueOnce(hash);
       citizenService.findByHash.mockResolvedValue(false);
-      const req = { totp: 'valid' };
+      const req = { totp: 'valid', user: { username: 'Toto' } };
       const res = { json: jest.fn() };
       // When
       await citizenController.patchCitizenStatus(body, req, res);
@@ -153,7 +167,10 @@ describe('CitizenController', () => {
       expect(citizenService.findByHash).toHaveBeenCalledWith(hash);
 
       expect(citizenService.createBlockedCitizen).toHaveBeenCalledTimes(1);
-      expect(citizenService.createBlockedCitizen).toHaveBeenCalledWith(body);
+      expect(citizenService.createBlockedCitizen).toHaveBeenCalledWith(
+        body,
+        req.user,
+      );
     });
 
     it('Should return an error on missing TOTP', async () => {
@@ -166,6 +183,7 @@ describe('CitizenController', () => {
         birthPlace: 99,
         birthCountry: 99,
         active: false,
+        supportId: '1234567891234567',
       };
       const req = {};
       const res = { status: jest.fn(), send: jest.fn() };
@@ -190,6 +208,7 @@ describe('CitizenController', () => {
         birthPlace: 99,
         birthCountry: 99,
         active: false,
+        supportId: '1234567891234567',
       };
       const req = { totp: 'invalid' };
       const res = { status: jest.fn(), send: jest.fn() };

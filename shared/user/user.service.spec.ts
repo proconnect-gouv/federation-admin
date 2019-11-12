@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user.entity';
+import { User } from './user.sql.entity';
 import { UserService } from './user.service';
 import { UserRole } from './roles.enum';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';

@@ -20,7 +20,7 @@ import { UserService } from '@fc/shared/user/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EnrollUserDto } from './dto/enroll-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@fc/shared/user/user.entity';
+import { User } from '@fc/shared/user/user.sql.entity';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { FormErrorsInterceptor } from '@fc/shared/form/interceptor/form-errors.interceptor';
 import { AccountService } from './account.service';

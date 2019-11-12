@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult, UpdateResult } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './user.sql.entity';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';

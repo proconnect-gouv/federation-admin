@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@fc/shared/user/user.entity';
+import { User } from '@fc/shared/user/user.sql.entity';
 import { PaginationService } from '@fc/shared/pagination/pagination.service';
 
 @Injectable()

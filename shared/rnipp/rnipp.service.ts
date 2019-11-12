@@ -1,4 +1,10 @@
-import { Injectable, HttpService, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  HttpService,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { Person } from './interface/person.interface';
 import { RnippSerializer } from './rnippSerializer.service';
@@ -7,6 +13,9 @@ import { PersonFromRnipp } from './interface/personFromRnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { TraceService } from '@fc/shared/logger/trace.service';
 import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
+import { CitizenService } from '@fc/shared/citizen/citizen.service';
+import { CitizenIdentityDTO } from '@fc/shared/citizen/dto/citizen-identity.dto';
+import { CitizenAccountDTO } from 'citizen/dto/citizen-account.dto';
 
 @Injectable()
 export class RnippService {
@@ -15,16 +24,19 @@ export class RnippService {
     private readonly http: HttpService,
     private readonly serializer: RnippSerializer,
     private readonly logger: TraceService,
+    private readonly citizen: CitizenService,
   ) {}
 
   public async getJsonFromRnippApi(
     req: any,
     personData: Person,
   ): Promise<PersonFromRnipp | any> {
+    const accountId = await this.getRnippRequestedUserId(personData);
     this.logger.supportRnippCall({
       action: LogActions.SUPPORT_RNIPP_CALL,
       user: req.user.username,
       motif: `ticket support : ${personData.supportId}`,
+      accountId,
     });
     Logger.debug(`Will get xml`);
 
@@ -87,5 +99,50 @@ export class RnippService {
     );
 
     return `${protocol}://${hostname}${baseUrl}&${query}`;
+  }
+
+  private async getRnippRequestedUserId(personData: Person): Promise<string> {
+    let citizenAccount;
+    const userToFind = RnippService.convertPersonToCitizen(personData);
+    const userHash = await this.citizen.getCitizenHash(userToFind);
+
+    try {
+      citizenAccount = await this.citizen.findByHash(userHash);
+      if (citizenAccount === undefined) {
+        return 'Inconnu.e de Franceconnect.';
+      }
+    } catch (error) {
+      return `Une erreur est survenue lors de la récupération de l'utilisateur`;
+    }
+    return citizenAccount.id;
+  }
+
+  private static convertPersonToCitizen(
+    personData: Person,
+  ): CitizenIdentityDTO {
+    if (!personData) {
+      return null;
+    }
+    const {
+      gender = '',
+      familyName = '',
+      givenName = '',
+      preferredUsername = '',
+      birthdate,
+      birthCountry,
+      birthPlace,
+    } = personData;
+
+    let bd = new Date(birthdate);
+    bd = bd instanceof Date && !isNaN(bd as any) ? bd : ('' as any);
+    return {
+      gender,
+      familyName,
+      givenName,
+      preferredUsername,
+      birthdate: bd,
+      birthCountry: parseInt(birthCountry, 10) || 0,
+      birthPlace: parseInt(birthPlace, 10) || 0,
+    } as any;
   }
 }

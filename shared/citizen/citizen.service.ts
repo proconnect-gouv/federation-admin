@@ -1,10 +1,12 @@
 import { v4 as uuid } from 'uuid';
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { Citizen } from './citizen.entity';
+import { Citizen } from './citizen.mongodb.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CitizenIdentityDTO } from './dto/citizen-identity.dto';
 import { CitizenAccountDTO } from './dto/citizen-account.dto';
+import { TraceService } from '@fc/shared/logger/trace.service';
+import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
 
 @Injectable()
 export class CitizenService {
@@ -12,6 +14,7 @@ export class CitizenService {
     @InjectRepository(Citizen, 'fc-mongo')
     private readonly citizenRepository: Repository<Citizen>,
     @Inject('cryptoProvider') private readonly crypto,
+    private readonly logger: TraceService,
   ) {}
 
   async findByHash(hash: string): Promise<Citizen> {
@@ -20,12 +23,23 @@ export class CitizenService {
     });
   }
 
-  async setActive(hash, active) {
+  async setActive(hash, active, supportId, user) {
     const citizen: Citizen = await this.findByHash(hash);
+    const accountId =
+      citizen && citizen.id ? citizen.id : 'Inconnu.e de Franceconnect.';
+    this.logger.supportUserAcountStatus({
+      action: !active
+        ? LogActions.DESACTIVATE_ACCOUNT
+        : LogActions.ACTIVATE_ACCOUNT,
+      user: user.username,
+      motif: `ticket support : ${supportId}`,
+      accountId,
+    });
+
     return this.citizenRepository.save({ ...citizen, active });
   }
 
-  async createBlockedCitizen(citizenIdentity: CitizenIdentityDTO) {
+  async createBlockedCitizen(citizenIdentity: CitizenIdentityDTO, user) {
     const identityHash = this.getCitizenHash(citizenIdentity);
     const id = this.generateLegacyAccountId();
     const active = false;
@@ -35,6 +49,12 @@ export class CitizenService {
       active,
       identityHash,
     };
+    this.logger.supportUserAcountStatus({
+      action: LogActions.CREATE_BLOCKED_ACCOUNT,
+      user: user.username,
+      motif: `ticket support : ${citizenIdentity.supportId}`,
+      accountId: newCitizen.id,
+    });
 
     return this.citizenRepository.save(newCitizen);
   }
