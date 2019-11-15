@@ -2,15 +2,15 @@
   "chromeWebSecurity": false,
   "videoUploadOnPasses": false,
   "viewportHeight": 1800,
-  "viewportWidth": 1000,
+  "viewportWidth": 1400,
   "pageLoadTimeout": 30000,
+  "baseUrl": "https://support.docker.dev-franceconnect.fr",
   "env": {
-    "BASE_URL": "https://support.docker.dev-franceconnect.fr",
     "APP_NAME": "support",
     "APP_HOME_ROLE_ADMIN": "https://support.docker.dev-franceconnect.fr/account",
     "APP_HOME_ROLE_OPERATOR": "https://support.docker.dev-franceconnect.fr/rnipp",
     "APP_HOME_ROLE_SECURITY": "https://support.docker.dev-franceconnect.fr/account",
-    "APP_FORBIDDEN_PAGE": "https://support.docker.dev-franceconnect.fr/rnipp"
+    "APP_FORBIDDEN_PAGE": "https://support.docker.dev-franceconnect.fr/rnipp",
+    "TOTP_WINDOW": "loose"
   }
 }
-

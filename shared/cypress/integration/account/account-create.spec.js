@@ -2,25 +2,24 @@ import {
   USER_ADMIN,
   USER_PASS,
   LIMIT_PAGE,
-} from '../../../../shared/cypress/integration/util/constants.util';
-import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
-import { createUserAccount, createUserAndLogWith } from '../../../../shared/cypress/integration/account/account-create.util';
-import { deleteUser } from '../../../../shared/cypress/integration/account/account-delete.util';
-import { resetPostgres } from '../../../../shared/cypress/integration/util/prepare.util';
+} from '../../../../shared/cypress/support/constants';
 
-function logoutAndDeleteUser (username, basicConfiguration) {
-  if(basicConfiguration.redirect) {
-    cy.visit(`${Cypress.env('BASE_URL')}/account`);
-    logout(username);
+import { createUserAccount, createUserAndLogWith } from './account-create.util';
+import { deleteUser } from './account-delete.util';
+
+function logoutAndDeleteUser(username, basicConfiguration) {
+  if (basicConfiguration.redirect) {
+    cy.visit(`/account`);
+    cy.logout(username);
   }
-  login(USER_ADMIN, USER_PASS);
-  cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+  cy.login(USER_ADMIN, USER_PASS);
+  cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   deleteUser(username, basicConfiguration);
-  logout(USER_ADMIN);
+  cy.logout(USER_ADMIN);
 }
 
 describe('Account', () => {
-  before(resetPostgres);
+  before(() => cy.resetEnv('postgres'));
   describe('Create user', () => {
     const userInfo = {
       username: 'christophe',
@@ -38,144 +37,172 @@ describe('Account', () => {
       submit: true,
       redirect: true,
       totp: true,
+      fast: true,
     };
 
     beforeEach(() => {
-      login(USER_ADMIN, USER_PASS);
+      cy.login(USER_ADMIN, USER_PASS);
     });
 
     it('should be possible for an admin to create a new user with all the roles', () => {
-      createUserAccount(userInfo ,basicConfiguration);
+      createUserAccount(userInfo, basicConfiguration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
-      cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
-        expect(roles).to.have.length(4);
-        const firstRole = roles[0].textContent;
-        const secondRole = roles[1].textContent;
-        const thirdRole = roles[2].textContent;
-        const fourthRole = roles[3].textContent;
-        expect(firstRole).to.equal('Administrateur inactif');
-        expect(secondRole).to.equal('Exploitant inactif');
-        expect(thirdRole).to.equal('Sécurité inactif');
-        expect(fourthRole).to.equal('Nouvel utilisateur');
-      });
+      cy.get(`#${userInfo.username} .roles span`)
+        .should('be.visible')
+        .then(roles => {
+          expect(roles).to.have.length(4);
+          const firstRole = roles[0].textContent;
+          const secondRole = roles[1].textContent;
+          const thirdRole = roles[2].textContent;
+          const fourthRole = roles[3].textContent;
+          expect(firstRole).to.equal('Administrateur inactif');
+          expect(secondRole).to.equal('Exploitant inactif');
+          expect(thirdRole).to.equal('Sécurité inactif');
+          expect(fourthRole).to.equal('Nouvel utilisateur');
+        });
 
       deleteUser(userInfo.username, basicConfiguration);
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
     it('should be possible for an admin to create a new user with only operator role', () => {
-      const configuration = Object.assign({}, basicConfiguration, { adminRole: false, securityRole: false });
-      createUserAccount(userInfo ,configuration);
+      const configuration = Object.assign({}, basicConfiguration, {
+        adminRole: false,
+        securityRole: false,
+      });
+      createUserAccount(userInfo, configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
-      cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
-        expect(roles).to.have.length(2);
-        const firstRole = roles[0].textContent;
-        const secondRole = roles[1].textContent;
-        expect(firstRole).to.equal('Exploitant inactif');
-        expect(secondRole).to.equal('Nouvel utilisateur');
-      });
+      cy.get(`#${userInfo.username} .roles span`)
+        .should('be.visible')
+        .then(roles => {
+          expect(roles).to.have.length(2);
+          const firstRole = roles[0].textContent;
+          const secondRole = roles[1].textContent;
+          expect(firstRole).to.equal('Exploitant inactif');
+          expect(secondRole).to.equal('Nouvel utilisateur');
+        });
 
       deleteUser(userInfo.username, basicConfiguration);
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
     it('should be possible for an admin to create a new user with only admin role', () => {
-      const configuration = Object.assign({}, basicConfiguration, { operatorRole: false, securityRole: false });
-      createUserAccount(userInfo ,configuration);
+      const configuration = Object.assign({}, basicConfiguration, {
+        operatorRole: false,
+        securityRole: false,
+      });
+      createUserAccount(userInfo, configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
-      cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
-        expect(roles).to.have.length(2);
-        const firstRole = roles[0].textContent;
-        const secondRole = roles[1].textContent;
-        expect(firstRole).to.equal('Administrateur inactif');
-        expect(secondRole).to.equal('Nouvel utilisateur');
-      });
+      cy.get(`#${userInfo.username} .roles span`)
+        .should('be.visible')
+        .then(roles => {
+          expect(roles).to.have.length(2);
+          const firstRole = roles[0].textContent;
+          const secondRole = roles[1].textContent;
+          expect(firstRole).to.equal('Administrateur inactif');
+          expect(secondRole).to.equal('Nouvel utilisateur');
+        });
 
       deleteUser(userInfo.username, basicConfiguration);
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
     it('should be possible for an admin to create a new user with only security role', () => {
-      const configuration = Object.assign({}, basicConfiguration, { operatorRole: false, adminRole: false });
-      createUserAccount(userInfo ,configuration);
+      const configuration = Object.assign({}, basicConfiguration, {
+        operatorRole: false,
+        adminRole: false,
+      });
+      createUserAccount(userInfo, configuration);
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
 
-      cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
-        expect(roles).to.have.length(2);
-        const firstRole = roles[0].textContent;
-        const secondRole = roles[1].textContent;
-        expect(firstRole).to.equal('Sécurité inactif');
-        expect(secondRole).to.equal('Nouvel utilisateur');
-      });
+      cy.get(`#${userInfo.username} .roles span`)
+        .should('be.visible')
+        .then(roles => {
+          expect(roles).to.have.length(2);
+          const firstRole = roles[0].textContent;
+          const secondRole = roles[1].textContent;
+          expect(firstRole).to.equal('Sécurité inactif');
+          expect(secondRole).to.equal('Nouvel utilisateur');
+        });
 
       deleteUser(userInfo.username, basicConfiguration);
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
     it('should not be possible for an admin to create a user with an existing username', () => {
-      createUserAccount(userInfo ,basicConfiguration);
-      createUserAccount(userInfo ,basicConfiguration);
+      createUserAccount(userInfo, basicConfiguration);
+      createUserAccount(userInfo, basicConfiguration);
 
-      cy.contains('Le nom d\'utilisateur est déjà utilisé').should('be.visible');
+      cy.contains("Le nom d'utilisateur est déjà utilisé").should('be.visible');
 
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       deleteUser(userInfo.username, basicConfiguration);
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
-    it('shouldn\'t validate the user creation if the csrf token is invalid', () => {
-      const configuration = Object.assign({}, basicConfiguration, { _csrf: false });
-      createUserAccount(userInfo ,configuration);
+    it("shouldn't validate the user creation if the csrf token is invalid", () => {
+      const configuration = Object.assign({}, basicConfiguration, {
+        _csrf: false,
+      });
+      createUserAccount(userInfo, configuration);
 
       cy.contains('Error - 500').should('be.visible');
 
-      cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+      cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('not.be.visible');
-      logout(USER_ADMIN);
+      cy.logout(USER_ADMIN);
     });
 
     describe('First user connection', () => {
       it('should be possible for the new user to update his password, and type his totp token', () => {
-        const configuration = Object.assign({}, basicConfiguration, { redirect: false, password:'S:z,s.xS3', confirmPassword: 'S:z,s.xS3' });
-        cy.contains('Comptes utilisateurs').click();
+        const configuration = Object.assign({}, basicConfiguration, {
+          redirect: false,
+          password: 'S:z,s.xS3',
+          confirmPassword: 'S:z,s.xS3',
+        });
         createUserAndLogWith(userInfo, configuration);
 
-        cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
-        cy.get(`#${userInfo.username} .roles span`).should('be.visible').then(roles => {
-          expect(roles).to.have.length(2);
-          const firstRole = roles[0].textContent;
-          const secondRole = roles[1].textContent;
-          expect(firstRole).to.equal('Administrateur');
-          expect(secondRole).to.equal('Exploitant');
-        });
+        cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+        cy.get(`#${userInfo.username} .roles span`)
+          .should('be.visible')
+          .then(roles => {
+            expect(roles).to.have.length(2);
+            const firstRole = roles[0].textContent;
+            const secondRole = roles[1].textContent;
+            expect(firstRole).to.equal('Administrateur');
+            expect(secondRole).to.equal('Exploitant');
+          });
 
         logoutAndDeleteUser(userInfo.username, configuration);
-        });
+      });
 
       it('Should not be possible for the new user to update his password if he is not respecting password format', () => {
-        const configuration = Object.assign({}, basicConfiguration, { redirect: false });
+        const configuration = Object.assign({}, basicConfiguration, {
+          redirect: false,
+          typeEvent: true,
+        });
         const user = Object.assign({}, userInfo, { password: 'MyNewPassword' });
         cy.contains('Comptes utilisateurs').click();
-        createUserAndLogWith(user, basicConfiguration);
+        createUserAndLogWith(user, configuration);
 
-        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
+        cy.url().should('contain', `/account/enrollment`);
 
         cy.get('#password + div > span').then(checkPassword => {
           // use jquery's map to grab all of their classes
           // jquery's map returns a new jquery object
           const classes = checkPassword.map((i, el) => {
-            return Cypress.$(el).attr('class')
+            return Cypress.$(el).attr('class');
           });
 
           // call classes.get() to make this a plain array
@@ -184,35 +211,44 @@ describe('Account', () => {
             'fa valid-password',
             'fa',
             'fa',
-            'fa valid-password'
+            'fa valid-password',
           ]);
-
         });
 
         logoutAndDeleteUser(userInfo.username, configuration);
       });
 
-
       it('Should not be possible for the new user to update his password if he is not respecting confirm password format', () => {
-        const configuration = Object.assign({}, basicConfiguration, { redirect: false, submit: false });
-        const user = Object.assign({}, userInfo, { confirmPassword: 'fsfsdfdsf' });
+        const configuration = Object.assign({}, basicConfiguration, {
+          redirect: false,
+          submit: false,
+          typeEvent: true,
+        });
+        const user = Object.assign({}, userInfo, {
+          confirmPassword: 'fsfsdfdsf',
+        });
 
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(user, configuration);
 
-        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
-        cy.contains('Les mots de passe ne sont pas les mêmes.').should('be.visible');
+        cy.url().should('contain', `/account/enrollment`);
+        cy.contains('Les mots de passe ne sont pas les mêmes.').should(
+          'be.visible',
+        );
 
         logoutAndDeleteUser(userInfo.username, configuration);
       });
 
       it('Should not be possible for the new user to update his password if totp is not valid', () => {
-        const configuration = Object.assign({}, basicConfiguration, { redirect: false, totp: false });
+        const configuration = Object.assign({}, basicConfiguration, {
+          redirect: false,
+          totp: false,
+        });
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(userInfo, configuration);
 
-        cy.url().should('eq', `${Cypress.env('BASE_URL')}/account/enrollment`);
-        cy.contains('Le TOTP saisi n\'est pas valide').should('be.visible');
+        cy.url().should('contain', `/account/enrollment`);
+        cy.contains("Le TOTP saisi n'est pas valide").should('be.visible');
 
         logoutAndDeleteUser(userInfo.username, configuration);
       });

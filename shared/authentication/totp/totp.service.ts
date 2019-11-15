@@ -7,9 +7,7 @@ import { Injectable } from '@nestjs/common';
 export class TotpService {
   public constructor(@InjectConfig() private readonly config) {
     // setting
-    otplib.authenticator.options = {
-      algorithm: this.config.get('totp').totpAlgo,
-    };
+    otplib.authenticator.options = this.config.get('totp');
   }
 
   generateTotpSecret() {

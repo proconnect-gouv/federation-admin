@@ -1,8 +1,7 @@
 import {
   USER_ONLY_ADMIN,
-  USER_PASS
-} from '../../../../shared/cypress/integration/util/constants.util';
-import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
+  USER_PASS,
+} from '../../../../shared/cypress/support/constants';
 
 describe('Forbidden - error 403', () => {
   const option = {
@@ -12,7 +11,7 @@ describe('Forbidden - error 403', () => {
   };
 
   it('Should not possible to see content if we are not right roles', () => {
-    login(USER_ONLY_ADMIN, USER_PASS);
+    cy.login(USER_ONLY_ADMIN, USER_PASS);
 
     cy.visit(option);
     cy.url().should('eq', `${Cypress.env('APP_FORBIDDEN_PAGE')}`);
@@ -20,13 +19,11 @@ describe('Forbidden - error 403', () => {
     cy.get('nav').should('be.visible');
     cy.contains('Accès refusé').should('be.visible');
 
-    cy
-      .request(option)
-      .then((response) => {
-        expect(response.status).to.eq(403);
-        expect(response.statusText).to.eq('Forbidden');
-      });
+    cy.request(option).then(response => {
+      expect(response.status).to.eq(403);
+      expect(response.statusText).to.eq('Forbidden');
+    });
 
-    logout(USER_ONLY_ADMIN);
+    cy.logout(USER_ONLY_ADMIN);
   });
 });
