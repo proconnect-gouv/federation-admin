@@ -1,12 +1,13 @@
-import { getTotp } from '../../../../shared/cypress/integration/util/totp.util';
-import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../../../shared/cypress/integration/util/constants.util';
-import { login, logout } from '../../../../shared/cypress/integration/util/login.util';
+import {
+  USER_ADMIN,
+  USER_PASS,
+  LIMIT_PAGE,
+} from '../../../../shared/cypress/support/constants';
 import { createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
-import { resetPostgres } from '../../../../shared/cypress/integration/util/prepare.util';
 
 describe('Update account', () => {
-  before(resetPostgres);
+  before(() => cy.resetEnv('postgres'));
   const userInfo = {
     username: 'thomas',
     email: 'thomas@email.com',
@@ -21,34 +22,35 @@ describe('Update account', () => {
     submit: true,
     confirmSuppression: true,
     totp: true,
+    fast: true,
   };
   beforeEach(() => {
-    login(USER_ADMIN, USER_PASS);
+    cy.login(USER_ADMIN, USER_PASS);
     createUserAndLogWith(userInfo, basicConfiguration);
   });
 
   afterEach(() => {
-    cy.visit(`${Cypress.env('BASE_URL')}/account`);
-    logout(userInfo.username);
+    cy.visit(`/account`);
+    cy.logout(userInfo.username);
 
-    login(USER_ADMIN, USER_PASS);
-    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.login(USER_ADMIN, USER_PASS);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
     deleteUser(userInfo.username, basicConfiguration);
-    logout(USER_ADMIN);
+    cy.logout(USER_ADMIN);
   });
 
   it('should be possible for a  user to update his password', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.get('#currentPassword').type('MyNewPassword10!!');
-    cy.get('#password').type('MyPass10!!');
-    cy.get('#confirm-password').type('MyPass10!!');
+    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#password', 'MyPass10!!');
+    cy.formType('#confirm-password', 'MyPass10!!');
 
     cy.get('#secret > td').then(async secret => {
-      const token = await getTotp(secret[0].textContent);
-      cy.get('#_totp').type(token);
+      await cy.totp(basicConfiguration, secret[0].textContent);
     });
+
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains('Le mot de passe a bien été mis à jour !');
   });
@@ -57,62 +59,65 @@ describe('Update account', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.get('#currentPassword').type('badPassword!!');
-    cy.get('#password').type('MyPass10!!');
-    cy.get('#confirm-password').type('MyPass10!!');
-    cy.get('#secret > td').then(async secret => {
-      const token = await getTotp(secret[0].textContent);
-      cy.get('#_totp').type(token);
-    });
+    cy.formType('#currentPassword', 'badPassword!!');
+    cy.formType('#password', 'MyPass10!!');
+    cy.formType('#confirm-password', 'MyPass10!!');
+
+    cy.get('#secret > td').then(secret =>
+      cy.totp(basicConfiguration, secret[0].textContent),
+    );
+
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains(
       'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
     );
-    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad new password to update his password', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.get('#currentPassword').type('MyNewPassword10!!');
-    cy.get('#password').type('badone!!');
+    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#password', 'badone!!', { typeEvent: true });
     cy.get('#password').should('have.class', 'is-invalid');
-    cy.get('#confirm-password').type('badone!!');
-    cy.get('#secret > td').then(async secret => {
-      const token = await getTotp(secret[0].textContent);
-      cy.get('#_totp').type(token);
-    });
+    cy.formType('#confirm-password', 'badone!!');
+
+    cy.get('#secret > td').then(secret =>
+      cy.totp(basicConfiguration, secret[0].textContent),
+    );
+
     cy.contains('Mettre à jour mon mot de passe').click();
-    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad password confirmation to update his password', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.get('#currentPassword').type('MyNewPassword10!!');
-    cy.get('#password').type('MyPass10!!');
-    cy.get('#confirm-password').type('badconfirmation');
+    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#password', 'MyPass10!!');
+    cy.formType('#confirm-password', 'badconfirmation', { typeEvent: true });
     cy.get('#confirm-password').should('have.class', 'is-invalid');
-    cy.get('#secret > td').then(async secret => {
-      const token = await getTotp(secret[0].textContent);
-      cy.get('#_totp').type(token);
-    });
+
+    cy.get('#secret > td').then(secret =>
+      cy.totp(basicConfiguration, secret[0].textContent),
+    );
+
     cy.contains('Mettre à jour mon mot de passe').click();
-    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
 
   it('should not be possible for a user entering a bad totp to update his password', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.get('#currentPassword').type('MyNewPassword10!!');
-    cy.get('#password').type('MyPass10!!');
-    cy.get('#confirm-password').type('MyPass10!!');
-    cy.get('#_totp').type(123456);
+    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#password', 'MyPass10!!');
+    cy.formType('#confirm-password', 'MyPass10!!');
+    cy.formType('#_totp', 123456);
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains("Le TOTP saisi n'est pas valide");
-    cy.visit(`${Cypress.env('BASE_URL')}/account?page=1&limit=${LIMIT_PAGE}`);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
 });

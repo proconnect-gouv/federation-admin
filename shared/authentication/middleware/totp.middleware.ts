@@ -7,9 +7,7 @@ export class TotpMiddleware implements NestMiddleware {
     @Inject('otplib') private readonly otplibService,
   ) {
     // setting
-    otplibService.authenticator.options = {
-      algorithm: this.config.get('totp').totpAlgo,
-    };
+    // otplibService.authenticator.options = this.config.get('totp');
   }
 
   use(req, res, next: () => void): any {

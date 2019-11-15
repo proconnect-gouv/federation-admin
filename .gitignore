@@ -2,8 +2,6 @@
 node_modules
 
 # Cypress
-*/cypress/support
 */cypress/plugins
-*/cypress/screeshots
+*/cypress/screenshots
 */cypress/videos
-
