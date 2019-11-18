@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { RnippSerializer } from './rnippSerializer.service';
 import { TraceService } from '@fc/shared/logger/trace.service';
-import { CitizenService } from '@fc/shared/citizen/citizen.service';
+import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 
 describe('RnippService (e2e)', () => {
   let rnippService: RnippService;
@@ -57,7 +57,7 @@ describe('RnippService (e2e)', () => {
         ConfigService,
         RnippSerializer,
         TraceService,
-        CitizenService,
+        CitizenServiceBase,
       ],
     })
       .overrideProvider(HttpService)
@@ -68,7 +68,7 @@ describe('RnippService (e2e)', () => {
       .useValue(rnippSerializerMock)
       .overrideProvider(TraceService)
       .useValue(loggerMock)
-      .overrideProvider(CitizenService)
+      .overrideProvider(CitizenServiceBase)
       .useValue(citizenMock)
       .compile();
 

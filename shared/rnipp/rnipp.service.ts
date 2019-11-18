@@ -7,7 +7,7 @@ import { PersonFromRnipp } from './interface/personFromRnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { TraceService } from '@fc/shared/logger/trace.service';
 import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
-import { CitizenService } from '@fc/shared/citizen/citizen.service';
+import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { CitizenIdentityDTO } from '@fc/shared/citizen/dto/citizen-identity.dto';
 
 @Injectable()
@@ -17,19 +17,19 @@ export class RnippService {
     private readonly http: HttpService,
     private readonly serializer: RnippSerializer,
     private readonly logger: TraceService,
-    private readonly citizen: CitizenService,
+    private readonly citizen: CitizenServiceBase,
   ) {}
 
   public async getJsonFromRnippApi(
     req: any,
     personData: Person,
   ): Promise<PersonFromRnipp | any> {
-    const accountId = await this.getRnippRequestedUserId(personData);
+    const identityHash = await this.getRnippRequestedUserHash(personData);
     this.logger.supportRnippCall({
       action: LogActions.SUPPORT_RNIPP_CALL,
       user: req.user.username,
       motif: `ticket support : ${personData.supportId}`,
-      accountId,
+      identityHash,
     });
     Logger.debug(`Will get xml`);
 
@@ -94,20 +94,9 @@ export class RnippService {
     return `${protocol}://${hostname}${baseUrl}&${query}`;
   }
 
-  private async getRnippRequestedUserId(personData: Person): Promise<string> {
-    let citizenAccount;
+  private getRnippRequestedUserHash(personData: Person): string {
     const userToFind = RnippService.convertPersonToCitizen(personData);
-    const userHash = await this.citizen.getCitizenHash(userToFind);
-
-    try {
-      citizenAccount = await this.citizen.findByHash(userHash);
-      if (citizenAccount === undefined) {
-        return 'Inconnu.e de Franceconnect.';
-      }
-    } catch (error) {
-      return `Une erreur est survenue lors de la récupération de l'utilisateur`;
-    }
-    return citizenAccount.id;
+    return this.citizen.getCitizenHash(userToFind);
   }
 
   private static convertPersonToCitizen(
