@@ -5,7 +5,13 @@ import { HttpConfigService } from '@fc/shared/config/http.service';
 import { RnippSerializer } from './rnippSerializer.service';
 import * as xml2js from 'xml2js';
 import { TraceService } from '@fc/shared/logger/trace.service';
-import { CitizenModule } from '@fc/shared/citizen/citizen.module';
+import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
+import * as crypto from 'crypto';
+
+const cryptoProvider = {
+  provide: 'cryptoProvider',
+  useValue: crypto,
+};
 
 const xmlProvider = {
   provide: 'Xml2js',
@@ -17,7 +23,6 @@ const xmlProvider = {
     HttpModule.registerAsync({
       useClass: HttpConfigService,
     }),
-    CitizenModule,
   ],
   controllers: [RnippController],
   providers: [
@@ -26,6 +31,8 @@ const xmlProvider = {
     RnippSerializer,
     xmlProvider,
     TraceService,
+    cryptoProvider,
+    CitizenServiceBase,
   ],
 })
 export class RnippModule {}

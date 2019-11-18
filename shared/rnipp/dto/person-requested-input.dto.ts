@@ -6,6 +6,7 @@ import {
   ValidationOptions,
   ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 const NAME_REGEX = /^[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*$/;
 
@@ -16,6 +17,7 @@ export class PersonRequestedDTO {
 
   @Matches(NAME_REGEX)
   @IsString()
+  @Transform(value => typeof value === 'string' && value.toUpperCase())
   readonly familyName: string;
 
   @IsOptional()
