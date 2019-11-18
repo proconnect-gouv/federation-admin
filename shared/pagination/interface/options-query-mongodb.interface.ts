@@ -3,4 +3,6 @@ export interface IOptions {
   page?: number;
   limit?: number;
   route?: string;
+  action?: string;
+  defaultLimit: number;
 }
