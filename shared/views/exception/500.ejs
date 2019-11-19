@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="<%= APP_ROOT %>/favicon.ico" />
-    <script src="<%= APP_ROOT %>/main.js"></script>
-    <link rel="stylesheet" href="<%= APP_ROOT %>/main.css"/>
-    <title>500 - Erreur</title>
+    <%- include('partials/head.ejs', { title: "500 - Erreur interne" }) %>
   </head>
   <body id="internal-server-exception">
     <% if (locals.CURRENT_USER !== undefined) { %>
