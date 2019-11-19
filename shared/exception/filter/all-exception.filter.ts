@@ -20,9 +20,17 @@ export class AllExceptionFilter implements ExceptionFilter {
       res.locals.CURRENT_USER = req.user;
     }
 
+    /*
+     * this test allow to check if the function
+     * getStatus() or the property status.
+     * the "any" cast is here to replace the lack
+     * of Interface available.
+     */
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
+      typeof (exception as any).getStatus === 'function'
+        ? (exception as any).getStatus()
+        : exception.hasOwnProperty('status')
+        ? (exception as any).status
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     if (
