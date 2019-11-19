@@ -12,6 +12,10 @@ const STOP = moment()
   .format('YYYY-MM-DD');
 
 describe('Metrics visualisation UI', () => {
+  before(() => {
+    cy.resetEnv('elasticStats');
+  });
+
   beforeEach(() => {
     cy.login(USER_OPERATOR, USER_PASS);
   });
@@ -36,10 +40,10 @@ describe('Metrics visualisation UI', () => {
     });
     cy.get('tbody td')
       .first()
-      .should('contain', 'account');
+      .should('contain', 'Comptes');
     cy.get('tbody tr:last td')
       .first()
-      .should('contain', 'account');
+      .should('contain', 'Comptes');
   });
 
   it('displays the metric page with result when another filter key is choosed', () => {
@@ -51,10 +55,10 @@ describe('Metrics visualisation UI', () => {
     });
     cy.get('tbody td')
       .first()
-      .should('contain', 'disabled');
+      .should('contain', 'Comptes désactivés');
     cy.get('tbody tr:last td')
       .first()
-      .should('contain', 'disabled');
+      .should('contain', 'Comptes désactivés');
   });
 
   it('displays the metric page with result only with choosen granularity', () => {
@@ -129,10 +133,7 @@ describe('Metrics visualisation UI', () => {
       'not.be.checked',
     );
 
-    cy.get('#y-dropdown input[id="ydate"]').should('not.be.checked');
-    cy.get('#y-dropdown input[id="ykey"]').should('be.checked');
-    cy.get('#y-dropdown input[id="yrange"]').should('not.be.checked');
-    cy.get('#y-dropdown input[id="yvalue"]').should('not.be.checked');
+    cy.get('input[name="y"]').should('have.value', 'key');
   });
 
   it('UI controls are working', () => {
@@ -154,10 +155,10 @@ describe('Metrics visualisation UI', () => {
     });
     cy.get('tbody td')
       .first()
-      .should('contain', 'account');
+      .should('contain', 'Comptes');
     cy.get('tbody tr:last td')
       .first()
-      .should('contain', 'account');
+      .should('contain', 'Comptes');
 
     cy.get('#visualize-dropdown button').click();
     cy.get('#visualize-dropdown label[for="visualizeline"]').click();

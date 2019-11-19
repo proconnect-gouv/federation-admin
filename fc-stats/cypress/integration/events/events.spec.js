@@ -12,6 +12,10 @@ const STOP = moment()
   .format('YYYY-MM-DD');
 
 describe('Events visualisation UI', () => {
+  before(() => {
+    cy.resetEnv('elasticStats');
+  });
+
   beforeEach(() => {
     cy.login(USER_OPERATOR, USER_PASS);
   });
