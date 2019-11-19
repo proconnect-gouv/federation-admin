@@ -4,7 +4,7 @@ ES_LOG="http://localhost:9200"
 ES_STATS="http://localhost:9200"
 START=$(date --rfc-3339=date -d "-1 year")
 STOP=$(date --rfc-3339=date -d "1 year")
-LOGS_PER_DAY=200
+LOGS_PER_DAY=50
 VARIATION=0.10
 METRIC_GROWTH=0.03
 
@@ -37,13 +37,13 @@ curl -XPUT "$ES_STATS/stats" -d '@Infra/ansible/roles/elasticsearch/files/mappin
 echo ""
 
 echo "Generate logs"
-docker exec -ti fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-logs.js $START $STOP $LOGS_PER_DAY $VARIATION"
+docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-logs.js $START $STOP $LOGS_PER_DAY $VARIATION"
 
 echo "Sleep 2 seconds to give elastic some rest"
 sleep 2
 
 echo "Generate stats"
-docker exec -ti fc_workers_1 bash -c "cd /var/www/app/fc-workers && ./run IndexElasticLogs --start=$START --stop=$STOP"
+docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers && ./run IndexElasticLogs --start=$START --stop=$STOP"
 
 echo "Generate metrics stats"
-docker exec -ti fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-metrics.js $START $STOP $METRIC_GROWTH"
+docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-metrics.js $START $STOP $METRIC_GROWTH"

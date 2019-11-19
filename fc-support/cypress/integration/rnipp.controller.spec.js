@@ -41,7 +41,7 @@ describe('RnippController', () => {
       expect($divs.eq(6)).to.contain('99100');
     });
 
-    cy.formControl(person);
+    cy.formControl({ ...person, familyName: 'JACK' });
   });
 
   it('Should retrieve userinfo with accented character and ç from RNIPP (person who is born in France)', () => {
@@ -72,7 +72,7 @@ describe('RnippController', () => {
       expect($divs.eq(6)).to.contain('99100');
     });
 
-    cy.formControl(person);
+    cy.formControl({ ...person, familyName: 'JACK' });
   });
 
   it('Should retrieve userinfo from RNIPP (person who is not born in France)', () => {
@@ -106,7 +106,7 @@ describe('RnippController', () => {
       expect($divs.eq(6)).to.contain('99350');
     });
 
-    cy.formControl(person);
+    cy.formControl({ ...person, familyName: 'JACK' });
   });
 
   it('Should not send the form if require input are empty', () => {
