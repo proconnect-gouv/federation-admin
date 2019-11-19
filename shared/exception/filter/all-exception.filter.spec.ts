@@ -37,6 +37,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -81,6 +82,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -125,6 +127,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -169,6 +172,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -215,6 +219,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -250,6 +255,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);
@@ -294,6 +300,7 @@ describe('AllExceptionFilter', () => {
       getClass: jest.fn(),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
     };
 
     const exceptionFilter = new AllExceptionFilter(configurationMock);

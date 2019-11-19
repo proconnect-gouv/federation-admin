@@ -23,6 +23,7 @@ describe('DummyApiGuard', () => {
     getClass: jest.fn(),
     getArgs: jest.fn(),
     getArgByIndex: jest.fn(),
+    getType: jest.fn().mockReturnValue('http'),
   });
 
   it('blocks the request if no key given', async () => {

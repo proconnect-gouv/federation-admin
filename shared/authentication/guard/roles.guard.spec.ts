@@ -6,6 +6,8 @@ describe('RolesGuard', () => {
   const createReflector = (roles): Reflector => ({
     get: jest.fn().mockReturnValue(roles),
     getAll: jest.fn(),
+    getAllAndMerge: jest.fn(),
+    getAllAndOverride: jest.fn(),
   });
   const createContext = (user): ExecutionContext => ({
     getHandler: jest.fn(),
@@ -19,6 +21,7 @@ describe('RolesGuard', () => {
     getClass: jest.fn(),
     getArgs: jest.fn(),
     getArgByIndex: jest.fn(),
+    getType: jest.fn().mockReturnValue('http'),
   });
 
   it('lets the request pass if no role is specified', () => {

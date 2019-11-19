@@ -27,6 +27,7 @@ describe('FormErrorsInterceptor', () => {
     getArgs: jest.fn(),
     getArgByIndex: jest.fn(),
     getHandler: jest.fn(),
+    getType: jest.fn(),
   };
   const callHandler = {
     handle: () =>
