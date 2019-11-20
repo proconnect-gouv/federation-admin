@@ -84,14 +84,10 @@ class IndexMongoStats extends Job {
 
       log.info(' * Save document to index');
       await statsService.index(doc, 'stats', 'metric', id);
-    } catch (error) {
-      // Make sure we close connection in case of failure
+    } finally {
+      // Make sure we close connection
       this.db.connections[0].close();
-      // But error are actually handled by runner
-      throw error;
     }
-
-    this.db.connections[0].close();
   }
 }
 
