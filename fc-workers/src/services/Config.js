@@ -37,9 +37,10 @@ class Config {
       FC_DB_USER,
       FC_DB_PASSWORD,
       FC_DB_DATABASE,
+      FC_DB_CONNECT_OPTIONS,
     } = this.config;
 
-    return `mongodb://${FC_DB_USER}:${FC_DB_PASSWORD}@${FC_DB_HOSTS}/${FC_DB_DATABASE}`;
+    return `mongodb://${FC_DB_USER}:${FC_DB_PASSWORD}@${FC_DB_HOSTS}/${FC_DB_DATABASE}${FC_DB_CONNECT_OPTIONS}`;
   }
 }
 
