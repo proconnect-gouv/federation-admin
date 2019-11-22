@@ -1,4 +1,4 @@
-test(fc-support):
+test/support:
   stage: test
   image: node:8
   dependencies:
@@ -6,3 +6,25 @@ test(fc-support):
   script:
     - cd fc-support
     - npm test
+
+run/support:
+  stage: run
+  image: node:8
+  dependencies:
+    - global-install
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: fc-support
+    POSTGRES_USER: runner
+    POSTGRES_PASSWORD: yolo
+    DB_TYPE: postgres
+    DB_DATABASE: fc-support
+    DB_HOST: postgres
+    DB_USER: runner
+    DB_PASSWORD: yolo
+  script:
+    - cd fc-support
+    - yarn migrations:run
+    - yarn fixtures:load
+    - yarn build

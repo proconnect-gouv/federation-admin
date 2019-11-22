@@ -10,24 +10,14 @@ export function resetMongoFC() {
 }
 
 export function resetPostgres() {
-  const commandBase = `docker exec fc_${Cypress.env(
-    'APP_NAME',
-  )}_1 bash -c 'cd /var/www/app/fc-${Cypress.env('APP_NAME')} && `;
+  const command = ` ../shared/cypress/support/db.sh ${Cypress.env('APP_NAME')} apply`;
 
-  const commands = [
-    'yarn typeorm schema:drop',
-    'yarn typeorm migrations:run',
-    'yarn fixtures:load',
-  ];
-
-  commands.forEach(command => {
-    cy.log(`
-      Executing command:
-      > ${commandBase} ${command}'
+  cy.log(`
+    Executing command:
+    > ${command}'
     `);
 
-    cy.exec(`${commandBase} ${command}'`);
-  });
+  cy.exec(command);
 }
 
 export function resetElasticStats() {

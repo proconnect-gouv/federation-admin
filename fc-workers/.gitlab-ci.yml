@@ -1,8 +1,8 @@
-test(fc-workers):
+test/workers:
   stage: test
   image: node:8
   dependencies:
     - global-install
   script:
     - cd fc-workers
-    - npm run test
+    - yarn test

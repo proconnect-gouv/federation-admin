@@ -1,8 +1,30 @@
-test(fc-stats):
+test/stats:
   stage: test
   image: node:8
   dependencies:
     - global-install
   script:
     - cd fc-stats
-    - npm test
+    - yarn test
+
+run/stats:
+  stage: run
+  image: node:8
+  dependencies:
+    - global-install
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: fc-stats
+    POSTGRES_USER: runner
+    POSTGRES_PASSWORD: yolo
+    DB_TYPE: postgres
+    DB_DATABASE: fc-stats
+    DB_HOST: postgres
+    DB_USER: runner
+    DB_PASSWORD: yolo
+  script:
+    - cd fc-stats
+    - yarn migrations:run
+    - yarn fixtures:load
+    - yarn build

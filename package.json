@@ -10,6 +10,7 @@
     "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
   },
   "devDependencies": {
+    "husky": "^4.0.0-beta.5",
     "prettier": "^1.18.2",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
