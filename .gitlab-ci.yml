@@ -1,13 +1,14 @@
 stages:
-  - build
+  - install
   - test
+  - run
 
 global-install:
   image: node:8
-  stage: build
+  stage: install
   script:
     - yarn install
-    - npm run lint
+    - yarn lint
   artifacts:
     paths:
       - node_modules
@@ -16,7 +17,6 @@ global-install:
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
-
 
 include:
   - '/shared/.gitlab-ci.yml'

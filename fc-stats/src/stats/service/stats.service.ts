@@ -27,8 +27,16 @@ export class StatsService {
     const streamConfig = { objectMode: true };
 
     const stream: Readable = new ElasticsearchScrollStream(
-      client,
-      query,
+      // We pass Client and query as `any` since they are strongly typed
+      // by teir respective emitters, but not compatible with `ElasticsearchScrollStream`.
+      //
+      // This is caused by `ElasticsearchScrollStream` expecting types definition from
+      // newest @elastic/elasticsearch library while our implementtion relies on
+      // types from @types/elasticsearch. This dependency is introduced by official
+      // nestjs module (@nest/elasticsearch). We should probably dig to fix this and publish a PR
+      // against @nestjs/elasticsearch repository.
+      client as any,
+      query as any,
       [],
       streamConfig,
     );

@@ -1,8 +1,8 @@
-test(shared):
+test/shared:
   stage: test
   image: node:8
   dependencies:
     - global-install
   script:
     - cd shared
-    - npm test
+    - yarn test
