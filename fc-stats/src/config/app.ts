@@ -8,5 +8,6 @@ export default {
   currentBranch: process.env.CURRENT_BRANCH || 'dev',
   latestCommitShortHash: process.env.GIT_LATEST_COMMIT_SHORT_HASH || '',
   latestCommitLongHash: process.env.GIT_LATEST_COMMIT_LONG_HASH || '',
-  appVersion: process.env.APP_VERSION || '',
+  isProduction: process.env.IS_PRODUCTION || false,
+  appVersion: process.env.APP_VERSION || 'no-version',
 };

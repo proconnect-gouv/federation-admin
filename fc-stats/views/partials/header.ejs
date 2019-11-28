@@ -1,6 +1,6 @@
 <nav class="navbar navbar-light navbar-expand-lg col-12 shadow-sm mb-4">
   <div class="container">
-    <a href="<%= APP_ROOT %>/" class="navbar-brand logo">
+    <a href="<%= locals.APP_ROOT %>/" class="navbar-brand logo">
       <img src="/images/FClogo.png">
       FranceConnect Statistiques
     </a>
@@ -8,14 +8,14 @@
       <ul class="navbar-nav mr-auto">
         <% if (locals.CURRENT_USER.roles.includes('operator')) { %>
           <li class="nav-item">
-            <a class="nav-link" data-prefix="<%= APP_ROOT %>/events" href="<%= APP_ROOT %>/events">Évènements</a>
+            <a class="nav-link" data-prefix="<%= locals.APP_ROOT %>/events" href="<%= locals.APP_ROOT %>/events">Évènements</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-prefix="<%= APP_ROOT %>/metrics" href="<%= APP_ROOT %>/metrics">Métriques</a>
+            <a class="nav-link" data-prefix="<%= locals.APP_ROOT %>/metrics" href="<%= locals.APP_ROOT %>/metrics">Métriques</a>
           </li>
         <% } %>
         <li class="nav-item">
-            <a class="nav-link" data-prefix="<%= APP_ROOT %>/account" href="<%= APP_ROOT %>/account">Comptes utilisateurs</a>
+            <a class="nav-link" data-prefix="<%= locals.APP_ROOT %>/account" href="<%= locals.APP_ROOT %>/account">Comptes utilisateurs</a>
         </li>
       </ul>
       <div class="dropdown">
@@ -23,14 +23,14 @@
             aria-expanded="false"><i class="fa fa-git-square"></i></a>
         <div class="dropdown-menu dropdown-menu-right p-3 text-muted meta-information-container">
           <div class="meta-information">
-            <i>Environnement : <%= APP_ENVIRONMENT %></i>
+            <i>Environnement : <%= locals.APP_ENVIRONMENT %></i>
           </div>
           <div class="meta-information">
-            <i>Branche : <%= GIT_CURRENT_BRANCH %></i>
+            <i>Branche : <%= locals.GIT_CURRENT_BRANCH %></i>
           </div>
           <div class="meta-information">
             <i>Commit : <a
-                href="<%= COMMIT_URL_PREFIX + GIT_LATEST_COMMIT_LONG_HASH %>"><%= GIT_LATEST_COMMIT_SHORT_HASH %></a></i>
+                href="<%= locals.COMMIT_URL_PREFIX + locals.GIT_LATEST_COMMIT_LONG_HASH %>"><%= locals.GIT_LATEST_COMMIT_SHORT_HASH %></a></i>
           </div>
         </div>
        </div>
