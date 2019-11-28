@@ -30,6 +30,8 @@ export class LocalsInterceptor implements NestInterceptor {
 
     res.locals.APP_ROOT = appConfig.app_root;
 
+    res.locals.APP_VERSION = appConfig.appVersion;
+
     res.locals.APP_ENVIRONMENT = appConfig.environment;
     res.locals.COMMIT_URL_PREFIX = appConfig.commitUrlPrefix;
 
@@ -43,6 +45,7 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
     res.locals.queryString = queryString;
+    res.locals.title = appConfig.appName;
 
     res.locals.helpers.MAPPINGS = MAPPINGS;
 

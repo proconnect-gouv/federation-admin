@@ -7,4 +7,8 @@
 <script src="<%= APP_ROOT %>/main.js"></script>
 <link rel="stylesheet" href="<%= APP_ROOT %>/main.css"/>
 
-<title><%= locals.title || "FC Stats" %></title>
+<% if (APP_ENVIRONMENT === 'production') { %>
+  <style type="text/css">body { border: 5px solid red; }</style>
+<% } %>
+
+<title><%= locals.title%></title>
