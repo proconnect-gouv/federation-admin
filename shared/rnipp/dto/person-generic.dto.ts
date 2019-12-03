@@ -1,12 +1,7 @@
-import {
-  IsIn,
-  IsString,
-  Matches,
-  IsOptional,
-  IsISO8601,
-} from 'class-validator';
+import { IsIn, IsString, Matches, IsISO8601 } from 'class-validator';
+import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
 
-const NAME_REGEX = /^[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*$/;
+const NAME_REGEX = /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\ \-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/;
 
 export class PersonGenericDTO {
   @IsIn(['male', 'female'])
@@ -17,7 +12,7 @@ export class PersonGenericDTO {
   @IsString()
   readonly familyName: string;
 
-  @IsOptional()
+  @IsOptionalExtended()
   @Matches(NAME_REGEX)
   @IsString()
   readonly preferredUsername: string;

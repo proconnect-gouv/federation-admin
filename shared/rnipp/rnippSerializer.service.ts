@@ -16,8 +16,8 @@ import {
 
 import { ParsedData } from './interface/parsed-data.interface';
 import { validate } from 'class-validator';
-import { PersonRequestedDTO } from './dto/person-requested-input.dto';
 import { Person } from './interface/person.interface';
+import { PersonGenericDTO } from './dto/person-generic.dto';
 
 @Injectable()
 export class RnippSerializer {
@@ -54,7 +54,7 @@ export class RnippSerializer {
   ): Promise<ParsedData> {
     const formatedData: ParsedData = this.formatJson(json, personRequest);
     if (formatedData.rnippCode === '2' || formatedData.rnippCode === '3') {
-      const rnippDto = new PersonRequestedDTO();
+      const rnippDto = new PersonGenericDTO();
       const validateFormatedData = plainToClassFromExist(
         rnippDto,
         formatedData.identity,
