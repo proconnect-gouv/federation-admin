@@ -1,14 +1,8 @@
-import {
-  IsString,
-  IsISO8601,
-  Matches,
-  IsIn,
-  ValidationOptions,
-  ValidateIf,
-} from 'class-validator';
+import { IsString, IsISO8601, Matches, IsIn } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
 
-const NAME_REGEX = /^[a-zA-Zàâéêèëîïôùç]+([\ \-][a-zA-Zàâéêèëîïôùç]+)*$/;
+const NAME_REGEX = /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\ \-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/;
 
 export class PersonRequestedDTO {
   @IsIn(['male', 'female'])
@@ -20,7 +14,7 @@ export class PersonRequestedDTO {
   @Transform(value => typeof value === 'string' && value.toUpperCase())
   readonly familyName: string;
 
-  @IsOptional()
+  @IsOptionalExtended()
   @Matches(NAME_REGEX)
   @IsString()
   readonly preferredUsername: string;
@@ -43,10 +37,4 @@ export class PersonRequestedDTO {
   @Matches(/^[0-9]{16}$/)
   @IsString()
   readonly supportId: string;
-}
-
-function IsOptional(validationOptions?: ValidationOptions) {
-  return ValidateIf((obj, value) => {
-    return value !== null && value !== undefined && value !== '';
-  }, validationOptions);
 }

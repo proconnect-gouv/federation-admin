@@ -291,7 +291,7 @@ describe('RnippSerializer (e2e)', () => {
 
       const expectedContraints = {
         errors: [
-          'givenName must match /^[a-zA-Zàâéêèëîïôùç]+([\\ \\-][a-zA-Zàâéêèëîïôùç]+)*$/ regular expression',
+          'givenName must match /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\\ \\-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/ regular expression',
         ],
       };
 
