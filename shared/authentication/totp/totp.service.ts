@@ -16,7 +16,8 @@ export class TotpService {
 
   async generateTotpQRCode(userData): Promise<any> {
     const user = userData.username;
-    const issuer = this.config.get('app').appName;
+    const { appName, environment } = this.config.get('app');
+    const issuer = `${appName} - ${environment}`;
     const secret = userData.secret;
     const otpauth = otplib.authenticator.keyuri(user, issuer, secret);
 
