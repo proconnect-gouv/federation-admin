@@ -131,7 +131,7 @@ export function formControl(inputs) {
  * @example cy.formFillTotp({ totp: true }, 'ZAERZRERAZAZEZA');
  * @example cy.formFillTotp({ totp: true });
  */
-export function totp(configuration, secret = SECRET_TOTP) {
+export function totp(configuration = {}, secret = SECRET_TOTP) {
   if (configuration.totp === false) {
     return formType('input[name="_totp"]', '000000', configuration);
   }

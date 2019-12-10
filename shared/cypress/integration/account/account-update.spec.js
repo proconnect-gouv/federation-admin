@@ -22,7 +22,8 @@ describe('Update account', () => {
     _csrf: true,
     submit: true,
     confirmSuppression: true,
-    totp: true,
+    totpAccountCreate: true,
+    totpFirstLogin: true,
     fast: true,
   };
   beforeEach(() => {

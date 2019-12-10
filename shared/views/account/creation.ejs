@@ -17,7 +17,7 @@
               <input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
               <input id="password" type="hidden" required name="password" value="<%= locals.tmpPassword%>">
               <input type="hidden" name="secret" id="secret" value="fakeSecret">
-              <div class="form-group row">
+              <section class="form-group row">
                 <label class="col-2 col-form-label" for="username">Nom d'utilisateur</label>
                 <div class="col-10">
                   <input id="username" type="text" required
@@ -31,8 +31,8 @@
                   </div>
                   <% } %>
                 </div>
-              </div>
-              <div class="form-group row">
+              </section>
+              <section class="form-group row">
                 <label class="col-2 col-form-label" for="email">Email</label>
                 <div class="col-10">
                   <input id="email" type="'text" required
@@ -46,8 +46,8 @@
                   </div>
                   <% } %>
                 </div>
-              </div>
-              <div class="form-group row">
+              </section>
+              <section class="form-group row">
                 <label class="col-2 col-form-label" for="roles">Rôles</label>
                 <div class="col-10">
                   <% USER_ROLES_OPTIONS.filter(({value}) => value !== 'new_account' && !(value.startsWith('inactive_'))).forEach((roleOption, index) => { %>
@@ -68,11 +68,35 @@
                   </div>
                   <% }) %>
                 </div>
-              </div>
+              </section>
+
               <div class="my-4 text-center">
                 <p>MOT DE PASSE TEMPORAIRE :</p>
-                <p class="font-weight-bold display-4 my-5" id="tmpPassword"><%= locals.tmpPassword%></p>
-                <button type="submit" class="btn btn-primary">Créer l'utilisateur</button>
+                <p class="font-weight-bold display-4 my-3" id="tmpPassword"><%= locals.tmpPassword%></p>
+              </div>
+
+              <section class="form-group row">
+                <label class="col-2 col-form-label" for="confirm-2FAuthentication">Code TOTP</label>
+                <div class="col-10">
+                  <input id="_totp" type="text" required value="<%= locals.totp %>" placeholder="123456"
+                    class="form-control <%= locals.messages.errors && messages.errors[0]._totp && 'is-invalid' %>" name="_totp">
+                  <div class="invalid-feedback">
+                    <% if (locals.messages.errors && messages.errors[0]._totp) { %>
+                    <p>
+                      <% messages.errors[0]._totp.forEach((error) => { %>
+                      <%= error %>
+                      <br>
+                      <% }) %>
+                    </p>
+                    <% } else { %>
+                    Veuillez mettre un code TOTP valide.
+                    <% } %>
+                  </div>
+                </div>
+              </section>
+
+              <div class="my-4 text-center">
+                <button type="submit" class="btn btn-primary my-5">Créer l'utilisateur</button>
               </div>
             </form>
           </div>

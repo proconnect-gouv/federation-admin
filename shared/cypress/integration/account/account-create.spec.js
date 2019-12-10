@@ -41,7 +41,8 @@ describe('Account', () => {
       confirmSuppression: true,
       submit: true,
       redirect: true,
-      totp: true,
+      totpAccountCreate: true,
+      totpFirstLogin: true,
       fast: true,
     };
 
@@ -248,7 +249,8 @@ describe('Account', () => {
       it('Should not be possible for the new user to update his password if totp is not valid', () => {
         const configuration = Object.assign({}, basicConfiguration, {
           redirect: false,
-          totp: false,
+          totpAccountCreate: true,
+          totpFirstLogin: false,
         });
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(userInfo, configuration);
