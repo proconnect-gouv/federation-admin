@@ -26,6 +26,8 @@ export function createUserAccount(userInfo, basicConfiguration) {
       .check();
   }
 
+  cy.totp(basicConfiguration);
+
   // change csrf token
   if (!basicConfiguration._csrf) {
     cy.get('input[name="_csrf"]').then(csrf => {
@@ -49,6 +51,8 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
     .find('[id="role-operator"]')
     .check();
 
+  cy.totp({ totp: basicConfiguration.totpAccountCreate });
+
   cy.get('#tmpPassword').then(tmpPassword => {
     cy.contains("Créer l'utilisateur").click();
     cy.logout(USER_ADMIN);
@@ -68,7 +72,7 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
       basicConfiguration,
     );
 
-    await cy.totp(basicConfiguration, secret[0].textContent);
+    cy.totp({ totp: basicConfiguration.totpFirstLogin }, secret[0].textContent);
 
     if (basicConfiguration.submit) {
       cy.get('button[type="submit"]').click();

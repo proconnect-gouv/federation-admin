@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RouteInfo } from '@nestjs/common/interfaces';
 import { ConsoleModule } from 'nestjs-console';
 import { resolve } from 'path';
 import { ConfigModule, ConfigService } from 'nestjs-config';
@@ -65,13 +66,23 @@ export class AppModule implements NestModule {
       .apply(AppContextMiddleware, TotpMiddleware)
       .forRoutes({ path: '/account/enrollment', method: RequestMethod.PATCH });
 
-    consumer.apply(TotpMiddleware).forRoutes({
-      path: '/account/:key',
-      method: RequestMethod.DELETE,
-    });
-    consumer.apply(TotpMiddleware).forRoutes({
-      path: '/account/update-account/:username',
-      method: RequestMethod.PATCH,
-    });
+    const totpAccount = [
+      {
+        path: '/account/create',
+        method: RequestMethod.POST,
+      },
+      {
+        path: '/account/:key',
+        method: RequestMethod.DELETE,
+      },
+      {
+        path: '/account/update-account/:username',
+        method: RequestMethod.PATCH,
+      },
+    ];
+
+    const totpRoutes: RouteInfo[] = [...totpAccount];
+
+    consumer.apply(TotpMiddleware).forRoutes(...totpRoutes);
   }
 }
