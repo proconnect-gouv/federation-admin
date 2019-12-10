@@ -7,6 +7,7 @@ import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.int
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
+import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -18,15 +19,34 @@ export class UserService implements IUserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  generateTmpPass() {
+  callGeneratePassword() {
     return this.generatePassword.generate({
-      length: 10,
+      length: 12,
       numbers: true,
       symbols: true,
       uppercase: true,
       excludeSimilarCharacters: true,
       strict: true,
     });
+  }
+
+  generateTmpPass() {
+    const validator = new IsPasswordCompliant();
+    let temporaryPassword = '';
+    let i = 0;
+    while (i < 10) {
+      temporaryPassword = this.callGeneratePassword();
+      if (validator.validate(temporaryPassword)) {
+        return temporaryPassword;
+      }
+      i += 1;
+    }
+    return 'The password could not be generated, please try again';
+  }
+
+  passwordDoesNotContainUsername(password: string, username: string) {
+    const lowerCasePassword = password.toLowerCase();
+    return lowerCasePassword.includes(username) ? false : true;
   }
 
   async enrollUser(

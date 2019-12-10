@@ -23,7 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         password,
       );
     } catch (err) {
-      throw new Error('The user could be found due to a database error');
+      throw new Error('The user could not be found due to a database error');
     }
     if (!user) {
       req.flash('error', "Nom d'utilisateur ou mot de passe incorrect.");

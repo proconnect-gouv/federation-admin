@@ -106,6 +106,18 @@ export class AccountController {
     @Req() req,
     @Res() res,
   ) {
+    const validPassword = this.userService.passwordDoesNotContainUsername(
+      req.body.password,
+      req.user.username,
+    );
+    if (!validPassword) {
+      req.flash(
+        'globalError',
+        "Votre nouveau mot de passe contient votre nom d'utilisateur",
+      );
+      return res.redirect(`${res.locals.APP_ROOT}/account/enrollment`);
+    }
+
     try {
       await this.userService.enrollUser(req.user, enrollUserDto);
     } catch (error) {
@@ -171,17 +183,30 @@ export class AccountController {
   @Patch('update-account/:username')
   @Roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY)
   @UseInterceptors(new FormErrorsInterceptor(`/account/me`))
+  @UsePipes(ValidationPipe)
   async updateUserPassword(
     @Body() updateAccountDto: UpdateAccountDto,
     @Req() req,
     @Res() res,
   ) {
+    const validPassword = this.userService.passwordDoesNotContainUsername(
+      req.body.password,
+      req.user.username,
+    );
+
+    if (!validPassword) {
+      req.flash(
+        'globalError',
+        "Votre nouveau mot de passe contient votre nom d'utilisateur",
+      );
+      return res.redirect(`${res.locals.APP_ROOT}/account/me`);
+    }
     try {
       await this.userService.updateUserAccount(req.user, updateAccountDto);
     } catch (error) {
       req.flash(
         'globalError',
-        'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
+        'Nouveau mot de passe non mis à jour, Ancien mot de passe incorrect.',
       );
       return res.redirect(`${res.locals.APP_ROOT}/account/me`);
     }

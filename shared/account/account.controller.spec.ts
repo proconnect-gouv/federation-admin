@@ -28,6 +28,7 @@ describe('AccountController', () => {
     generateTmpPass: jest.fn(),
     enrollUser: jest.fn(),
     updateUserAccount: jest.fn(),
+    passwordDoesNotContainUsername: jest.fn(),
   };
   const res = {
     redirect: jest.fn(),
@@ -292,6 +293,7 @@ describe('AccountController', () => {
       expect(tmpPassword).toEqual('mygreattmppassword');
     });
   });
+
   describe('Post create user', () => {
     it('redirects the user when a valid user is provided', async () => {
       // setup
@@ -357,6 +359,7 @@ describe('AccountController', () => {
     it('should update a new user and redirect to the account page if the user has only the role admin', async () => {
       // setup
       req.user.roles = ['new_account', 'inactive_admin'];
+      userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
       userService.enrollUser.mockImplementation(() => Promise.resolve(true));
       // action
       await accountController.enrollUser(enrollUserDto, req, res);
@@ -372,6 +375,7 @@ describe('AccountController', () => {
     });
     it("should fall back in the catch statement if user's updated password and password confirmation do not respect the dto", async () => {
       // setup
+      userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
       userService.enrollUser.mockImplementation(() =>
         Promise.reject(new Error('wrong, buddy')),
       );
@@ -389,6 +393,51 @@ describe('AccountController', () => {
       expect(req.flash).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/enrollment');
+    });
+
+    it('should call req flash and redirect the user to the enrollment page', async () => {
+      // setup
+      const enrollUserDtoMock: EnrollUserDto = {
+        password: 'fredIsNotSecured10!!',
+        passwordConfirmation: 'fredIsNotSecured10!!',
+      };
+      req.body.password = 'fredIsNotSecured10!!';
+      req.body.passwordConfirmation = 'fredIsNotSecured10!!';
+      req.user.username = 'fred';
+      userService.passwordDoesNotContainUsername.mockReturnValueOnce(false);
+      // action
+      await accountController.enrollUser(enrollUserDtoMock, req, res);
+      // assertion
+      expect(req.flash).toHaveBeenCalledTimes(1);
+      expect(req.flash).toHaveBeenCalledWith(
+        'globalError',
+        "Votre nouveau mot de passe contient votre nom d'utilisateur",
+      );
+      expect(res.redirect).toHaveBeenCalledTimes(1);
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/enrollment');
+    });
+
+    it('should not call req flash with a globalError', async () => {
+      // setup
+      const enrollUserDtoMock: EnrollUserDto = {
+        password: 'fredIsNotSecured10!!',
+        passwordConfirmation: 'fredIsNotSecured10!!',
+      };
+      req.body.password = 'fredIsNotSecured10!!';
+      req.body.passwordConfirmation = 'fredIsNotSecured10!!';
+      req.user.username = 'fred';
+      userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+      userService.enrollUser.mockImplementation(() => Promise.resolve(true));
+      // action
+      await accountController.enrollUser(enrollUserDtoMock, req, res);
+      // assertion
+      expect(req.flash).toHaveBeenCalledTimes(1);
+      expect(req.flash).toHaveBeenCalledWith(
+        'success',
+        'Le mot de passe a bien été mis à jour !',
+      );
+      expect(res.redirect).toHaveBeenCalledTimes(1);
+      expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
     });
   });
 
@@ -456,15 +505,16 @@ describe('AccountController', () => {
     });
 
     describe('patch update-account/:username', () => {
-      it('updateUserAccount', async () => {
+      it('updates the user account', async () => {
         // setup
         req.body = {
           __csrf: 'mygreatcsrftoken',
           currentPassword: 'MyPass10!!',
-          password: 'MyPass20!!',
-          passwordConfirmation: 'MyPass20!!',
+          password: 'MyNewPass20!!',
+          passwordConfirmation: 'MyNewPass20!!!!',
           _totp: 123456,
         };
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
         // action
         await accountController.updateUserPassword(updateAccountDto, req, res);
         // assert
@@ -482,8 +532,9 @@ describe('AccountController', () => {
         expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
       });
 
-      it('updateUserPassword', async () => {
+      it('does not update the user password', async () => {
         // setup
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
         userService.updateUserAccount = jest.fn(() => {
           throw Error;
         });
@@ -498,7 +549,30 @@ describe('AccountController', () => {
         expect(req.flash).toHaveBeenCalledTimes(1);
         expect(req.flash).toHaveBeenCalledWith(
           'globalError',
-          'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
+          'Nouveau mot de passe non mis à jour, Ancien mot de passe incorrect.',
+        );
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/me');
+      });
+
+      it('should call req flash and redirect the user to the update account page', async () => {
+        // setup
+        req.body = {
+          __csrf: 'mygreatcsrftoken',
+          currentPassword: 'MyPass10!!',
+          password: 'MyNewPass20!!',
+          passwordConfirmation: 'MyNewPass20!!!!',
+          _totp: 123456,
+        };
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(false);
+        // action
+        await accountController.updateUserPassword(updateAccountDto, req, res);
+        // assert
+        expect(userService.updateUserAccount).toHaveBeenCalledTimes(0);
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'globalError',
+          "Votre nouveau mot de passe contient votre nom d'utilisateur",
         );
         expect(res.redirect).toHaveBeenCalledTimes(1);
         expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/me');

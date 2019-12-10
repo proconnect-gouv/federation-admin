@@ -5,7 +5,7 @@ import { dateRangePicker } from './dateRangePicker';
 import { dropdown } from './dropdown';
 import { paginationStyle } from './pagination-style';
 import { validateEnrollment } from './validate-enrollment';
-import { comparePassword } from './compare-password';
+import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem }  from './confirm-form';
 import { initGraph, initGraphSetting } from './graph';
 import 'lightpick/css/lightpick.css';

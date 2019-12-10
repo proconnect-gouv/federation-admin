@@ -1,4 +1,5 @@
-import { USER_ADMIN } from '../../../../shared/cypress/support/constants';
+import { USER_ADMIN, LIMIT_PAGE } from '../../../../shared/cypress/support/constants';
+import { deleteUser } from './account-delete.util';
 
 export function createUserAccount(userInfo, basicConfiguration) {
   cy.contains('Comptes utilisateurs').click();
@@ -52,7 +53,10 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
     cy.contains("Créer l'utilisateur").click();
     cy.logout(USER_ADMIN);
     // login with new user created
-    cy.login(userInfo.username, tmpPassword[0].textContent);
+    cy.login(
+      userInfo.username, 
+      tmpPassword[0].textContent
+    )
   });
 
   // retrieve secret hash
@@ -70,4 +74,11 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
       cy.get('button[type="submit"]').click();
     }
   });
+}
+
+export function deleteUserAndLogout(adminAccount, userToDelete, configuration) {
+  cy.login(adminAccount.admin, adminAccount.adminPass);
+  cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+  deleteUser(userToDelete, configuration);
+  cy.logout(adminAccount.admin);
 }

@@ -4,7 +4,9 @@ import { IsCompliant } from '../validator/is-compliant.validator';
 
 export class EnrollUserDto {
   @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
-  @IsCompliant()
+  @IsCompliant({
+    message: 'Le mot de passe saisi est invalide',
+  })
   readonly password: string;
 
   @IsNotEmpty({

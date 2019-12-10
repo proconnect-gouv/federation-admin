@@ -22,7 +22,9 @@ export class CreateUserDto {
   readonly email: string;
 
   @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
-  @IsCompliant()
+  @IsCompliant({
+    message: 'Le mot de passe saisi est invalide',
+  })
   readonly password: string;
 
   @ArrayNotEmpty({ message: 'Veuillez renseigner au moins un rôle' })
