@@ -3,9 +3,9 @@ import {
   USER_PASS,
   LIMIT_PAGE,
 } from '../../../../shared/cypress/support/constants';
-
 import { createUserAccount, createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
+import { testIsCompliantPasswordEnrollment } from '../../support/request'
 
 function logoutAndDeleteUser(username, basicConfiguration) {
   if (basicConfiguration.redirect) {
@@ -27,6 +27,11 @@ describe('Account', () => {
       password: 'MyNewPassword10!!',
       confirmPassword: 'MyNewPassword10!!',
     };
+
+    const adminAccount = {
+      admin: 'jean_moust',
+      adminPass: 'georgesmoustaki'
+    }
 
     const basicConfiguration = {
       adminRole: true,
@@ -164,7 +169,7 @@ describe('Account', () => {
       cy.logout(USER_ADMIN);
     });
 
-    describe('First user connection', () => {
+    describe('Patch enrollment', () => {
       it('should be possible for the new user to update his password, and type his totp token', () => {
         const configuration = Object.assign({}, basicConfiguration, {
           redirect: false,
@@ -192,7 +197,7 @@ describe('Account', () => {
           redirect: false,
           typeEvent: true,
         });
-        const user = Object.assign({}, userInfo, { password: 'MyNewPassword' });
+        const user = Object.assign({}, userInfo, { password: 'MyNewPassword10' });
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(user, configuration);
 
@@ -210,7 +215,8 @@ describe('Account', () => {
             'fa valid-password',
             'fa valid-password',
             'fa',
-            'fa',
+            'fa valid-password',
+            'fa valid-password',
             'fa valid-password',
           ]);
         });
@@ -251,6 +257,79 @@ describe('Account', () => {
         cy.contains("Le TOTP saisi n'est pas valide").should('be.visible');
 
         logoutAndDeleteUser(userInfo.username, configuration);
+      });
+
+      it("Should throw an error if his password is too short", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'short@Pass1',
+            passwordConfirmation:'short@Pass1', 
+            errorMessage: 'Le mot de passe saisi est invalide'
+          },
+          adminAccount
+        );
+      })
+
+      it("Should throw an error if his password does not contain lowercase letters", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'NO-LOWER@PASS10',
+            passwordConfirmation: 'NO-LOWER@PASS10',
+            errorMessage: 'Le mot de passe saisi est invalide'
+          },
+          adminAccount);
+      })
+
+      it("Should throw an error if his password does not contain uppercase letters", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'no-upper@pass1',
+            passwordConfirmation: 'no-upper@pass1',
+            errorMessage: 'Le mot de passe saisi est invalide'
+          },
+          adminAccount);
+      })
+
+      it("Should throw an error if his password does not contain special characters", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'NoSpecialChars123',
+            passwordConfirmation: 'NoSpecialChars123',
+            errorMessage: 'Le mot de passe saisi est invalide'
+          },
+          adminAccount);
+      })
+
+      it("Should throw an error if his password does not contain numbers", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'NoNumbers@TryAgainBuddy',
+            passwordConfirmation: 'NoNumbers@TryAgainBuddy',
+            errorMessage: 'Le mot de passe saisi est invalide',
+          },
+          adminAccount);
+      })
+
+      it("Should throw an error if his passwords do not match", () => {
+        testIsCompliantPasswordEnrollment(
+          {...basicConfiguration},
+          userInfo,
+          {
+            password: 'DoesNotMatch@Buddy10',
+            passwordConfirmation: 'NotMatching@Buddy20',
+            errorMessage: 'Les mots de passe fournis ne correspondent pas'
+          },
+          adminAccount);
       });
     });
   });

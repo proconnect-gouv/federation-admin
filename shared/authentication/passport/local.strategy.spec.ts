@@ -48,7 +48,7 @@ describe('LocalStrategy', () => {
       } catch (err) {
         const { message } = err;
         expect(message).toEqual(
-          'The user could be found due to a database error',
+          'The user could not be found due to a database error',
         );
       }
       expect.hasAssertions();

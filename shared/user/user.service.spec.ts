@@ -7,6 +7,10 @@ import { UserService } from './user.service';
 import { UserRole } from './roles.enum';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
+import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
+
+const mockValidate = jest.fn();
+IsPasswordCompliant.prototype.validate = mockValidate;
 
 describe('UserService', () => {
   let userService: UserService;
@@ -53,11 +57,11 @@ describe('UserService', () => {
     jest.resetAllMocks();
   });
 
-  describe('generateTmpPass', () => {
+  describe('callGeneratePassword', () => {
     it('should be called with the wright arguments', () => {
       // setup
       const args = {
-        length: 10,
+        length: 12,
         numbers: true,
         symbols: true,
         uppercase: true,
@@ -65,9 +69,41 @@ describe('UserService', () => {
         strict: true,
       };
       // action
-      userService.generateTmpPass();
+      userService.callGeneratePassword();
       // assertion
       expect(generatePasswordMock.generate).toHaveBeenCalledWith(args);
+    });
+  });
+
+  describe('generateTmpPass', () => {
+    it('should return a temporary password', () => {
+      // Set up
+      mockValidate.mockReturnValue(true);
+      userService.callGeneratePassword = jest
+        .fn()
+        .mockReturnValue('GoodToGo10!!');
+
+      // action
+      const result = userService.generateTmpPass();
+
+      // assertion
+      expect(result).toEqual('GoodToGo10!!');
+    });
+
+    it('should return an error message', () => {
+      // Set up
+      mockValidate.mockReturnValue(false);
+      userService.callGeneratePassword = jest
+        .fn()
+        .mockReturnValue('GoodToGo10!!');
+
+      // action
+      const result = userService.generateTmpPass();
+
+      // assertion
+      expect(result).toEqual(
+        'The password could not be generated, please try again',
+      );
     });
   });
 
@@ -124,6 +160,7 @@ describe('UserService', () => {
       expect.hasAssertions();
     });
   });
+
   describe('compareHash', () => {
     it('resolves true if the hashes match', async () => {
       const password = 'georgesmoustaki';
@@ -234,6 +271,7 @@ describe('UserService', () => {
       expect.hasAssertions();
     });
   });
+
   describe('deleteUserById', () => {
     it('calls the delete function of the userRepositoryMock', async () => {
       // set up
@@ -376,6 +414,44 @@ describe('UserService', () => {
         expect(message).toEqual('password could not be updated');
       }
       expect.hasAssertions();
+    });
+  });
+
+  describe('passwordDoesNotContainUsername', () => {
+    it('should return false if username is contained in the password', () => {
+      // given
+      const password = 'fredHasANotSecuredPassword10!!';
+      // when
+      const result = userService.passwordDoesNotContainUsername(
+        password,
+        user.username,
+      );
+      // then
+      expect(result).toEqual(false);
+    });
+
+    it('should return false if username is contained in the password, case insensitively', () => {
+      // given
+      const password = 'fReDHasANotSecuredPassword10!!';
+      // when
+      const result = userService.passwordDoesNotContainUsername(
+        password,
+        user.username,
+      );
+      // then
+      expect(result).toEqual(false);
+    });
+
+    it('should return true if username is not contained in the password', () => {
+      // given
+      const password = 'thePasswordIsSecured10!!';
+      // when
+      const result = userService.passwordDoesNotContainUsername(
+        password,
+        user.username,
+      );
+      // then
+      expect(result).toEqual(true);
     });
   });
 });

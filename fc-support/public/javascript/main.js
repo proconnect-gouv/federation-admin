@@ -6,7 +6,7 @@ import { validateForm } from './validateForm';
 import { copyText } from './clipboard';
 import { paginationStyle } from './pagination-style';
 import { validateEnrollment } from './validate-enrollment';
-import { comparePassword } from './compare-password';
+import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem }  from './confirm-form';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';

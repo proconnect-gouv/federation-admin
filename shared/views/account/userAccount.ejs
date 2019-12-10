@@ -89,13 +89,12 @@
                 <% } %>
               </div>
             </div>
-
             <div class="form-group row">
               <label class="col-lg-2 col-lg-form-label" for="password">Votre nouveau mot de passe</label>
               <div class="col-lg-10">
                 <input id="password" type="password" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].password && 'is-invalid' %>"
-                  name="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&,;:])[A-Za-z\d@$!%*?&,;:]{8,}$">
+                  name="password" maxlength="72" pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\d)(?=.*?[^a-zA-Z0-9\s])^[\S]{12,72}$">
                   <% if (locals.messages.errors && messages.errors[0].password) { %>
                     <div class="invalid-feedback">
                     <p>
@@ -115,7 +114,9 @@
                   <br>
                   <span id="number-icon" class="fa">au moins un chiffre</span>
                   <br>
-                  <span id="length-icon" class="fa">au moins 8 caratères</span>
+                  <span id="length-icon" class="fa">12 caractères minimum</span>
+                  <br>
+                  <span id="patterns-icon" class="fa">aucun pattern facilement identifiable ou répété(aaa, 123, aze, qsd, ...) ni votre nom d'utilisateur</span>
                 </div>
               </div>
             </div>
@@ -125,7 +126,7 @@
               <div class="col-lg-10">
                 <input id="confirm-password" type="password" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].passwordConfirmation && 'is-invalid' %>"
-                  name="passwordConfirmation" data-init="comparePassword">
+                  name="passwordConfirmation" maxlength="72" data-init="comparePassword">
                   <div class="invalid-feedback">
                     <% if (locals.messages.errors && messages.errors[0].passwordConfirmation) { %>
                     <p>

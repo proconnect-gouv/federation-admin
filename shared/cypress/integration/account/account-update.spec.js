@@ -5,6 +5,7 @@ import {
 } from '../../../../shared/cypress/support/constants';
 import { createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
+import { testIsCompliantPasswordUpdate } from '../../support/request';
 
 describe('Update account', () => {
   before(() => cy.resetEnv('postgres'));
@@ -44,8 +45,8 @@ describe('Update account', () => {
     cy.contains('Mon compte').click();
 
     cy.formType('#currentPassword', 'MyNewPassword10!!');
-    cy.formType('#password', 'MyPass10!!');
-    cy.formType('#confirm-password', 'MyPass10!!');
+    cy.formType('#password', 'MyNewPassword20!!');
+    cy.formType('#confirm-password', 'MyNewPassword20!!');
 
     cy.get('#secret > td').then(async secret => {
       await cy.totp(basicConfiguration, secret[0].textContent);
@@ -60,8 +61,8 @@ describe('Update account', () => {
     cy.contains('Mon compte').click();
 
     cy.formType('#currentPassword', 'badPassword!!');
-    cy.formType('#password', 'MyPass10!!');
-    cy.formType('#confirm-password', 'MyPass10!!');
+    cy.formType('#password', 'MyNewPassword20!!');
+    cy.formType('#confirm-password', 'MyNewPassword20!!');
 
     cy.get('#secret > td').then(secret =>
       cy.totp(basicConfiguration, secret[0].textContent),
@@ -69,7 +70,7 @@ describe('Update account', () => {
 
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains(
-      'Nouveau mot de pass non mis à jour, Ancien mot de passe incorrect.',
+      'Nouveau mot de passe non mis à jour, Ancien mot de passe incorrect.',
     );
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
@@ -113,11 +114,96 @@ describe('Update account', () => {
     cy.contains('Mon compte').click();
 
     cy.formType('#currentPassword', 'MyNewPassword10!!');
-    cy.formType('#password', 'MyPass10!!');
-    cy.formType('#confirm-password', 'MyPass10!!');
+    cy.formType('#password', 'MyNewPassword20!!');
+    cy.formType('#confirm-password', 'MyNewPassword20!!');
     cy.formType('#_totp', 123456);
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains("Le TOTP saisi n'est pas valide");
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
   });
 });
+
+describe('Patch update-account/:username', () => {
+  beforeEach(() => {
+    cy.login(USER_ADMIN, USER_PASS);
+  });
+
+  const basicConfiguration = {
+    adminRole: true,
+    operatorRole: true,
+    securityRole: true,
+    _csrf: true,
+    confirmSuppression: true,
+    submit: true,
+    redirect: true,
+    totp: true,
+    fast: true,
+  };
+
+  afterEach(() => {
+    cy.visit(`/logout`);
+  });
+  describe("is-compliant-validator", () => {
+    it("should throw an error if his password is too short", () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          password: 'short@Pass1',
+          passwordConfirmation: 'short@Pass1',
+          errorMessage: 'Le mot de passe saisi est invalide'
+        });
+    })
+
+    it("should throw an error if his password does not contain lowercase letters", () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          password: 'NO-LOWER@PASS10',
+          passwordConfirmation: 'NO-LOWER@PASS10',
+          errorMessage: 'Le mot de passe saisi est invalide'
+        });
+    })
+
+    it("should throw an error if his password does not contain uppercase letters", () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          password: 'no-upper@pass1',
+          passwordConfirmation: 'no-upper@pass1',
+          errorMessage: 'Le mot de passe saisi est invalide'
+        });
+    })
+
+    it("should throw an error if his password does not contain special characters", () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          passwordConfirmation: 'NoSpecialChars123',
+          passwordConfirmation: 'NoSpecialChars123',
+          errorMessage: 'Le mot de passe saisi est invalide'
+        });
+    })
+
+    it("should throw an error if his password does not contain numbers", () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          password: 'NoNumbers@TryAgainBuddy',
+          passwordConfirmation: 'NoNumbers@TryAgainBuddy',
+          errorMessage: 'Le mot de passe saisi est invalide'
+        });
+    })
+  });
+  
+  describe("isSameAS", () => {
+    it('should throw an error if his passwords do not match', () => {
+      testIsCompliantPasswordUpdate(
+        {...basicConfiguration},
+        {
+          password: 'DoesNotMatch@TryAgainBuddy',
+          passwordConfirmation: 'NotMatching@TryAgainBuddy',
+          errorMessage: 'Les mots de passe fournis ne correspondent pas'
+        });
+    });
+  });
+})

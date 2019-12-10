@@ -7,7 +7,9 @@ export class UpdateAccountDto {
   readonly currentPassword: string;
 
   @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
-  @IsCompliant()
+  @IsCompliant({
+    message: 'Le mot de passe saisi est invalide',
+  })
   readonly password: string;
 
   @IsNotEmpty({
