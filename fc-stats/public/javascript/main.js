@@ -6,7 +6,7 @@ import { dropdown } from './dropdown';
 import { paginationStyle } from './pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
-import { removeItem }  from './confirm-form';
+import { removeItem } from './modals/confirm-form';
 import { initGraph, initGraphSetting } from './graph';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
