@@ -7,7 +7,7 @@ import { copyText } from './clipboard';
 import { paginationStyle } from './pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
-import { removeItem }  from './confirm-form';
+import { removeItem }  from './modals/confirm-form';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/fonts/fontawesome-webfont.ttf';

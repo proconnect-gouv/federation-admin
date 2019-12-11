@@ -6,7 +6,7 @@
 <body>
   <% include partials/header.ejs %>
   <section class="mt-5">
-    <div class="container">
+    <div class="container-fluid">
       <div class="row">
         <div class="alert alert-danger col-sm-12">
           <p> Cette fonctionnalité de vérification de l’identité pivot d'un usager
@@ -208,55 +208,70 @@
             <div class="card my-3">
               <div class="card-body">
                 <div class="mb-2">
-                  Genre
-                  <br>
+                  <div class="label">Numéro de ticket support</div>
+                  <div class="font-weight-bold">
+                    <%= (locals.person && person.requested.supportId) ? person.requested.supportId : '' %>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <div class="label">Genre</div>
                   <% if (person.found.gender === 'male') { %>
-                    Masculin
+                    <div class="font-weight-bold">
+                      Masculin
+                    </div>
                   <% } %>
                   <% if (person.found.gender === 'female') { %>
-                    Féminin
+                    <div class="font-weight-bold">
+                      Féminin
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  Nom
-                  <br>
+                  <div class="label">Nom</div>
                   <% if (person.found.familyName) { %>
-                    <%=person.found.familyName%>
+                    <div class="font-weight-bold">
+                      <%=person.found.familyName%>
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  Nom d'usage
-                  <br>
+                  <div class="label">Nom d'usage</div>
                   <% if (person.found.preferredUsername) { %>
-                    <%=person.found.preferredUsername%>
+                    <div class="font-weight-bold">
+                      <%=person.found.preferredUsername%>
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  Prénoms
-                  <br>
+                  <div class="label">Prénoms</div>
                   <% if (person.found.givenName) { %>
-                    <%=person.found.givenName%>
+                    <div class="font-weight-bold">
+                      <%=person.found.givenName%>
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  Date de naissance
-                  <br>
+                  <div class="label">Date de naissance</div>
                   <% if (person.found.birthdate) { %>
-                    <%=person.found.birthdate%>
+                    <div class="font-weight-bold">
+                      <%=person.found.birthdate%>
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  COG du lieu de naissance
-                  <br>
+                  <div class="label">COG du lieu de naissance</div>
                   <% if (person.found.birthPlace && person.found.birthPlace !== '00000') { %>
-                    <%=person.found.birthPlace%>
+                    <div class="font-weight-bold">
+                      <%=person.found.birthPlace%>
+                    </div>
                   <% } %>
                 </div>
                 <div class="mb-2">
-                  COG du pays de naissance
-                  <br>
+                  <div class="label">COG du pays de naissance</div>
                   <% if (person.found.birthCountry) { %>
-                    <%=person.found.birthCountry%>
+                    <div class="font-weight-bold">
+                      <%=person.found.birthCountry%>
+                    </div>
                   <% } %>
                 </div>
                 <hr/>

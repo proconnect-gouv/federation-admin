@@ -4,15 +4,16 @@
     <% include partials/head.ejs %>
 </head>
 <body>
-<div class="container">
-    <% include partials/header.ejs %>
+<% include partials/header.ejs %>
+<div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <p class="h2">Stats</p>
             <p><i>Mesure All the things!</i></p>
 
-
-            <% include ./form.ejs %>
+            <div class="container">
+              <% include ./form.ejs %>
+            </div>
 
             <% if (!params.start || !params.stop) { %>
             <div class="d-flex justify-content-center">
