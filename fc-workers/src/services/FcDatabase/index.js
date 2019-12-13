@@ -6,6 +6,7 @@ class FcDatabase {
     return mongoose.connect(config, {
       useNewUrlParser: true,
       useCreateIndex: true,
+      useUnifiedTopology: true,
     });
   }
 }

@@ -16,18 +16,28 @@ class IndexMongoStats extends Job {
     switch (metric) {
       case 'account':
         return account.countDocuments();
+
       case 'desactivated':
         return account.find({ active: false }).countDocuments();
+
       case 'registration':
-        const stop = IndexMongoStats.getStopDateForRange(start, range);
-        const query = {
-          $and: [
-            { createdAt: { $gte: new Date(start) } },
-            { createdAt: { $lt: new Date(stop) } },
-          ],
-        };
-        return account.find(query).countDocuments();
+        return IndexMongoStats.getRegistrationMetric(account, start, range);
+
+      default:
+        throw new Error(`Unknown metric: <${metric}>`);
     }
+  }
+
+  static getRegistrationMetric(account, start, range) {
+    const stop = IndexMongoStats.getStopDateForRange(start, range);
+    const query = {
+      $and: [
+        { createdAt: { $gte: new Date(start) } },
+        { createdAt: { $lt: new Date(stop) } },
+      ],
+    };
+
+    return account.find(query).countDocuments();
   }
 
   static getStopDateForRange(start, range) {
@@ -51,13 +61,11 @@ class IndexMongoStats extends Job {
 
   async run(params) {
     try {
-      const log = this.container.get('logger');
-
-      log.info(' * Connection to database');
+      this.log.info('Connection to database');
       // (async cause connection is made on demand)
       this.db = await this.container.get('fcDatabase');
 
-      log.info(' * Input control');
+      this.log.info('Input control');
       const input = this.container.get('input');
       const schema = {
         count: { type: 'string', mandatory: true },
@@ -67,10 +75,14 @@ class IndexMongoStats extends Job {
 
       const { count, start, range } = input.get(schema, params);
 
-      log.info(' * Fetch the value we want from DB');
+      this.log.info(
+        `Found parameters: ${JSON.stringify({ count, start, range })}`
+      );
+
+      this.log.info('Fetch the value we want from DB');
       const value = await this.getMetric(count, start, range);
 
-      log.info(' * build a document');
+      this.log.info('build a document');
       const statsService = this.container.get('stats');
       const doc = statsService.createMetricDocument({
         key: count,
@@ -79,11 +91,12 @@ class IndexMongoStats extends Job {
         range,
       });
 
-      log.info(' * Create a unique consistant id for idempotence');
+      this.log.info('Create a unique consistant id for idempotence');
       const id = IndexMongoStats.getMetricId(doc);
 
-      log.info(' * Save document to index');
+      this.log.info('Save document to index');
       await statsService.index(doc, 'stats', 'metric', id);
+      this.log.info('All done');
     } finally {
       // Make sure we close connection
       this.db.connections[0].close();

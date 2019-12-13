@@ -1,4 +1,5 @@
 import Runner from '../../../src/services/Runner';
+import Job from '../../../src/jobs/Job';
 
 describe('Runner', () => {
   describe('usage', () => {
@@ -33,14 +34,39 @@ describe('Runner', () => {
   });
 
   describe('run', () => {
+    const container = {
+      services: {
+        logger: {
+          info: jest.fn(),
+          error: jest.fn(),
+          log: jest.fn(),
+          debug: jest.fn(),
+        },
+      },
+    };
+    container.get = key => container.services[key];
+
+    const runMock = jest.fn();
+    const usageMock = jest.fn();
+    class Foo extends Job {
+      static usage() {
+        usageMock();
+        return 'usage text';
+      }
+
+      run(params) {
+        runMock(params);
+        return Promise.resolve(true);
+      }
+    }
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('Should throw if no job name provided', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
-      const container = {
-        services: {
-          logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
-        },
-      };
       container.get = key => container.services[key];
       jest.spyOn(process, 'exit').mockImplementation(() => {});
       const runner = new Runner(container, jobs);
@@ -57,12 +83,6 @@ describe('Runner', () => {
     it('Should throw if job does not exists', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
-      const container = {
-        services: {
-          logger: { debug: jest.fn(), log: jest.fn(), error: jest.fn() },
-        },
-      };
-      container.get = key => container.services[key];
       const runner = new Runner(container, jobs);
       // When
       runner.run('wizz');
@@ -76,12 +96,12 @@ describe('Runner', () => {
     });
     it('Should throw if job does not implement run() method', async () => {
       // Given
-      class foo {}
-      const jobs = { foo };
-      const runner = new Runner(null, jobs);
+      class Bar extends Job {}
+      const jobs = { Bar };
+      const runner = new Runner(container, jobs);
       runner.handleError = jest.fn();
       // When
-      await runner.run('foo');
+      await runner.run('Bar');
       // Then
       expect(runner.handleError.mock.calls).toHaveLength(1);
       expect(runner.handleError.mock.calls[0][0].message).toBe(
@@ -90,66 +110,49 @@ describe('Runner', () => {
     });
     it('Should call the usage func of job and not run it', async () => {
       // Given
-      const jobs = { foo: { usage: jest.fn(() => 'usage text') } };
-      const container = { services: { logger: { log: jest.fn() } } };
-      container.get = key => container.services[key];
+      const jobs = { Foo };
       const runner = new Runner(container, jobs);
       const params = { help: true };
       // When
-      await runner.run('foo', params);
+      await runner.run('Foo', params);
       // Then
-      expect(jobs.foo.usage.mock.calls).toHaveLength(1);
+      expect(usageMock.mock.calls).toHaveLength(1);
       expect(container.services.logger.log.mock.calls).toHaveLength(1);
       expect(container.services.logger.log.mock.calls[0][0]).toBe('usage text');
     });
     it('Should call the run() method of job', () => {
       // Given
-      const runMock = jest.fn();
-      class foo {
-        constructor() {
-          this.run = runMock;
-        }
-      }
-      const jobs = { foo };
-      const runner = new Runner(null, jobs);
+      const jobs = { Foo };
+      const runner = new Runner(container, jobs);
       // When
-      runner.run('foo');
+      runner.run('Foo');
       // Then
       expect(runMock.mock.calls).toHaveLength(1);
     });
     it('Should inject service container into job', () => {
       // Given
-      const runMock = jest.fn();
-      class foo {
-        constructor(container) {
-          this.container = container;
+      const runMock2 = jest.fn();
+      class Bar {
+        constructor(_container) {
+          runMock2(_container);
         }
 
-        run() {
-          runMock(this.container);
-        }
+        run() {}
       }
-      const jobs = { foo };
-      const container = {};
+      const jobs = { Bar };
       const runner = new Runner(container, jobs);
       // When
-      runner.run('foo');
+      runner.run('Bar');
       // Then
-      expect(runMock.mock.calls[0][0]).toBe(container);
+      expect(runMock2.mock.calls[0][0]).toBe(container);
     });
     it('Should pass params method run()', () => {
       // Given
-      const runMock = jest.fn();
-      class foo {
-        constructor() {
-          this.run = runMock;
-        }
-      }
-      const jobs = { foo };
+      const jobs = { Foo };
       const params = {};
-      const runner = new Runner(null, jobs);
+      const runner = new Runner(container, jobs);
       // When
-      runner.run('foo', params);
+      runner.run('Foo', params);
       // Then
       expect(runMock.mock.calls[0][0]).toBe(params);
     });

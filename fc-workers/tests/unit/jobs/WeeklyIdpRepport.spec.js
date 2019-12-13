@@ -1,3 +1,4 @@
+import Container from '../../../src/services/Container';
 import WeeklyIdpRepport from '../../../src/jobs/WeeklyIdpRepport';
 
 describe('WeeklyIdpRepport', () => {
@@ -119,28 +120,28 @@ describe('WeeklyIdpRepport', () => {
     it('Should call mailer service with good params', async () => {
       // Given
       const send = jest.fn();
-      const container = {
-        services: {
-          input: { get: (schema, values) => values },
-          mailer: { send },
-          config: { getAPIRoot: () => 'foo' },
-          httpClient: {
-            get: () =>
-              Promise.resolve({
-                data: {
-                  payload: {
-                    weeks: [
-                      {
-                        startDate: 1514764800000,
-                        events: [{ count: 2, label: 'bar' }],
-                      },
-                    ],
+      const container = new Container();
+
+      container.add('input', () => ({ get: (schema, values) => values }));
+      container.add('mailer',() => ( { send }));
+      container.add('config',() => ( { getAPIRoot: () => 'foo' }));
+      container.add('logger',() => ( { info: jest.fn() }));
+      container.add('httpClient', () => ({
+        get: () =>
+          Promise.resolve({
+            data: {
+              payload: {
+                weeks: [
+                  {
+                    startDate: 1514764800000,
+                    events: [{ count: 2, label: 'bar' }],
                   },
-                },
-              }),
-          },
-        },
-      };
+                ],
+              },
+            },
+          }),
+      }));
+
       const params = { idp: 'foo', email: 'fizz@buzz.com' };
       // When
       const instance = new WeeklyIdpRepport(container);

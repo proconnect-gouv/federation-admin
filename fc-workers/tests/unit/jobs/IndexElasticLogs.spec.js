@@ -387,6 +387,7 @@ describe('IndexElasticLogs', () => {
         createBulkQuery: jest.fn(),
       };
       const container = new Container();
+      container.add('logger', () => ({}));
       const docList = [
         { id: 'a', a: 1 },
         { id: 'b', c: 2 },

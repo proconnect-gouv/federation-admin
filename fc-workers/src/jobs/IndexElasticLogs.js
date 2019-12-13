@@ -192,9 +192,7 @@ class IndexElasticLogs extends Job {
   }
 
   async run(params) {
-    const log = this.container.get('logger');
-
-    log.info(' * Input control');
+    this.log.info('Input control');
     const input = this.container.get('input');
     const schema = {
       start: { type: 'date', mandatory: true },
@@ -203,30 +201,30 @@ class IndexElasticLogs extends Job {
 
     const { start, stop } = input.get(schema, params);
 
-    log.info(' * Fetch the value we want from ES');
+    this.log.info('Fetch the value we want from ES');
     const data = await this.fetchData(start, stop);
 
-    log.info(' * Workarround our old eslasticsearch limitations');
+    this.log.info('Workarround our old eslasticsearch limitations');
     const tree = IndexElasticLogs.fixMissingFields(data.aggregations);
 
-    log.info(' * Creating documents from data');
+    this.log.info('Creating documents from data');
     const documents = IndexElasticLogs.getDocuments(tree);
 
-    log.info(' * Build an array of documents');
+    this.log.info('Build an array of documents');
     const docList = IndexElasticLogs.mapToArrayWithIds(documents);
     const eventCount = IndexElasticLogs.getEventCountFromAggregates(docList);
-    log.info(`   > Created ${docList.length} documents
+    this.log.info(`   > Created ${docList.length} documents
      with ${eventCount} events
      from ${data.hits.total} original events`);
 
-    log.info(' * Post new entries to stats index');
+    this.log.info('Post new entries to stats index');
 
     const chunkSize = 1000;
     const timePerRequest = 100;
     const delay = Math.floor(
       ((docList.length / chunkSize) * timePerRequest) / 1000
     );
-    log.info(
+    this.log.info(
       `   > This will take at least ${delay} seconds, please hold on...`
     );
     const results = await this.createDocuments(
@@ -235,11 +233,11 @@ class IndexElasticLogs extends Job {
       timePerRequest
     );
 
-    log.info(
+    this.log.info(
       `   > created ${IndexElasticLogs.getIndexationStats(results)} documents`
     );
 
-    log.info(' * All done\n');
+    this.log.info('All done');
   }
 }
 
