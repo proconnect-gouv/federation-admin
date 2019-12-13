@@ -5,4 +5,5 @@ export interface IOptions {
   route?: string;
   action?: string;
   defaultLimit: number;
+  userSearch?: string;
 }

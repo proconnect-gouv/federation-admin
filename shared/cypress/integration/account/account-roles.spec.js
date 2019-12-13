@@ -81,7 +81,6 @@ describe('Account', () => {
       cy.get('body > nav > div > div > ul > li').each(elem => {
         const tab = elem[0].innerText;
         cy.contains(tab).click();
-        cy.get('.btn').should('not.be.visible');
         cy.get('.btn-action-update').should('not.be.visible');
         cy.get('.btn-action_generate-client-secret').should('not.be.visible');
         cy.get('.btn-action-delete').should('not.be.visible');

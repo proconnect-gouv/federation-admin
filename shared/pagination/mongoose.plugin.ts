@@ -43,10 +43,34 @@ async function paginate(query, route, options: IOptions) {
  */
 
 const createPipelineAggregate = options => {
-  const { sort, action, page = 1, limit = 10 } = options;
+  let userEntry;
+  const { sort, action, page = 1, limit = 10, userSearch } = options;
 
   const sortTags = createAggregateTagSort(sort, action);
+  if (userSearch && userSearch !== 'undefined') {
+    const escapedUserSearch = userSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    userEntry = new RegExp(escapedUserSearch, 'i');
+  }
+
   const aggregate = [
+    {
+      $match: {
+        $or: [
+          {
+            key: userEntry,
+          },
+          {
+            clientID: userEntry,
+          },
+          {
+            name: userEntry,
+          },
+          {
+            title: userEntry,
+          },
+        ],
+      },
+    },
     sortTags,
     { $skip: (page - 1) * limit },
     { $limit: limit },
