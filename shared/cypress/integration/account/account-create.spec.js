@@ -19,7 +19,7 @@ function logoutAndDeleteUser(username, basicConfiguration) {
 }
 
 describe('Account', () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() =>  cy.resetEnv('postgres'));
   describe('Create user', () => {
     const userInfo = {
       username: 'christophe',
