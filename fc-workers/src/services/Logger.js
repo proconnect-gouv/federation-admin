@@ -1,24 +1,25 @@
 /* eslint-disable no-console */
 class Logger {
-  constructor() {
+  constructor(transformer = (...args) => args) {
     this.logger = console;
+    this.transformer = transformer;
   }
 
-  log(...args) {
-    this.logger.log(...args);
+  log(args) {
+    this.logger.log(...this.transformer(args));
   }
 
-  error(...args) {
-    this.logger.error(...args);
+  error(args) {
+    this.logger.error(...this.transformer(args));
   }
 
-  info(...args) {
-    this.logger.info(...args);
+  info(args) {
+    this.logger.info(...this.transformer(args));
   }
 
-  debug(...args) {
+  debug(args) {
     if (process.env.NODE_ENV === 'development') {
-      this.logger.log(...args);
+      this.logger.log(...this.transformer(args));
     }
   }
 }

@@ -57,6 +57,9 @@ class Runner {
       }
       const job = new this.jobs[jobName](this.container);
 
+      job.log.info(`New job: ${jobName}`);
+      job.log.info(`params: ${JSON.stringify(params)}}`);
+
       return job.run(params).catch(error => this.handleError(error, jobName));
     } catch (error) {
       return this.handleError(error, jobName);

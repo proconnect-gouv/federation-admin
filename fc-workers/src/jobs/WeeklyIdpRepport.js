@@ -105,7 +105,12 @@ class WeeklyIdpRepport extends Job {
 
   async run(params) {
     // Setup
-    const { config, httpClient, input, mailer } = this.container.services;
+    const { config, httpClient, input, mailer } = this.container.get([
+      'config',
+      'httpClient',
+      'input',
+      'mailer',
+    ]);
 
     const schema = {
       idp: { type: 'string', mandatory: true },

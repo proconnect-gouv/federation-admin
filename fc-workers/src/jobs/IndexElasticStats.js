@@ -25,20 +25,16 @@ class IndexElasticStats extends Job {
       case 'activeAccount':
         return stats.getActiveAccountsByRange(params);
       case 'usersPerFsCount':
-        const logger = this.container.get('logger');
-        logger.error('/!\\ Not implemented yet');
-        process.exit(1);
+      default:
+        this.log.error('/!\\ Not implemented yet');
+        return process.exit(1);
     }
   }
 
   async run(params) {
-    const { logger, input, stats } = this.container.get([
-      'logger',
-      'input',
-      'stats',
-    ]);
+    const { input, stats } = this.container.get(['input', 'stats']);
 
-    logger.info(' * Input control');
+    this.log.info('Input control');
     const schema = {
       count: { type: 'string', mandatory: true },
       start: { type: 'date', mandatory: true },
@@ -47,7 +43,7 @@ class IndexElasticStats extends Job {
 
     const { count, start, range } = input.get(schema, params);
 
-    logger.info(' * Fecth data from logs');
+    this.log.info('Fecth data from logs');
     const value = await this.getMetric(count, { start, range });
 
     const doc = stats.createMetricDocument({
@@ -57,13 +53,13 @@ class IndexElasticStats extends Job {
       range,
     });
 
-    logger.info(' * Create a unique consistant id for idempotence');
+    this.log.info('Create a unique consistant id for idempotence');
     const id = IndexElasticStats.getMetricId(doc);
 
-    logger.info(' * Save document to index');
+    this.log.info('Save document to index');
     await stats.index(doc, 'stats', 'metric', id);
 
-    logger.info(' * All done');
+    this.log.info('All done');
   }
 }
 
