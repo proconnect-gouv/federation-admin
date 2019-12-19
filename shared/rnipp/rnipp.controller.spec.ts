@@ -4,7 +4,7 @@ import { RnippService } from './rnipp.service';
 import { rawXml } from '../fixtures/xmlMockedString';
 import { PersonRequestedDTO } from './dto/person-requested-input.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
-import { PersonFromRnipp } from './interface/personFromRnipp.interface';
+import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
 import { TraceService } from '@fc/shared/logger/trace.service';
 
@@ -27,6 +27,9 @@ describe('RnippController', () => {
   };
 
   const req = {
+    user: {
+      username: 'kenjin',
+    },
     csrfToken: function csrfToken() {
       return 'mygreatcsrftoken';
     },
@@ -53,7 +56,7 @@ describe('RnippController', () => {
 
   describe('researchRnipp', () => {
     it('should return an object of person', async () => {
-      const mockedRnippService: PersonFromRnipp = {
+      const mockedRnippService: IResponseFromRnipp = {
         personFoundByRnipp: {
           gender: 'male',
           familyName: 'Dupont',

@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { RnippSerializer } from './rnippSerializer.service';
+import { RnippSerializer } from './rnipp-serializer.service';
 import { rawXml } from '../fixtures/xmlMockedString';
 describe('RnippSerializer (e2e)', () => {
   let rnippSerializer: RnippSerializer;

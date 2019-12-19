@@ -1,7 +1,7 @@
 import { Person } from './person.interface';
-import { PersonFromRnipp } from './personFromRnipp.interface';
+import { IResponseFromRnipp } from './response-from-rnipp.interface';
 
 export interface PersonInformation {
   readonly requested: Person;
-  readonly found: PersonFromRnipp;
+  readonly found: IResponseFromRnipp;
 }

@@ -16,12 +16,18 @@ import { ErrorControllerInterface } from './interface/error-controller.interface
 import { Person } from './interface/person.interface';
 import { PersonRequestedDTO } from './dto/person-requested-input.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
-import { PersonFromRnipp } from './interface/personFromRnipp.interface';
+import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
+import { TraceService } from '@fc/shared/logger/trace.service';
+import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
+import { RnippCallStates } from '@fc/shared/logger/enum/rnipp-call-states.enum';
 
 @Controller()
 export class RnippController {
   prototype: any;
-  public constructor(private readonly rnippService: RnippService) {}
+  public constructor(
+    private readonly rnippService: RnippService,
+    private readonly logger: TraceService,
+  ) {}
 
   @Get('rnipp')
   @Roles(UserRole.OPERATOR)
@@ -41,24 +47,48 @@ export class RnippController {
     @Req() req,
   ): Promise<PersonFoundDTO | ErrorControllerInterface> {
     const csrfToken = req.csrfToken();
+
+    this.logger.supportRnippCall({
+      action: LogActions.SUPPORT_RNIPP_CALL,
+      state: RnippCallStates.INITIATED,
+      user: req.user.username,
+      reason: `ticket support : ${personRequested.supportId}`,
+    });
     try {
-      const rnipp: PersonFromRnipp = await this.rnippService.getJsonFromRnippApi(
+      const response: IResponseFromRnipp = await this.rnippService.getJsonFromRnippApi(
         req,
         personRequested as Person,
       );
 
+      this.logger.supportRnippCall({
+        action: LogActions.SUPPORT_RNIPP_CALL,
+        state: RnippCallStates.SUCCESS,
+        code: response.rnippCode,
+        user: req.user.username,
+        reason: `ticket support : ${personRequested.supportId}`,
+        identityHash: response.identityHash,
+      });
+
       return {
         person: {
           requested: personRequested,
-          found: rnipp.personFoundByRnipp,
+          found: response.personFoundByRnipp,
         },
         rnippResponse: {
-          code: rnipp.rnippCode,
-          raw: rnipp.rawResponse,
+          code: response.rnippCode,
+          raw: response.rawResponse,
         },
         csrfToken,
       };
     } catch (error) {
+      this.logger.supportRnippCall({
+        action: LogActions.SUPPORT_RNIPP_CALL,
+        state: RnippCallStates.ERRORED,
+        code: error.rnippCode,
+        user: req.user.username,
+        reason: `ticket support : ${personRequested.supportId}`,
+        identityHash: error.identityHash,
+      });
       return this.handleError(error, personRequested, csrfToken);
     }
   }

@@ -15,8 +15,8 @@ export class CitizenServiceBase {
         .split('T')
         .shift(),
       citizen.gender,
-      citizen.birthPlace,
-      citizen.birthCountry,
+      // if birthplace is present we do not use birthcountry because it's implicitly France
+      citizen.birthPlace || citizen.birthCountry,
     ].join('');
 
     return this.crypto
