@@ -4,7 +4,7 @@ import { ConfigService } from 'nestjs-config';
 import { RnippService } from './rnipp.service';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { RnippSerializer } from './rnippSerializer.service';
+import { RnippSerializer } from './rnipp-serializer.service';
 import { TraceService } from '@fc/shared/logger/trace.service';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 
@@ -74,6 +74,10 @@ describe('RnippService (e2e)', () => {
 
     rnippService = module.get<RnippService>(RnippService);
     jest.resetAllMocks();
+
+    citizenMock.getCitizenHash.mockReturnValue(
+      'fhsekfeshsfefeefeseshjehkfhefsk',
+    );
   });
 
   describe(`getXmlFormRnippApi`, () => {
@@ -116,6 +120,10 @@ describe('RnippService (e2e)', () => {
         rnippCode: personParsedData.rnippCode,
         rawResponse: result.data,
         statusCode: result.status,
+        identityHash: {
+          idp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+          rnipp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+        },
       });
     });
 
@@ -138,6 +146,9 @@ describe('RnippService (e2e)', () => {
           rawResponse: result.data,
           statusCode: result.status,
           message: result.statusText,
+          identityHash: {
+            idp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+          },
         });
       }
     });
@@ -160,6 +171,9 @@ describe('RnippService (e2e)', () => {
           rawResponse: 'No Data from rnipp',
           statusCode: result.status,
           message: result.statusText,
+          identityHash: {
+            idp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+          },
         });
       }
     });
@@ -182,6 +196,9 @@ describe('RnippService (e2e)', () => {
           rawResponse: 'No Data from rnipp',
           statusCode: result.status,
           message: result.statusText,
+          identityHash: {
+            idp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+          },
         });
       }
     });

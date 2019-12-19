@@ -56,7 +56,7 @@ describe('CitizenService', () => {
       // When
       const result = citizenService.getCitizenHash(citizen);
       // Then
-      expect(result).toBe('0bEYSUw1htXph3WBFy+oEJZtRTab7SjejflD8xiRAL8=');
+      expect(result).toBe('yeD9TZeZcVQM9LYWc5rPHTxG6eIe5wbTti9jFIGAGpw=');
     });
 
     it('Should return a different hash for different infos', () => {
@@ -73,7 +73,7 @@ describe('CitizenService', () => {
       // When
       const result = citizenService.getCitizenHash(citizen);
       // Then
-      expect(result).toBe('sBQ1pJVX88wVSyK5HfnmWPREqeVVGE66gygQn+ITV+I=');
+      expect(result).toBe('JadmXz7R1OBtkBVanqGaOBL7N8itrx01Yi4U2viiN2k=');
     });
   });
 
