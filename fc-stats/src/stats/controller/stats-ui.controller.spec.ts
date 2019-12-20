@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { StatsUIController } from './stats-ui.controller';
 import { StatsService } from '../service/stats.service';
+import { SummaryService } from '../service/sumary.service';
 import { StatsQueries } from '../stats.queries';
 import {
   ElasticsearchModule,
@@ -23,7 +24,7 @@ describe('StatsUIController', () => {
           log: 'trace',
         }),
       ],
-      providers: [StatsService, StatsQueries],
+      providers: [StatsService, StatsQueries, SummaryService],
       controllers: [StatsUIController],
     })
       .overrideProvider(ElasticsearchService)

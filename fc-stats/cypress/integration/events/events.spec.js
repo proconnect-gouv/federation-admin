@@ -21,6 +21,7 @@ describe('Events visualisation UI', () => {
   });
 
   it('displays the events page with', () => {
+    cy.visit('/events');
     cy.contains('Choisissez des dates');
   });
 

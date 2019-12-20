@@ -21,6 +21,7 @@ describe('Metrics visualisation UI', () => {
   });
 
   it('displays the metric page with', () => {
+    cy.visit('/metrics');
     cy.contains('Choisissez des dates');
   });
 
