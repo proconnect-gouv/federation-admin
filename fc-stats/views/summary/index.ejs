@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <% include partials/head.ejs %>
+</head>
+
+<body>
+  <div class="container">
+    <% include partials/header.ejs %>
+      <div class="row">
+        <div class="col-12">
+          <p class="h2">Stats</p>
+          <p><i>Mesure All the things!</i></p>
+          <% summary.forEach((chapter) => { %>
+            <h2><%= chapter.label %></h2>
+            <ul>
+            <% chapter.list.forEach((entry) => { %>
+              <li>
+                <a href="<%= entry.href %>"><%= entry.label %></a>
+              </li>
+            <% }); %>
+            </ul>
+          <% }); %>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -7,6 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { StatsService } from '../service/stats.service';
+import { SummaryService } from '../service/sumary.service';
 import { EventUIListInputDTO } from '../dto/event-ui-list-input.dto';
 import { EventUIListOutputDTO } from '../dto/event-ui-list-output.dto';
 import { MetricUIListInputDTO } from '../dto/metric-ui-list-input.dto';
@@ -14,10 +15,23 @@ import { MetricUIListOutputDTO } from '../dto/metric-ui-list-output.dto';
 import { StatsServiceParams } from '../interfaces/stats-service-params.interface';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { UserRole } from '@fc/shared/user/roles.enum';
+import { ISummary } from '../interfaces/summary.interface';
 
 @Controller()
 export class StatsUIController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(
+    private readonly statsService: StatsService,
+    private readonly summaryService: SummaryService,
+  ) {}
+
+  @Get('summary')
+  @Roles(UserRole.OPERATOR)
+  @Render('summary/index')
+  getIndex() {
+    const summary: ISummary[] = this.summaryService.getSummary();
+
+    return { summary };
+  }
 
   @Get('events')
   @Roles(UserRole.OPERATOR)
