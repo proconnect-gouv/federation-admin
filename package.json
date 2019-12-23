@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "lint": "tslint 'fc-exploitation/src/**/*.ts' 'shared/**/*.ts' 'fc-support/**/*.ts' 'fc-stats/**/*.ts' --exclude '**/node_modules/**/*'"
+    "lint": "tslint 'fc-exploitation/src/**/*.ts' 'shared/**/*.ts' 'fc-support/**/*.ts' 'fc-stats/**/*.ts' --exclude '**/node_modules/**/*'",
+    "lint:commit": "export files=$(git diff --name-only --cached -- '*.ts') && [[ -z $files ]] && echo 'no files to lint' || tslint $files --exclude '**/node_modules/**/*'"
   },
   "repository": {
     "type": "git",

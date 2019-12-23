@@ -23,7 +23,9 @@ import { SECRET_TOTP } from './constants';
  * @example cy.formType('#myId', 'foo', { fast: true, typeEvent: true });
  */
 export function formType(input, value, config = { fast: true }) {
-  const cyInput = typeof input === 'string' ? cy.get(input) : input;
+  const isCypress = typeof input === 'object' && 'chainerId' in input;
+  const cyInput = isCypress ? input : cy.get(input);
+
   if (config.fast === false) {
     return cyInput.clear().type(value);
   }
@@ -124,6 +126,7 @@ export function formControl(inputs) {
  * Otherwise, a wrong code (000000) will fill the field
  * Warning You should await this function !
  *
+ * @param {object?} subject the previous cypress object that call totp
  * @param {object} configuration Configuration object from test suite
  * @param {string} secret Secret for TOTP generator
  * @return {Promise}
@@ -131,11 +134,20 @@ export function formControl(inputs) {
  * @example cy.formFillTotp({ totp: true }, 'ZAERZRERAZAZEZA');
  * @example cy.formFillTotp({ totp: true });
  */
-export function totp(configuration = {}, secret = SECRET_TOTP) {
+
+export function totp(subject, arg1, arg2) {
+  // the subject can be : the input element, a undefined element or ignore and be the first argument of your call
+  const hasSubject = typeof subject === 'object' && 'prevObject' in subject;
+  // we inject the arguments based on the possible existence of the subject element
+  const input = hasSubject ? subject : 'input[name="_totp"]';
+  const configuration = (hasSubject || subject === undefined ? arg1 : subject) || {};
+  const secret = (hasSubject || subject === undefined ? arg2 : arg1) || SECRET_TOTP;
+
   if (configuration.totp === false) {
-    return formType('input[name="_totp"]', '000000', configuration);
+    return formType(input, '000000', configuration);
   }
 
   const token = getTotp(secret);
-  return formType('input[name="_totp"]', token, configuration);
+  return formType(input, token, configuration);
 }
+
