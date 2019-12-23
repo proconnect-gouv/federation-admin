@@ -22,6 +22,6 @@ Cypress.Commands.add('resetEnv', type => {
 Cypress.Commands.add('formFill', formFill);
 Cypress.Commands.add('formControl', formControl);
 Cypress.Commands.add('formType', formType);
-Cypress.Commands.add('totp', totp);
+Cypress.Commands.add('totp', { prevSubject: 'optional' }, totp);
 Cypress.Commands.add('login', login);
 Cypress.Commands.add('logout', logout);
