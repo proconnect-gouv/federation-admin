@@ -41,5 +41,6 @@ export const aggregateProjectTagName = {
     specificText: 1,
     mailto: 1,
     output: { $toLower: '$name' },
+    signup_id: 1,
   },
 };

@@ -68,6 +68,9 @@ const createPipelineAggregate = options => {
           {
             title: userEntry,
           },
+          {
+            signup_id: userEntry,
+          },
         ],
       },
     },
