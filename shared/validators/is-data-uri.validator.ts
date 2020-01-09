@@ -84,7 +84,7 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
     }
 
     // on vérifie le "vrai" type de l'élément
-    const { ext } = fileType(Buffer.from(image, 'base64')) || {};
+    const { ext } = fileType(Buffer.from(image, 'base64')) || { ext: null };
     if (!ext || typeof ext !== 'string') {
       return false;
     }
