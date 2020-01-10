@@ -24,6 +24,7 @@ export class PersonGenericDTO {
   @IsISO8601()
   readonly birthdate: string;
 
+  @IsOptionalExtended()
   @Matches(/^[0-9]{5}$/)
   @IsString()
   readonly birthPlace: string;
@@ -31,8 +32,4 @@ export class PersonGenericDTO {
   @Matches(/^[0-9]{5}$/)
   @IsString()
   readonly birthCountry: string;
-
-  @Matches(/^[0-9]{16}$/)
-  @IsString()
-  readonly supportId: string;
 }

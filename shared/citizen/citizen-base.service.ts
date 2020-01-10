@@ -1,22 +1,19 @@
 import { v4 as uuid } from 'uuid';
-import { CitizenIdentityDTO } from './dto/citizen-identity.dto';
+import { IPivotIdentity } from './interfaces/pivot-identity.interface';
 import { Inject } from '@nestjs/common';
 
 export class CitizenServiceBase {
   // tslint:disable-next-line: no-empty
   constructor(@Inject('cryptoProvider') private readonly crypto) {}
 
-  getCitizenHash(citizen: CitizenIdentityDTO): string {
+  getPivotIdentityHash(pivotIdentity: IPivotIdentity): string {
     const data = [
-      citizen.givenName,
-      citizen.familyName,
-      citizen.birthdate
-        .toISOString()
-        .split('T')
-        .shift(),
-      citizen.gender,
-      // if birthplace is present we do not use birthcountry because it's implicitly France
-      citizen.birthPlace || citizen.birthCountry,
+      pivotIdentity.givenName,
+      pivotIdentity.familyName,
+      pivotIdentity.birthdate,
+      pivotIdentity.gender,
+      pivotIdentity.birthPlace,
+      pivotIdentity.birthCountry,
     ].join('');
 
     return this.crypto

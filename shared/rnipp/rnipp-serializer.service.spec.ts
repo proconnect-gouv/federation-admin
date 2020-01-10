@@ -90,7 +90,6 @@ describe('RnippSerializer (e2e)', () => {
 
       const result = await rnippSerializer.serializeXmlFromRnipp(
         rawXml.xmlString,
-        personBornInFrance,
       );
       expect(result).toMatchObject({
         identity: {
@@ -100,9 +99,9 @@ describe('RnippSerializer (e2e)', () => {
           birthdate: '2019-07-02',
           birthCountry: '99100',
           birthPlace: '55555',
-          supportId: '1234567891234567',
         },
         rnippCode: '3',
+        dead: false,
       });
     });
 
@@ -151,7 +150,6 @@ describe('RnippSerializer (e2e)', () => {
 
         const result = await rnippSerializer.serializeXmlFromRnipp(
           rawXml.xmlString,
-          personNotBornInFrance,
         );
         expect(result).toMatchObject({
           identity: {
@@ -160,10 +158,10 @@ describe('RnippSerializer (e2e)', () => {
             givenName: 'trete',
             birthdate: '2019-07-02',
             birthCountry: '99350',
-            birthPlace: '00000',
-            supportId: '1234567891234567',
+            birthPlace: '',
           },
           rnippCode: '2',
+          dead: false,
         });
       });
     });
@@ -184,7 +182,6 @@ describe('RnippSerializer (e2e)', () => {
 
       const result = await rnippSerializer.serializeXmlFromRnipp(
         rawXml.xmlString,
-        personBornInFrance,
       );
       expect(result).toMatchObject({
         rnippCode: '8',
@@ -238,10 +235,7 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(
-          rawXml.xmlString,
-          personBornInFrance,
-        );
+        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
@@ -296,10 +290,7 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(
-          rawXml.xmlString,
-          personBornInFrance,
-        );
+        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
@@ -352,10 +343,7 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(
-          rawXml.xmlString,
-          personBornInFrance,
-        );
+        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }
@@ -411,10 +399,7 @@ describe('RnippSerializer (e2e)', () => {
       };
 
       try {
-        await rnippSerializer.serializeXmlFromRnipp(
-          rawXml.xmlString,
-          personBornInFrance,
-        );
+        await rnippSerializer.serializeXmlFromRnipp(rawXml.xmlString);
       } catch (error) {
         expect(error).toEqual(expectedContraints);
       }

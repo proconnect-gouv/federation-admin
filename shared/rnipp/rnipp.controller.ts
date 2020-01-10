@@ -13,8 +13,8 @@ import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { RnippService } from './rnipp.service';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
-import { Person } from './interface/person.interface';
-import { PersonRequestedDTO } from './dto/person-requested-input.dto';
+import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
+import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { TraceService } from '@fc/shared/logger/trace.service';
@@ -43,7 +43,7 @@ export class RnippController {
   @Render('rnipp')
   @UsePipes(new ValidationPipe({ transform: true }))
   public async researchRnipp(
-    @Body() personRequested: PersonRequestedDTO,
+    @Body() rectificationRequest: RectificationRequestDTO,
     @Req() req,
   ): Promise<PersonFoundDTO | ErrorControllerInterface> {
     const csrfToken = req.csrfToken();
@@ -52,12 +52,14 @@ export class RnippController {
       action: LogActions.SUPPORT_RNIPP_CALL,
       state: RnippCallStates.INITIATED,
       user: req.user.username,
-      reason: `ticket support : ${personRequested.supportId}`,
+      reason: `ticket support : ${rectificationRequest.supportId}`,
     });
+
+    const requestedIdentity = rectificationRequest.toIdentity();
+
     try {
-      const response: IResponseFromRnipp = await this.rnippService.getJsonFromRnippApi(
-        req,
-        personRequested as Person,
+      const response: IResponseFromRnipp = await this.rnippService.requestIdentityRectification(
+        requestedIdentity,
       );
 
       this.logger.supportRnippCall({
@@ -65,19 +67,20 @@ export class RnippController {
         state: RnippCallStates.SUCCESS,
         code: response.rnippCode,
         user: req.user.username,
-        reason: `ticket support : ${personRequested.supportId}`,
+        reason: `ticket support : ${rectificationRequest.supportId}`,
         identityHash: response.identityHash,
       });
 
       return {
         person: {
-          requested: personRequested,
-          found: response.personFoundByRnipp,
+          requestedIdentity,
+          rectifiedIdentity: response.rectifiedIdentity,
         },
         rnippResponse: {
           code: response.rnippCode,
           raw: response.rawResponse,
         },
+        supportId: rectificationRequest.supportId,
         csrfToken,
       };
     } catch (error) {
@@ -86,31 +89,39 @@ export class RnippController {
         state: RnippCallStates.ERRORED,
         code: error.rnippCode,
         user: req.user.username,
-        reason: `ticket support : ${personRequested.supportId}`,
+        reason: `ticket support : ${rectificationRequest.supportId}`,
         identityHash: error.identityHash,
       });
-      return this.handleError(error, personRequested, csrfToken);
+      return this.handleError(
+        error,
+        rectificationRequest.supportId,
+        requestedIdentity,
+        csrfToken,
+      );
     }
   }
 
   private async handleError(
     error: any,
-    personRequested: PersonRequestedDTO,
+    supportId: string,
+    requestedIdentity: IIdentity,
     csrfToken: string,
   ): Promise<ErrorControllerInterface> {
     if (error.errors) {
       return {
         person: {
-          requested: personRequested,
+          requestedIdentity,
         },
+        supportId,
         message: error.errors,
         csrfToken,
       };
     } else {
       return {
         person: {
-          requested: personRequested,
+          requestedIdentity,
         },
+        supportId,
         rawResponse: error.rawResponse,
         rnippCode: error.rnippCode || '',
         statusCode: error.statusCode || 500,

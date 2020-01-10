@@ -1,0 +1,50 @@
+{
+  "utilisateur_français_actif_à_désactiver": {
+    "gender": "male",
+    "familyName": "SAITAMA",
+    "givenName": "Makoto",
+    "birthdate": "0001-01-01",
+    "isFrench": "false",
+    "cog": "99217"
+  },
+  "utilisateur_français_actif": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "Chuck",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "cog": "00000"
+  },
+  "utilisateur_français_actif_caractère_spéciaux": {
+    "gender": "male",
+    "familyName": "LE FRANÇAIS",
+    "givenName": "François",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "cog": "00000"
+  },
+  "utilisateur_français_actif_à_redresser": {
+    "gender": "male",
+    "familyName": "nOrRiS",
+    "givenName": "Chuck",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "cog": "00000"
+  },
+  "utilisateur_étranger_actif": {
+    "gender": "male",
+    "familyName": "TARGE",
+    "givenName": "Jean",
+    "birthdate": "2019-11-15",
+    "isFrench": "male",
+    "cog": "99217"
+  },
+  "utilisateur_étranger_désactivé_jamais_connecté": {
+    "gender": "male",
+    "familyName": "FLEURET",
+    "givenName": "Jean",
+    "birthdate": "2019-11-15",
+    "isFrench": "false",
+    "cog": "99217"
+  }
+}

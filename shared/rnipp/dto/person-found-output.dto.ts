@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ValidateNested, IsString } from 'class-validator';
+import { ValidateNested, IsString, Matches } from 'class-validator';
 import { RnippInformation } from './rnipp-information.dto';
 import { PersonInformation } from './person-information.dto';
 
@@ -14,4 +14,8 @@ export class PersonFoundDTO {
 
   @IsString()
   public csrfToken: string;
+
+  @Matches(/^[0-9]{16}$/)
+  @IsString()
+  readonly supportId: string;
 }

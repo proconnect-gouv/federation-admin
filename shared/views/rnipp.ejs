@@ -39,7 +39,7 @@
                     class="form-control"
                     id="support-id"
                     name="supportId"
-                    value="<%= (locals.person && person.requested.supportId) ? person.requested.supportId : '' %>"
+                    value="<%= locals.supportId || '' %>"
                     pattern="^[0-9]{16}$"
                     required
                   >
@@ -62,7 +62,7 @@
                       name="gender"
                       value="female"
                       required
-                      <% if(locals.person && person.requested.gender === 'female'){ %> checked <%} %>
+                      <% if(locals.person && locals.person.requestedIdentity.gender === 'female'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="female">Féminin</label>
                   </div>
@@ -74,7 +74,7 @@
                       name="gender"
                       value="male"
                       required
-                      <% if(locals.person && person.requested.gender === 'male'){ %> checked <%} %>
+                      <% if(locals.person && locals.person.requestedIdentity.gender === 'male'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="male">Masculin</label>
                     <div class="invalid-feedback" style="margin: 0.15rem 0 0 1rem">
@@ -90,8 +90,8 @@
                     class="form-control"
                     id="family-name"
                     name="familyName"
-                    value="<%= (locals.person && person.requested.familyName) ? person.requested.familyName : '' %>"
-                    pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+                    value="<%= (locals.person && locals.person.requestedIdentity.familyName) ? locals.person.requestedIdentity.familyName : '' %>"
+                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
                     required
                   >
                   <div class="invalid-feedback">
@@ -105,8 +105,8 @@
                     class="form-control"
                     id="preferred-username"
                     name="preferredUsername"
-                    value="<%= (locals.person && person.requested.preferredUsername) ? person.requested.preferredUsername : '' %>"
-                    pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+                    value="<%= (locals.person && locals.person.requestedIdentity.preferredUsername) ? locals.person.requestedIdentity.preferredUsername : '' %>"
+                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
                   >
                   <div class="invalid-feedback">
                     Veuillez renseigner un nom d'usage
@@ -120,15 +120,15 @@
                     id="given-name"
                     name="givenName"
                     placeholder="exemple : Jean Michel Pierre Marie"
-                    value="<%= (locals.person && person.requested.givenName) ? person.requested.givenName : '' %>"
-                    pattern="[a-zA-Zàâéêèëîïôùç]+([ -][a-zA-Zàâéêèëîïôùç]+)*"
+                    value="<%= (locals.person && locals.person.requestedIdentity.givenName) ? locals.person.requestedIdentity.givenName : '' %>"
+                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
                     required
                   >
                   <div class="invalid-feedback">
                     Veuillez renseigner un prénom ou vos prénoms
                   </div>
                 </div>
-                <div class="form-group ">
+                <div class="form-group">
                   <label for="birthdate" class="control-label">Date de naissance (format YYYY-mm-dd)</label>
                   <div class="input-group">
                     <input
@@ -137,7 +137,7 @@
                       id="birthdate"
                       name="birthdate"
                       placeholder="exemple : 1987-02-21"
-                      value="<%= (locals.person && person.requested.birthdate) ? person.requested.birthdate : '' %>"
+                      value="<%= (locals.person && locals.person.requestedIdentity.birthdate) ? locals.person.requestedIdentity.birthdate : '' %>"
                       data-init="datePicker"
                       required
                       autocomplete="off"
@@ -158,11 +158,10 @@
                       type="radio"
                       class="custom-control-input"
                       id="french"
-                      name="birthCountry"
-                      value="99100"
+                      name="isFrench"
+                      value="true"
                       required
-                      <% if(locals.person && person.requested.birthCountry === '99100'){ %> checked <%} %>
-                      checked
+                      <% if (!locals.person || locals.person.requestedIdentity.birthCountry === '99100'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="french">Oui</label>
                   </div>
@@ -171,23 +170,25 @@
                       type="radio"
                       class="custom-control-input"
                       id="no-french"
-                      name="birthCountry"
-                      value="99999"
+                      name="isFrench"
+                      value="false"
                       required
-                      <% if(locals.person && person.requested.birthCountry === '99999'){ %> checked <%} %>
+                      <% if (locals.person && locals.person.requestedIdentity.birthCountry !== '99100'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="no-french">Non</label>
                   </div>
                 </div>
-                <div class="form-group ">
-                  <label for="birthplace" class="control-label">Code lieu de naissance (commune ou pays)</label>
+                <div class="form-group">
+                  <label for="cog" class="control-label">Code lieu de naissance (commune ou pays)</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="birthplace"
-                    name="birthPlace"
+                    id="cog"
+                    name="cog"
                     placeholder="exemple : 92012 pour Boulogne-Billancourt"
-                    value="<%= (locals.person && person.requested.birthPlace) ? person.requested.birthPlace : '' %>"
+                    value="<%= locals.person
+                      ? locals.person.requestedIdentity.birthPlace || locals.person.requestedIdentity.birthCountry
+                      : '' %>"
                     pattern="[0-9]{5}"
                     title="Vous devez renseigner 5 nombres"
                     required
@@ -205,24 +206,24 @@
           </form>
         </div>
         <div id="result" class="col-md-6 col-sm-12" >
-          <% if (locals.person && person.found) { %>
+          <% if (locals.person && locals.person.rectifiedIdentity) { %>
             <h3>Résultat du redressement RNIPP</h3>
             <div class="card my-3">
               <div class="card-body">
                 <div class="mb-2">
                   <div class="label">Numéro de ticket support</div>
                   <div class="font-weight-bold">
-                    <%= (locals.person && person.requested.supportId) ? person.requested.supportId : '' %>
+                    <%= locals.supportId || '' %>
                   </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">Genre</div>
-                  <% if (person.found.gender === 'male') { %>
+                  <% if (locals.person.rectifiedIdentity.gender === 'male') { %>
                     <div class="font-weight-bold">
                       Masculin
                     </div>
                   <% } %>
-                  <% if (person.found.gender === 'female') { %>
+                  <% if (locals.person.rectifiedIdentity.gender === 'female') { %>
                     <div class="font-weight-bold">
                       Féminin
                     </div>
@@ -230,51 +231,39 @@
                 </div>
                 <div class="mb-2">
                   <div class="label">Nom</div>
-                  <% if (person.found.familyName) { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.familyName%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.familyName || '' %>
+                  </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">Nom d'usage</div>
-                  <% if (person.found.preferredUsername) { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.preferredUsername%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.preferredUsername || '' %>
+                  </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">Prénoms</div>
-                  <% if (person.found.givenName) { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.givenName%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.givenName || '' %>
+                  </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">Date de naissance</div>
-                  <% if (person.found.birthdate) { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.birthdate%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.birthdate || '' %>
+                  </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">COG du lieu de naissance</div>
-                  <% if (person.found.birthPlace && person.found.birthPlace !== '00000') { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.birthPlace%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.birthPlace || '' %>
+                  </div>
                 </div>
                 <div class="mb-2">
                   <div class="label">COG du pays de naissance</div>
-                  <% if (person.found.birthCountry) { %>
-                    <div class="font-weight-bold">
-                      <%=person.found.birthCountry%>
-                    </div>
-                  <% } %>
+                  <div class="font-weight-bold">
+                    <%= locals.person.rectifiedIdentity.birthCountry || '' %>
+                  </div>
                 </div>
                 <hr/>
                 <div class="mb-2">
@@ -289,8 +278,9 @@
     <%/** Make RNIPP response data easily available for ajax requests (fc-exploitation) */%>
     <% if (locals.person) { %>
     <script type="text/javascript">
-      const __RNIPP_DATA__ = <%- JSON.stringify(person.found) %>;
+      const __RNIPP_DATA__ = <%- JSON.stringify(locals.person.rectifiedIdentity) %>;
+      const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
     </script>
-     <% } %>
+    <% } %>
   </section>
 <% include partials/footer.ejs %>

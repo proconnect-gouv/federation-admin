@@ -5,9 +5,9 @@ import { PersonGenericDTO } from './person-generic.dto';
 export class PersonInformation {
   @ValidateNested()
   @Type(() => PersonGenericDTO)
-  public requested: PersonGenericDTO;
+  public requestedIdentity: PersonGenericDTO;
 
   @ValidateNested()
   @Type(() => PersonGenericDTO)
-  public found?: PersonGenericDTO;
+  public rectifiedIdentity?: PersonGenericDTO;
 }

@@ -2,15 +2,19 @@
 import {
   USER_OPERATOR,
   USER_PASS,
-} from '../../../shared/cypress/support/constants';
+} from '../../support/constants';
+
+import *  as rnippIdentities from '../../fixtures/rnipp-test-identities';
 
 const configuration = {};
 
 const BASE_URL = Cypress.config('baseUrl');
 
-describe('RnippController', () => {
+describe('Rnipp rectification', () => {
+  before(() => cy.resetEnv('mongoFC'));
   beforeEach(() => {
     cy.login(USER_OPERATOR, USER_PASS);
+    cy.visit(`${BASE_URL}/rnipp`);
   });
 
   it('Should retrieve userinfo from RNIPP (person who is born in France)', () => {
@@ -19,15 +23,11 @@ describe('RnippController', () => {
 
     const person = {
       supportId: '1234567891234567',
-      familyName: 'Jack',
-      givenName: 'Pierre Paul',
-      birthdate: '1990-11-12',
-      birthPlace: '92012',
+      ...rnippIdentities['utilisateur_français_actif'],
     };
 
     cy.formFill(person, configuration);
 
-    cy.get('input[name=gender]').check('female', { force: true });
     cy.get('form[name="rnipp-form"] button[type="submit"]').click();
 
     // Should
@@ -35,17 +35,18 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
       // Expect
-      expect($divs).to.have.length(7);
+      expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
-      expect($divs.eq(1)).to.contain('Féminin');
-      expect($divs.eq(2)).to.contain('JACK');
-      expect($divs.eq(3)).to.contain('Pierre Paul');
-      expect($divs.eq(4)).to.contain('1990-11-12');
-      expect($divs.eq(5)).to.contain('92012');
-      expect($divs.eq(6)).to.contain('99100');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('NORRIS');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Chuck');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('00000');
+      expect($divs.eq(7)).to.contain('99100');
     });
 
-    cy.formControl({ ...person, familyName: 'JACK' });
+    cy.formControl({ ...person });
   });
 
   it('Should retrieve userinfo with accented character and ç from RNIPP (person who is born in France)', () => {
@@ -53,13 +54,9 @@ describe('RnippController', () => {
     cy.contains('Rechercher un usager');
     const person = {
       supportId: '1234567891234567',
-      familyName: 'Jack',
-      givenName: 'René Françoise',
-      birthdate: '1990-11-12',
-      birthPlace: '92012',
+      ...rnippIdentities['utilisateur_français_actif_caractère_spéciaux'],
     };
     cy.formFill(person, configuration);
-    cy.get('input[name=gender]').check('female', { force: true });
     cy.get('form[name="rnipp-form"] button[type="submit"]').click();
 
     // Should
@@ -67,17 +64,18 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
       // Expect
-      expect($divs).to.have.length(7);
+      expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
-      expect($divs.eq(1)).to.contain('Féminin');
-      expect($divs.eq(2)).to.contain('JACK');
-      expect($divs.eq(3)).to.contain('René Françoise');
-      expect($divs.eq(4)).to.contain('1990-11-12');
-      expect($divs.eq(5)).to.contain('92012');
-      expect($divs.eq(6)).to.contain('99100');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('LE FRANÇAIS');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('François');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('00000');
+      expect($divs.eq(7)).to.contain('99100');
     });
 
-    cy.formControl({ ...person, familyName: 'JACK' });
+    cy.formControl({ ...person });
   });
 
   it('Should retrieve userinfo from RNIPP (person who is not born in France)', () => {
@@ -86,15 +84,10 @@ describe('RnippController', () => {
 
     const person = {
       supportId: '1234567891234567',
-      familyName: 'Jack',
-      givenName: 'Pierre Paul',
-      birthdate: '1990-11-12',
+      ...rnippIdentities['utilisateur_étranger_actif'],
     };
     cy.formFill(person, configuration);
 
-    cy.get('input[name=gender]').check('female', { force: true });
-    cy.get('input[name=birthCountry]').check('99999', { force: true });
-    cy.formType('[name="birthPlace"]', '99350');
     cy.get('form[name="rnipp-form"] button[type="submit"]').click();
 
     // Should
@@ -102,16 +95,49 @@ describe('RnippController', () => {
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
       // Expect
-      expect($divs).to.have.length(6);
+      expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
-      expect($divs.eq(1)).to.contain('Féminin');
-      expect($divs.eq(2)).to.contain('JACK');
-      expect($divs.eq(3)).to.contain('Pierre Paul');
-      expect($divs.eq(4)).to.contain('1990-11-12');
-      expect($divs.eq(5)).to.contain('99350');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('TARGE');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Jean');
+      expect($divs.eq(5)).to.contain('2019-11-15');
+      expect($divs.eq(6)).to.contain('');
+      expect($divs.eq(7)).to.contain('99217');
     });
 
-    cy.formControl({ ...person, familyName: 'JACK' });
+    cy.formControl({ ...person });
+  });
+
+  it('Should retrieve userinfo rectified from RNIPP', () => {
+    cy.url().should('equal', `${BASE_URL}/rnipp`);
+    cy.contains('Rechercher un usager');
+
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_français_actif_à_redresser'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('NORRIS');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Chuck');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('00000');
+      expect($divs.eq(7)).to.contain('99100');
+    });
+
+    cy.formControl({ ...person, familyName: 'NORRIS' });
   });
 
   it('Should not send the form if require input are empty', () => {
@@ -164,6 +190,6 @@ describe('RnippController', () => {
     );
     cy.get('input[name=familyName]').should('have.value', 'Jack');
     cy.get('input[name=birthdate]').should('have.value', '1990-11-12');
-    cy.get('input[name=birthCountry]').should('be.checked');
+    cy.get('input[name=isFrench]').should('be.checked');
   });
 });

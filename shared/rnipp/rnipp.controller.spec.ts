@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
 import { rawXml } from '../fixtures/xmlMockedString';
-import { PersonRequestedDTO } from './dto/person-requested-input.dto';
+import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
@@ -12,18 +12,29 @@ describe('RnippController', () => {
   let rnippController: RnippController;
 
   const rnippService = {
-    getJsonFromRnippApi: jest.fn(),
+    requestIdentityRectification: jest.fn(),
   };
 
-  const identity: PersonRequestedDTO = {
+  const identity = {
     gender: 'male',
     familyName: 'Dupont',
     preferredUsername: 'Henri',
     givenName: 'Pierr',
     birthdate: '1992-03-03',
-    birthPlace: '99100',
+    birthPlace: '75107',
     birthCountry: '99100',
+  };
+
+  const rectificationRequest: RectificationRequestDTO = {
     supportId: '1234567891234567',
+    gender: 'male',
+    familyName: 'Dupont',
+    preferredUsername: 'Henri',
+    givenName: 'Pierr',
+    birthdate: '1992-03-03',
+    isFrench: true,
+    cog: '75107',
+    toIdentity: () => identity,
   };
 
   const req = {
@@ -57,15 +68,14 @@ describe('RnippController', () => {
   describe('researchRnipp', () => {
     it('should return an object of person', async () => {
       const mockedRnippService: IResponseFromRnipp = {
-        personFoundByRnipp: {
+        rectifiedIdentity: {
           gender: 'male',
           familyName: 'Dupont',
           preferredUsername: 'Henri',
           givenName: 'Pierr',
           birthdate: '1992-03-03',
-          birthPlace: '99100',
+          birthPlace: '75107',
           birthCountry: '99100',
-          supportId: '1234567891234567',
         },
         rawResponse: rawXml.xmlString,
         rnippCode: 2,
@@ -74,39 +84,41 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         person: {
-          requested: {
+          requestedIdentity: {
             gender: 'male',
             familyName: 'Dupont',
             preferredUsername: 'Henri',
             givenName: 'Pierr',
             birthdate: '1992-03-03',
-            birthPlace: '99100',
+            birthPlace: '75107',
             birthCountry: '99100',
-            supportId: '1234567891234567',
           },
-          found: {
+          rectifiedIdentity: {
             gender: 'male',
             familyName: 'Dupont',
             preferredUsername: 'Henri',
             givenName: 'Pierr',
             birthdate: '1992-03-03',
-            birthPlace: '99100',
+            birthPlace: '75107',
             birthCountry: '99100',
-            supportId: '1234567891234567',
           },
         },
         rnippResponse: {
           code: 2,
           raw: rawXml.xmlString,
         },
+        supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
       };
 
-      rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
 
-      const result = await rnippController.researchRnipp(identity, req);
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
 
       expect(result).toEqual(expectedResult);
     });
@@ -120,20 +132,24 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         person: {
-          requested: identity,
+          requestedIdentity: identity,
         },
         rawResponse: 'No Data from rnipp',
         statusCode: 500,
         message: '',
+        supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
         rnippCode: '',
       };
 
-      rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
 
-      const result = await rnippController.researchRnipp(identity, req);
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
 
       expect(result).toEqual(expectedResult);
     });
@@ -147,20 +163,24 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         person: {
-          requested: identity,
+          requestedIdentity: identity,
         },
         rawResponse: 'component',
         statusCode: 403,
         message: 'message',
+        supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
         rnippCode: '',
       };
 
-      rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
 
-      const result = await rnippController.researchRnipp(identity, req);
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
 
       expect(result).toEqual(expectedResult);
     });
@@ -177,8 +197,9 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         person: {
-          requested: identity,
+          requestedIdentity: identity,
         },
+        supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
         message: [
           'familyName must be a string',
@@ -188,11 +209,14 @@ describe('RnippController', () => {
         ],
       };
 
-      rnippService.getJsonFromRnippApi.mockImplementationOnce(() => {
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
 
-      const result = await rnippController.researchRnipp(identity, req);
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
 
       expect(result).toEqual(expectedResult);
     });

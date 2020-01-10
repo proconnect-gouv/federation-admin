@@ -28,7 +28,7 @@ describe('RnippService (e2e)', () => {
   };
 
   const citizenMock = {
-    getCitizenHash: jest.fn(),
+    getPivotIdentityHash: jest.fn(),
     findByHash: jest.fn(),
   };
 
@@ -38,9 +38,8 @@ describe('RnippService (e2e)', () => {
     preferredUsername: 'string',
     givenName: 'string',
     birthdate: '1992-03-03',
-    birthPlace: 'string',
-    birthCountry: 'string',
-    supportId: '1234567891234567',
+    birthPlace: '95277',
+    birthCountry: '99100',
   };
 
   const req = {
@@ -75,7 +74,7 @@ describe('RnippService (e2e)', () => {
     rnippService = module.get<RnippService>(RnippService);
     jest.resetAllMocks();
 
-    citizenMock.getCitizenHash.mockReturnValue(
+    citizenMock.getPivotIdentityHash.mockReturnValue(
       'fhsekfeshsfefeefeseshjehkfhefsk',
     );
   });
@@ -110,13 +109,12 @@ describe('RnippService (e2e)', () => {
         .mockImplementation(() => Promise.resolve(personParsedData));
       jest.spyOn(loggerMock, 'supportRnippCall');
 
-      const person = await rnippService.getJsonFromRnippApi(
-        req,
+      const person = await rnippService.requestIdentityRectification(
         personParsedData.identity,
       );
 
       expect(person).toEqual({
-        personFoundByRnipp: personParsedData.identity,
+        rectifiedIdentity: personParsedData.identity,
         rnippCode: personParsedData.rnippCode,
         rawResponse: result.data,
         statusCode: result.status,
@@ -140,7 +138,7 @@ describe('RnippService (e2e)', () => {
       jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(req, personData);
+        await rnippService.requestIdentityRectification(personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: result.data,
@@ -165,7 +163,7 @@ describe('RnippService (e2e)', () => {
       jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(req, personData);
+        await rnippService.requestIdentityRectification(personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: 'No Data from rnipp',
@@ -190,7 +188,7 @@ describe('RnippService (e2e)', () => {
       jest.spyOn(loggerMock, 'supportRnippCall');
 
       try {
-        await rnippService.getJsonFromRnippApi(req, personData);
+        await rnippService.requestIdentityRectification(personData);
       } catch (error) {
         expect(error).toEqual({
           rawResponse: 'No Data from rnipp',

@@ -1,12 +1,14 @@
 import { Injectable, HttpService, Logger } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
-import { Person } from './interface/person.interface';
+import { validate } from 'class-validator';
+import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
+import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
 import { RnippSerializer } from './rnipp-serializer.service';
 import * as queryString from 'query-string';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
-import { CitizenIdentityDTO } from '@fc/shared/citizen/dto/citizen-identity.dto';
+import { PersonGenericDTO } from './dto/person-generic.dto';
 
 @Injectable()
 export class RnippService {
@@ -17,57 +19,26 @@ export class RnippService {
     private readonly citizen: CitizenServiceBase,
   ) {}
 
-  public async getJsonFromRnippApi(
-    req: any,
-    personData: Person,
+  public async requestIdentityRectification(
+    identity: IIdentity,
   ): Promise<IResponseFromRnipp | any> {
-    Logger.debug(`Will get xml`);
+    const idpIdentityHash = await this.citizen.getPivotIdentityHash(
+      identity as IPivotIdentity,
+    );
 
-    const idpIdentityHash = await this.getRnippRequestedUserHash(personData);
+    Logger.debug(`Requested identity hash: ${idpIdentityHash}`);
 
-    const rnippUrl: string = this.createRnippUrl(personData);
+    const rnippUrl: string = this.constructRequestUrl(
+      identity as IPivotIdentity,
+    );
 
-    const response = this.http.get(`${rnippUrl}`);
+    Logger.debug(`Calling RNIPP with: ${rnippUrl}...`);
 
-    return response.toPromise().then(async axiosResponse => {
-      if (axiosResponse.status === 200 && axiosResponse.data) {
-        const xmlFromRnipp: string = axiosResponse.data;
-        Logger.debug(`Xml => ${xmlFromRnipp}`);
-        const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
-          xmlFromRnipp,
-          personData,
-        );
-        const rnippIdentityHash = await this.getRnippRequestedUserHash(
-          user.identity,
-        );
+    const axiosResponse = await this.http.get(`${rnippUrl}`).toPromise();
 
-        if (user.rnippCode === '2' || user.rnippCode === '3') {
-          return {
-            personFoundByRnipp: user.identity || {},
-            rnippCode: user.rnippCode,
-            rawResponse: xmlFromRnipp,
-            statusCode: axiosResponse.status,
-            identityHash: {
-              idp: idpIdentityHash,
-              rnipp: rnippIdentityHash,
-            },
-          };
-        } else {
-          throw {
-            rawResponse: xmlFromRnipp,
-            statusCode: axiosResponse.status,
-            message: "Une erreur s'est produite lors de l'appel au RNIPP.",
-            rnippCode: user.rnippCode,
-            identityHash: {
-              idp: idpIdentityHash,
-              rnipp: rnippIdentityHash,
-            },
-          };
-        }
-      }
+    Logger.debug(`RNIPP Response status: ${axiosResponse.status}`);
 
-      Logger.warn(`Response status is not ok. Xml => null`);
-
+    if (axiosResponse.status !== 200 || !axiosResponse.data) {
       throw {
         rawResponse: axiosResponse.data || 'No Data from rnipp',
         statusCode: axiosResponse.status,
@@ -76,20 +47,63 @@ export class RnippService {
           idp: idpIdentityHash,
         },
       };
-    });
+    }
+
+    Logger.debug('Calling serializer to get understandable json');
+
+    const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
+      axiosResponse.data,
+    );
+
+    if (!user.identity) {
+      throw {
+        rawResponse: axiosResponse.data,
+        statusCode: axiosResponse.status,
+        message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+        rnippCode: user.rnippCode,
+        identityHash: {
+          idp: idpIdentityHash,
+        },
+      };
+    }
+
+    const errors = await this.validateIdentityFormat(user.identity);
+
+    if (errors.length > 0) {
+      throw errors;
+    }
+
+    const rnippIdentityHash = await this.citizen.getPivotIdentityHash(
+      user.identity as IPivotIdentity,
+    );
+
+    return {
+      rectifiedIdentity: user.identity || {},
+      rnippCode: user.rnippCode,
+      rawResponse: axiosResponse.data,
+      statusCode: axiosResponse.status,
+      identityHash: {
+        idp: idpIdentityHash,
+        rnipp: rnippIdentityHash,
+      },
+    };
   }
 
-  private createRnippUrl(personData: Person): string {
+  private async validateIdentityFormat(identity: PersonGenericDTO) {
+    return validate(identity);
+  }
+
+  private constructRequestUrl(pivotIdentity: IPivotIdentity): string {
     const protocol = this.config.get('rnipp.protocol');
     const hostname = this.config.get('rnipp.hostname');
     const baseUrl = this.config.get('rnipp.baseUrl');
 
     const params = {
-      nom: personData.familyName,
-      prenoms: personData.givenName,
-      dateNaissance: personData.birthdate.replace(/\-/g, ''),
-      sexe: personData.gender.charAt(0).toUpperCase(),
-      codeLieuNaissance: personData.birthPlace,
+      nom: pivotIdentity.familyName,
+      prenoms: pivotIdentity.givenName,
+      dateNaissance: pivotIdentity.birthdate.replace(/\-/g, ''),
+      sexe: pivotIdentity.gender.charAt(0).toUpperCase(),
+      codeLieuNaissance: pivotIdentity.birthPlace || pivotIdentity.birthCountry,
     };
     const query = queryString.stringify(params);
 
@@ -99,39 +113,5 @@ export class RnippService {
     );
 
     return `${protocol}://${hostname}${baseUrl}&${query}`;
-  }
-
-  private getRnippRequestedUserHash(personData: Person): string {
-    const userToFind = RnippService.convertPersonToCitizen(personData);
-    return this.citizen.getCitizenHash(userToFind);
-  }
-
-  private static convertPersonToCitizen(
-    personData: Person,
-  ): CitizenIdentityDTO {
-    if (!personData) {
-      return null;
-    }
-    const {
-      gender = '',
-      familyName = '',
-      givenName = '',
-      preferredUsername = '',
-      birthdate,
-      birthCountry,
-      birthPlace,
-    } = personData;
-
-    let bd = new Date(birthdate);
-    bd = bd instanceof Date && !isNaN(bd as any) ? bd : ('' as any);
-    return {
-      gender,
-      familyName,
-      givenName,
-      preferredUsername,
-      birthdate: bd,
-      birthCountry: parseInt(birthCountry, 10) || 0,
-      birthPlace: parseInt(birthPlace, 10) || 0,
-    } as any;
   }
 }
