@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer';
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CitizenServiceBase } from './citizen-base.service';
 import { ConfigService } from 'nestjs-config';
@@ -41,22 +40,21 @@ describe('CitizenService', () => {
     module.close();
   });
 
-  describe('getCitizenHash', () => {
+  describe('getPivotIdentityHash', () => {
     it('Should return a hash of given infos', () => {
       // Given
       const citizen = {
         givenName: 'georges',
         familyName: 'moustaki',
-        birthdate: new Date('1934-01-01'),
+        birthdate: '1934-01-01',
         gender: 'gender',
-        birthPlace: 99,
-        birthCountry: 99,
-        supportId: '1234567891011121',
+        birthPlace: '95277',
+        birthCountry: '99100',
       };
       // When
-      const result = citizenService.getCitizenHash(citizen);
+      const hash = citizenService.getPivotIdentityHash(citizen);
       // Then
-      expect(result).toBe('yeD9TZeZcVQM9LYWc5rPHTxG6eIe5wbTti9jFIGAGpw=');
+      expect(hash).toBe('d4gaTT4PZCaIDYpACTY0yMlv2NjpKRMIHBnin+N79fI=');
     });
 
     it('Should return a different hash for different infos', () => {
@@ -64,16 +62,15 @@ describe('CitizenService', () => {
       const citizen = {
         givenName: 'georgette',
         familyName: 'moustaki',
-        birthdate: new Date('1934-01-01'),
+        birthdate: '1934-01-01',
         gender: 'gender',
-        birthPlace: 99,
-        birthCountry: 99,
-        supportId: '1234567891011121',
+        birthPlace: '95277',
+        birthCountry: '99100',
       };
       // When
-      const result = citizenService.getCitizenHash(citizen);
+      const hash = citizenService.getPivotIdentityHash(citizen);
       // Then
-      expect(result).toBe('JadmXz7R1OBtkBVanqGaOBL7N8itrx01Yi4U2viiN2k=');
+      expect(hash).toBe('WX6WdY6CfPSGAhfw0+hZhN7fLHRlcFRQGQU0H0a2VA8=');
     });
   });
 

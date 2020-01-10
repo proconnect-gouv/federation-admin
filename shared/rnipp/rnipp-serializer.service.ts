@@ -1,5 +1,4 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { plainToClassFromExist } from 'class-transformer';
 import * as _ from 'lodash';
 
 import {
@@ -12,22 +11,22 @@ import {
   RNIPP_CODE,
   BIRTH_PLACE,
   BIRTH_COUNTRY,
-} from './rnipp-xml-selectors-constants';
+  DEAD,
+  RNIPP_IDENTITY_NOT_RECTIFIED,
+  RNIPP_IDENTITY_RECTIFIED,
+  FRANCE_COG,
+} from './rnipp-constants';
 
 import { ParsedData } from './interface/parsed-data.interface';
-import { validate } from 'class-validator';
-import { Person } from './interface/person.interface';
-import { PersonGenericDTO } from './dto/person-generic.dto';
+import { IIdentity } from '../citizen/interfaces/identity.interface';
 
 @Injectable()
 export class RnippSerializer {
   public constructor(@Inject('Xml2js') private readonly xml2js) {}
 
-  public async serializeXmlFromRnipp(
-    xmlData: string,
-    personRequest: Person,
-  ): Promise<ParsedData> {
+  public async serializeXmlFromRnipp(xmlData: string): Promise<ParsedData> {
     Logger.debug(`Serializer xml ${xmlData}`);
+
     const stripNS = this.xml2js.processors.stripPrefix;
 
     try {
@@ -35,10 +34,10 @@ export class RnippSerializer {
         tagNameProcessors: [stripNS],
       });
 
-      const response = await this.handleResponse(json, personRequest);
+      const response = await this.handleResponse(json);
       return response;
-    } catch (reason) {
-      const constraints = reason.map(validationErrors => {
+    } catch (error) {
+      const constraints = error.map(validationErrors => {
         // tslint:disable-next-line: forin
         for (const key in validationErrors.constraints) {
           return validationErrors.constraints[key];
@@ -48,30 +47,59 @@ export class RnippSerializer {
     }
   }
 
-  private async handleResponse(
-    json,
-    personRequest: Person,
-  ): Promise<ParsedData> {
-    const formatedData: ParsedData = this.formatJson(json, personRequest);
-    if (formatedData.rnippCode === '2' || formatedData.rnippCode === '3') {
-      const rnippDto = new PersonGenericDTO();
-      const validateFormatedData = plainToClassFromExist(
-        rnippDto,
-        formatedData.identity,
-      );
-      const errors = await validate(validateFormatedData);
-      // errors is an array of validation errors
-      if (errors.length > 0) {
-        throw errors;
-      } else {
-        return formatedData;
-      }
-    } else {
-      return formatedData;
+  private async handleResponse(parsedXml: JSON): Promise<ParsedData> {
+    const rnippCode: string = this.getJsonAttribute(parsedXml, RNIPP_CODE);
+
+    if (
+      rnippCode !== RNIPP_IDENTITY_NOT_RECTIFIED &&
+      rnippCode !== RNIPP_IDENTITY_RECTIFIED
+    ) {
+      return { rnippCode };
     }
+
+    const dead: boolean = this.getDeadStateAttribute(parsedXml, DEAD);
+
+    const identity: IIdentity = {
+      gender: this.getGenderFromParsedXml(
+        parsedXml,
+        `${IDENTIFICATION}.${GENDER}`,
+      ),
+      familyName: this.getJsonAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${FAMILY_NAME}`,
+      ),
+      givenName: this.getGivenNamesAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${GIVEN_NAME}`,
+      ),
+      preferredUsername: this.getJsonAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${PREFERED_NAME}`,
+      ),
+      birthdate: this.getJsonAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${BIRTH_DATE}`,
+      ),
+      birthPlace: this.getBirthplaceAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${BIRTH_PLACE}`,
+        `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
+      ),
+      birthCountry: this.getBirthcountryAttribute(
+        parsedXml,
+        `${IDENTIFICATION}.${BIRTH_PLACE}`,
+        `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
+      ),
+    };
+
+    return {
+      identity,
+      dead,
+      rnippCode,
+    };
   }
 
-  private xml2jsToPromise(input, options): Promise<any> {
+  private xml2jsToPromise(input, options): Promise<JSON> {
     return new Promise((resolve, reject) => {
       this.xml2js.parseString(input, options, (error, result) => {
         if (error) {
@@ -84,76 +112,66 @@ export class RnippSerializer {
     });
   }
 
-  private formatJson(json: any, personRequest: Person): ParsedData {
-    const rnippCodeFromXML: string = _.get(
-      json,
-      `${RNIPP_CODE}`,
-      'Pas de rnipp code',
-    );
+  private getJsonAttribute(
+    parsedXml: JSON,
+    path: string,
+    defaultValue: any = '',
+  ): any {
+    return _.get(parsedXml, path, defaultValue);
+  }
 
-    // check the error code return by RNIPP before retrieve user info
-    if (rnippCodeFromXML === '2' || rnippCodeFromXML === '3') {
-      let birthCountry: string;
-      let birthPlace: string;
-      let translationGenderFormRnipp = _.get(
-        json,
-        `${IDENTIFICATION}.${GENDER}`,
-        'Pas de genre renseigné',
-      );
-      if (translationGenderFormRnipp === 'M') {
-        translationGenderFormRnipp = 'male';
-      } else {
-        translationGenderFormRnipp = 'female';
-      }
+  private getGenderFromParsedXml(parsedXml: JSON, path: string): string {
+    const rnippGender: string = this.getJsonAttribute(parsedXml, path);
 
-      if (personRequest.birthCountry === '99100') {
-        birthCountry = personRequest.birthCountry;
-        birthPlace = _.get(
-          json,
-          `${IDENTIFICATION}.${BIRTH_PLACE}`,
-          'Pas de lieu de naissance',
-        );
-      } else {
-        birthCountry = _.get(
-          json,
-          `${IDENTIFICATION}.${BIRTH_COUNTRY}`,
-          '99999',
-        );
-        birthPlace = '00000';
-      }
-
-      return {
-        identity: {
-          gender: translationGenderFormRnipp,
-          familyName: _.get(
-            json,
-            `${IDENTIFICATION}.${FAMILY_NAME}`,
-            'Pas de nom de famille',
-          ),
-          givenName: _.join(
-            _.get(json, `${IDENTIFICATION}.${GIVEN_NAME}`, 'Pas de prénom'),
-            ' ',
-          ),
-          preferredUsername: _.get(
-            json,
-            `${IDENTIFICATION}.${PREFERED_NAME}`,
-            null,
-          ),
-          birthdate: _.get(
-            json,
-            `${IDENTIFICATION}.${BIRTH_DATE}`,
-            'Pas de date de naissance',
-          ),
-          birthCountry,
-          birthPlace,
-          supportId: personRequest.supportId,
-        },
-        rnippCode: rnippCodeFromXML,
-      };
-    } else {
-      return {
-        rnippCode: rnippCodeFromXML,
-      };
+    switch (rnippGender) {
+      case 'F':
+        return 'female';
+      case 'M':
+        return 'male';
+      default:
+        return '';
     }
+  }
+
+  private getGivenNamesAttribute(parsedXml: JSON, path: string): string {
+    const givenNames: string[] = this.getJsonAttribute(parsedXml, path, []);
+
+    return givenNames.join(' ');
+  }
+
+  private getDeadStateAttribute(parsedXml: JSON, path: string): boolean {
+    return !!this.getJsonAttribute(parsedXml, path, false);
+  }
+
+  private getBirthplaceAttribute(
+    parsedXml: JSON,
+    birthplacePath: string,
+    birthcountryPath: string,
+  ): string {
+    const birthcountry = this.getJsonAttribute(parsedXml, birthcountryPath);
+
+    const birthplace = this.getJsonAttribute(parsedXml, birthplacePath);
+
+    if (!birthplace && !birthcountry) {
+      return 'invalid';
+    }
+
+    return birthplace;
+  }
+
+  private getBirthcountryAttribute(
+    parsedXml: JSON,
+    birthplacePath: string,
+    birthcountryPath: string,
+  ): string {
+    const birthplace = this.getJsonAttribute(parsedXml, birthplacePath);
+
+    const birthcountry = this.getJsonAttribute(parsedXml, birthcountryPath);
+
+    if (!birthplace && !birthcountry) {
+      return 'invalid';
+    }
+
+    return birthcountry || FRANCE_COG;
   }
 }

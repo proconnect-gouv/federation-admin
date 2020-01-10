@@ -1,7 +1,7 @@
 import { Person } from './person.interface';
 
 export interface IResponseFromRnipp {
-  personFoundByRnipp: Person;
+  rectifiedIdentity: Person;
   rnippCode: number;
   rawResponse: string;
   statusCode?: number;

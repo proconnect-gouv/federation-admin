@@ -1,7 +1,6 @@
-export interface Person {
+export interface IPivotIdentity {
   readonly gender: string;
   readonly familyName: string;
-  readonly preferredUsername: string;
   readonly givenName: string;
   readonly birthdate: string;
   readonly birthPlace: string;

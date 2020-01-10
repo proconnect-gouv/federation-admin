@@ -7,4 +7,5 @@ export interface ErrorControllerInterface<T = any> {
   csrfToken: string;
   person: PersonInformation;
   message: string | string[];
+  supportId: string;
 }
