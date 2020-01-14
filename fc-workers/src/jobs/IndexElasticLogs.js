@@ -13,74 +13,9 @@ class IndexElasticLogs extends Job {
   /**
    Handling data source
   */
-  async fetchData(start, stop) {
+  async fetchData(start, stop, after = null) {
     const statsService = this.container.get('stats');
-    return statsService.getByIntervalByFIFS(start, stop, 'day');
-  }
-
-  /**
-   Format inital input
-  */
-  static moveNofsToFs(action) {
-    if (action.nofs.doc_count > 0) {
-      // This is an elastic native fieldName
-      // eslint-disable-next-line camelcase
-      const { doc_count, fi } = action.nofs;
-      const key = 'N/A';
-      action.fs.buckets.push({ key, doc_count, fi });
-    }
-    // Already working on a copy of input
-    // eslint-disable-next-line no-param-reassign
-    delete action.nofs;
-
-    return action;
-  }
-
-  static fixMissingFields(input) {
-    const tree = JSON.parse(JSON.stringify(input));
-
-    tree.date.buckets = tree.date.buckets.map(date => {
-      // Already working on a copy of input
-      // eslint-disable-next-line no-param-reassign
-      date.action.buckets = date.action.buckets.map(action => {
-        // Already working on a copy of input
-        // eslint-disable-next-line no-param-reassign
-        action.typeAction.buckets = action.typeAction.buckets.map(
-          IndexElasticLogs.moveNofsToFs
-        );
-        return action;
-      });
-      return date;
-    });
-
-    return tree;
-  }
-
-  /**
-    Analyse and transform data to new structure
-  */
-  static hasChildren(property) {
-    return (
-      typeof property !== 'undefined' &&
-      typeof property.buckets !== 'undefined' &&
-      Array.isArray(property.buckets)
-    );
-  }
-
-  static getChildren(node) {
-    return Object.keys(node)
-      .filter(key => IndexElasticLogs.hasChildren(node[key]))
-      .map(key => ({
-        key,
-        children: node[key].buckets,
-      }));
-  }
-
-  static computeResult(context, key, node) {
-    return Object.assign({}, context, {
-      [key]: node.key,
-      count: node.doc_count,
-    });
+    return statsService.getByIntervalByFIFS(start, stop, 'day', after);
   }
 
   static getKey(entry) {
@@ -92,64 +27,7 @@ class IndexElasticLogs extends Job {
       .digest('hex');
   }
 
-  static storeNode(node, results, context) {
-    if (node.children.length === 0 && context.count > 0) {
-      // results is an accumulator
-      // eslint-disable-next-line no-param-reassign
-      results[IndexElasticLogs.getKey(context)] = context;
-    }
-  }
-
-  static storeChildren(node, results, context) {
-    node.children.forEach(child => {
-      const entry = IndexElasticLogs.computeResult(context, node.key, child);
-      const childNodes = IndexElasticLogs.getChildren(child);
-
-      if (childNodes.length > 0) {
-        // This is a recursive call
-        // eslint-disable-next-line no-use-before-define
-        IndexElasticLogs.walk(childNodes, results, entry);
-      } else {
-        // results is an accumulator
-        // eslint-disable-next-line no-param-reassign
-        results[IndexElasticLogs.getKey(entry)] = entry;
-      }
-    });
-  }
-
-  static walk(nodes, results = {}, context = {}) {
-    nodes.forEach(node => {
-      IndexElasticLogs.storeNode(node, results, context);
-      IndexElasticLogs.storeChildren(node, results, context);
-    });
-
-    return results;
-  }
-
-  static getDocuments(tree) {
-    return IndexElasticLogs.walk(IndexElasticLogs.getChildren(tree));
-  }
-
-  /**
-    Refine produced data
-  */
-  static mapToArrayWithIds(map) {
-    return Object.keys(map).map(id => Object.assign({ id }, map[id]));
-  }
-
-  static removeId(doc) {
-    return _.omit(doc, 'id');
-  }
-
-  static addNAFI(doc) {
-    return Object.assign({ fi: 'N/A' }, doc);
-  }
-
-  static formatDocument(doc) {
-    return IndexElasticLogs.addNAFI(IndexElasticLogs.removeId(doc));
-  }
-
-  async createDocuments(docList, chunkLength, timePerRequest) {
+  async createDocuments(docList, chunkLength, timePerRequest, delay) {
     const statsService = this.container.get('stats');
     const chunks = _.chunk(docList, chunkLength);
 
@@ -157,15 +35,14 @@ class IndexElasticLogs extends Job {
       statsService.createBulkQuery(
         chunk,
         'index',
-        'stats',
-        'entry',
+        'events',
         doc => doc.id,
         IndexElasticLogs.formatDocument
       )
     );
 
     const promises = queries.map((query, index) => {
-      const timeout = timePerRequest * index;
+      const timeout = delay + timePerRequest * index;
       return new Promise(res => {
         setTimeout(() => {
           res(statsService.executeBulkQuery(query));
@@ -191,27 +68,20 @@ class IndexElasticLogs extends Job {
     return documents.reduce(reducer, 0);
   }
 
-  async run(params) {
-    this.log.info('Input control');
-    const input = this.container.get('input');
-    const schema = {
-      start: { type: 'date', mandatory: true },
-      stop: { type: 'date', mandatory: true },
-    };
-
-    const { start, stop } = input.get(schema, params);
-
+  async indexLogs(start, stop, after = null, initialDelay = 0) {
     this.log.info('Fetch the value we want from ES');
-    const data = await this.fetchData(start, stop);
+    const data = await this.fetchData(start, stop, after);
 
-    this.log.info('Workarround our old eslasticsearch limitations');
-    const tree = IndexElasticLogs.fixMissingFields(data.aggregations);
+    const { buckets, after_key: nextAfter } = data.aggregations.date;
 
-    this.log.info('Creating documents from data');
-    const documents = IndexElasticLogs.getDocuments(tree);
+    const docList = buckets.map(bucket => ({
+      ...bucket.key,
+      id: IndexElasticLogs.getKey(bucket.key),
+      count: bucket.doc_count,
+    }));
 
     this.log.info('Build an array of documents');
-    const docList = IndexElasticLogs.mapToArrayWithIds(documents);
+
     const eventCount = IndexElasticLogs.getEventCountFromAggregates(docList);
     this.log.info(`   > Created ${docList.length} documents
      with ${eventCount} events
@@ -230,12 +100,30 @@ class IndexElasticLogs extends Job {
     const results = await this.createDocuments(
       docList,
       chunkSize,
-      timePerRequest
+      timePerRequest,
+      initialDelay
     );
 
     this.log.info(
       `   > created ${IndexElasticLogs.getIndexationStats(results)} documents`
     );
+
+    if (nextAfter) {
+      this.indexLogs(start, stop, nextAfter, delay + initialDelay);
+    }
+  }
+
+  async run(params) {
+    this.log.info('Input control');
+    const input = this.container.get('input');
+    const schema = {
+      start: { type: 'date', mandatory: true },
+      stop: { type: 'date', mandatory: true },
+    };
+
+    const { start, stop } = input.get(schema, params);
+
+    this.indexLogs(start, stop);
 
     this.log.info('All done');
   }

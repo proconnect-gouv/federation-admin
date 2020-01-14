@@ -32,17 +32,16 @@ export const getIdsToDelete = params => {
 };
 
 export const getByIntervalByFIFS = params => {
-  const { start, stop, interval } = params;
+  const { start, stop, interval, after } = params;
   const index = 'franceconnect';
-  const type = 'log';
 
   const query = {
     index,
+    size: 0,
     body: {
       query: {
         bool: {
           must: [
-            { term: { _type: type } },
             {
               range: {
                 time: {
@@ -56,65 +55,32 @@ export const getByIntervalByFIFS = params => {
       },
       aggs: {
         date: {
-          date_histogram: {
-            field: 'time',
-            interval,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: moment(start).format('YYYY-MM-DD'),
-              max: moment(stop).format('YYYY-MM-DD'),
-            },
-          },
-          aggs: {
-            action: {
-              terms: {
-                field: 'action',
-                size: 0,
-              },
-              aggs: {
-                typeAction: {
-                  terms: {
-                    field: 'type_action',
-                    size: 0,
-                  },
-                  aggs: {
-                    // Elasticseach 1.6 does not support 'missing' fields
-                    nofs: {
-                      missing: {
-                        field: 'fs.raw',
-                      },
-                      aggs: {
-                        fi: {
-                          terms: {
-                            field: 'fi.raw',
-                            size: 0,
-                          },
-                        },
-                      },
-                    },
-                    fs: {
-                      terms: {
-                        field: 'fs.raw',
-                        size: 0,
-                      },
-                      aggs: {
-                        fi: {
-                          terms: {
-                            field: 'fi.raw',
-                            size: 0,
-                          },
-                        },
-                      },
-                    },
+          composite: {
+            size: 10000,
+            sources: [
+              {
+                date: {
+                  date_histogram: {
+                    field: 'time',
+                    calendar_interval: interval,
+                    format: 'yyyy-MM-dd',
                   },
                 },
               },
-            },
+              { typeAction: { terms: { field: 'type_action' } } },
+              { action: { terms: { field: 'action' } } },
+              { fs: { terms: { field: 'fs', missing_bucket: true } } },
+              { fi: { terms: { field: 'fi', missing_bucket: true } } },
+            ],
           },
         },
       },
     },
   };
+
+  if (after) {
+    query.body.aggs.date.composite.after = after;
+  }
 
   return query;
 };
@@ -122,7 +88,6 @@ export const getByIntervalByFIFS = params => {
 export const getActiveAccount = params => {
   const { start, stop } = params;
   const index = 'franceconnect';
-  const type = 'log';
 
   const query = {
     index,
@@ -131,7 +96,6 @@ export const getActiveAccount = params => {
       query: {
         bool: {
           must: [
-            { term: { _type: type } },
             { term: { action: 'authentication' } },
             { term: { type_action: 'initial' } },
             {

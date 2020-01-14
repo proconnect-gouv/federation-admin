@@ -57,7 +57,7 @@ class IndexElasticStats extends Job {
     const id = IndexElasticStats.getMetricId(doc);
 
     this.log.info('Save document to index');
-    await stats.index(doc, 'stats', 'metric', id);
+    await stats.index(doc, 'metrics', id);
 
     this.log.info('All done');
   }

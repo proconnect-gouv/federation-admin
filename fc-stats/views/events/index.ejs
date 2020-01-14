@@ -11,23 +11,27 @@
             <p class="h2">Stats</p>
             <p><i>Mesure All the things!</i></p>
 
-
             <div class="container">
               <% include ./form.ejs %>
             </div>
 
-            <% if (!params.start || !params.stop) { %>
-            <div class="d-flex justify-content-center">
-              <h2>Choisissez des dates</h2>
-            </div>
-            <% } else { %>
+            <div class="container">
+              <% if (!params.start || !params.stop) { %>
 
-              <% if(REQ_QUERY.visualize === 'list') { %>
-                <% include ./list.ejs %>
+                <div class="d-flex justify-content-center">
+                  <h2>Choisissez des dates</h2>
+                </div>
+
               <% } else { %>
-                <% include ./graph.ejs %>
+
+                <% if(REQ_QUERY.visualize === 'list') { %>
+                  <% include ./list.ejs %>
+                <% } else { %>
+                  <% include ./graph.ejs %>
+                <% } %>
+              
               <% } %>
-            <% } %>
+            </div>
         </div>
     </div>
 </div>

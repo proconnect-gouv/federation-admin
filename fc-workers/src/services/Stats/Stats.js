@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import moment from 'moment';
 import * as queries from './queries';
 
@@ -20,18 +21,17 @@ class Stats {
     return { from, size, total, ids };
   }
 
-  async getByIntervalByFIFS(start, stop, interval) {
+  async getByIntervalByFIFS(start, stop, interval, after) {
     const api = this.container.get('logApi');
-    const query = queries.getByIntervalByFIFS({ start, stop, interval });
+    const query = queries.getByIntervalByFIFS({ start, stop, interval, after });
 
     return api.search(query);
   }
 
   async getActiveAccountsByRange(params) {
     const api = this.container.get('logApi');
-    params.stop = this.getStopDateForRange(params);
-    const query = queries.getActiveAccount(params);
-
+    const stop = this.getStopDateForRange(params);
+    const query = queries.getActiveAccount({ ...params, stop });
     const data = await api.search(query);
 
     return data.aggregations.activeUsers.value;
@@ -75,7 +75,6 @@ class Stats {
     documents,
     operation,
     index,
-    type,
     idFunction,
     transform = doc => doc
   ) {
@@ -83,7 +82,7 @@ class Stats {
 
     documents.forEach(doc => {
       entries.push({
-        [operation]: { _index: index, _type: type, _id: idFunction(doc) },
+        [operation]: { _index: index, _id: idFunction(doc) },
       });
       entries.push(transform(doc));
     });
@@ -104,7 +103,7 @@ class Stats {
     return api.bulk({ body });
   }
 
-  async index(doc, index, type, id) {
+  async index(doc, index, id) {
     /* Temp Workarround !
        I can't figure out how to use elasticClient.index() method,
        there seems to be no more doc associated with our version.
@@ -112,7 +111,7 @@ class Stats {
        Let's makke this work anyway by using bulk api for our only doc.
     */
     return this.executeBulkQuery(
-      this.createBulkQuery([doc], 'index', index, type, () => id)
+      this.createBulkQuery([doc], 'index', index, () => id)
     );
   }
 }

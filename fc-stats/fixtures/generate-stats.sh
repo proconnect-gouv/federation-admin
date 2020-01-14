@@ -25,15 +25,23 @@ curl -XDELETE "$ES_LOG/franceconnect"
 echo ""
 
 echo "Create log index"
-curl -XPUT "$ES_LOG/franceconnect" -d '@Infra/ansible/roles/elasticsearch/files/mapping_wip.json'
+curl -XPUT "$ES_LOG/franceconnect" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping_wip.json'
 echo ""
 
-echo "Delete stats index"
-curl -XDELETE "$ES_STATS/stats"
+echo "Delete events index"
+curl -XDELETE "$ES_STATS/events"
 echo ""
 
-echo "Create stats index"
-curl -XPUT "$ES_STATS/stats" -d '@Infra/ansible/roles/elasticsearch/files/mapping-stats.json'
+echo "Create events index"
+curl -XPUT "$ES_STATS/events" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping-stats.json'
+echo ""
+
+echo "Delete metrics index"
+curl -XDELETE "$ES_STATS/metrics"
+echo ""
+
+echo "Create metrics index"
+curl -XPUT "$ES_STATS/metrics" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping-stats.json'
 echo ""
 
 echo "Generate logs"

@@ -4,6 +4,7 @@ import { StatsQueries } from './stats.queries';
 describe('StatsQueries', () => {
   const START_DATE = new Date('2019-05-01');
   const STOP_DATE = new Date('2019-07-01');
+  const STOP_DATE_PLUS_ONE = new Date('2019-07-02');
 
   let statsQueries: StatsQueries;
 
@@ -74,11 +75,11 @@ describe('StatsQueries', () => {
       // When
       const result = statsQueries.streamEvents(params);
       // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('stats');
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
+      expect(result).toBeDefined(), expect(result.index).toBe('events');
+      expect(result.body.query.bool.must[0].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[1].range.date.lte).toBe(
+      expect(result.body.query.bool.must[0].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
     });
@@ -95,11 +96,11 @@ describe('StatsQueries', () => {
       // When
       const result = statsQueries.getEvents(params);
       // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('stats');
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
+      expect(result).toBeDefined(), expect(result.index).toBe('events');
+      expect(result.body.query.bool.must[0].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[1].range.date.lte).toBe(
+      expect(result.body.query.bool.must[0].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
     });
@@ -115,7 +116,7 @@ describe('StatsQueries', () => {
       const result = statsQueries.getEvents(params);
 
       // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('stats');
+      expect(result).toBeDefined(), expect(result.index).toBe('events');
       expect(result.body.aggs).toBeDefined();
       expect(result.body.aggs.date).toBeDefined();
       expect(result.body.aggs.fi).toBeDefined();
@@ -137,15 +138,15 @@ describe('StatsQueries', () => {
       // When
       const result = statsQueries.getTotalByActionAndRange(params);
       // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('stats');
+      expect(result).toBeDefined(), expect(result.index).toBe('events');
       expect(result.body.query.bool.must[0].term).toEqual({ action: 'foo' });
-      expect(result.body.query.bool.must[2].range.date.gte).toBe(
+      expect(result.body.query.bool.must[1].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[2].range.date.gte).toBe(
+      expect(result.body.query.bool.must[1].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[2].range.date.lte).toBe(
+      expect(result.body.query.bool.must[1].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
     });
@@ -163,15 +164,15 @@ describe('StatsQueries', () => {
       // When
       const result = statsQueries.getTotalForActionsAndFiAndRangeByWeek(params);
       // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('stats');
+      expect(result).toBeDefined(), expect(result.index).toBe('events');
       expect(result.body.query.bool.must[0].term).toEqual({ fi: 'foo' });
-      expect(result.body.query.bool.must[2].range.date.gte).toBe(
+      expect(result.body.query.bool.must[1].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[2].range.date.gte).toBe(
+      expect(result.body.query.bool.must[1].range.date.gte).toBe(
         START_DATE.getTime(),
       );
-      expect(result.body.query.bool.must[2].range.date.lte).toBe(
+      expect(result.body.query.bool.must[1].range.date.lte).toBe(
         STOP_DATE.getTime(),
       );
     });
@@ -230,16 +231,14 @@ describe('StatsQueries', () => {
           fi: {
             terms: {
               field: 'fi',
-              size: 0,
-              min_doc_count: 0,
+              min_doc_count: 1,
               order: { _term: 'asc' },
             },
             aggs: {
               typeAction: {
                 terms: {
                   field: 'typeAction',
-                  size: 0,
-                  min_doc_count: 0,
+                  min_doc_count: 1,
                   order: { _term: 'asc' },
                 },
                 aggs: {
@@ -269,22 +268,20 @@ describe('StatsQueries', () => {
       expect(result).toEqual({
         date_range: {
           field: 'date',
-          ranges: [{ from: START_DATE }, { to: STOP_DATE }],
+          ranges: [{ from: START_DATE, to: STOP_DATE_PLUS_ONE }],
         },
         aggs: {
           fi: {
             terms: {
               field: 'fi',
-              size: 0,
-              min_doc_count: 0,
+              min_doc_count: 1,
               order: { _term: 'asc' },
             },
             aggs: {
               typeAction: {
                 terms: {
                   field: 'typeAction',
-                  size: 0,
-                  min_doc_count: 0,
+                  min_doc_count: 1,
                   order: { _term: 'asc' },
                 },
                 aggs: {

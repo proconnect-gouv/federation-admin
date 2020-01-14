@@ -95,7 +95,7 @@ class IndexMongoStats extends Job {
       const id = IndexMongoStats.getMetricId(doc);
 
       this.log.info('Save document to index');
-      await statsService.index(doc, 'stats', 'metric', id);
+      await statsService.index(doc, 'metrics', id);
       this.log.info('All done');
     } finally {
       // Make sure we close connection
