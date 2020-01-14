@@ -32,7 +32,7 @@ describe('Stats', () => {
       const key = 'foo';
       const date = '2018-09-01';
       // When
-      const execute = () => createMetricDocument({ key, date });
+      const execute = () => statsService.createMetricDocument({ key, date });
       // Then
       expect(execute).toThrowError();
     });
@@ -42,7 +42,8 @@ describe('Stats', () => {
       const value = 'bar';
       const date = 'yo';
       // When
-      const execute = () => createMetricDocument({ key, value, date });
+      const execute = () =>
+        statsService.createMetricDocument({ key, value, date });
       // Then
       expect(execute).toThrowError();
     });
@@ -57,25 +58,23 @@ describe('Stats', () => {
       ];
       const operation = 'index';
       const index = 'pof';
-      const type = 'zap';
       const idFunction = item => item.key;
       // When
       const result = statsService.createBulkQuery(
         documents,
         operation,
         index,
-        type,
         idFunction
       );
       // Then
       expect(Array.isArray(result)).toBeTruthy();
       expect(result).toHaveLength(4);
       expect(result[0]).toEqual({
-        index: { _index: 'pof', _type: 'zap', _id: 'foo' },
+        index: { _index: 'pof', _id: 'foo' },
       });
       expect(result[1]).toEqual(documents[0]);
       expect(result[2]).toEqual({
-        index: { _index: 'pof', _type: 'zap', _id: 'fizz' },
+        index: { _index: 'pof', _id: 'fizz' },
       });
       expect(result[3]).toEqual(documents[1]);
     });
@@ -84,7 +83,6 @@ describe('Stats', () => {
       // Given
       const operation = 'index';
       const index = 'pof';
-      const type = 'zap';
       const idFunction = item => item.key;
       const list = [{ a: 'a' }, { b: 'b' }];
       // When
@@ -92,7 +90,6 @@ describe('Stats', () => {
         list,
         operation,
         index,
-        type,
         idFunction
       );
       // then
@@ -103,7 +100,6 @@ describe('Stats', () => {
       // Given
       const operation = 'a';
       const index = 'pof';
-      const type = 'zap';
       const idFunction = item => item.key;
       const list = [{ a: 'a' }, { b: 'b' }];
       // When
@@ -111,7 +107,6 @@ describe('Stats', () => {
         list,
         operation,
         index,
-        type,
         idFunction
       );
       // then
@@ -122,7 +117,6 @@ describe('Stats', () => {
       // Given
       const operation = 'a';
       const index = 'pof';
-      const type = 'zap';
       const idFunction = item => item.id;
       const list = [{ id: 'a', b: 'b' }, { id: 'b', c: 'c' }];
       // When
@@ -130,16 +124,15 @@ describe('Stats', () => {
         list,
         operation,
         index,
-        type,
         idFunction
       );
       // then
       expect(result[0]).toEqual({
-        a: { _index: 'pof', _type: 'zap', _id: 'a' },
+        a: { _index: 'pof', _id: 'a' },
       });
       expect(result[1]).toEqual({ b: 'b', id: 'a' });
       expect(result[2]).toEqual({
-        a: { _index: 'pof', _type: 'zap', _id: 'b' },
+        a: { _index: 'pof', _id: 'b' },
       });
       expect(result[3]).toEqual({ id: 'b', c: 'c' });
     });

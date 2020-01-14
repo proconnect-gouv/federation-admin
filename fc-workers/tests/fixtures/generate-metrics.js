@@ -89,8 +89,9 @@ async function indexDocs(list) {
   const bulkList = [];
 
   list.forEach(doc => {
+    const id = Object.values(doc).join('-');
     const header = {
-      index: { _index: 'stats', _type: 'metric', _id: doc._id },
+      index: { _index: 'metrics', _id: id },
     };
     bulk.push(JSON.stringify(header));
     bulk.push(JSON.stringify(doc));
@@ -110,9 +111,9 @@ async function indexDocs(list) {
 
 function sendToElastic(bulk) {
   const body = `${bulk.join('\n')}\n`;
-  const command = `curl -s -XPUT 'http://elasticsearch:9200/_bulk' --data-binary '${body}}'; echo`;
+  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://elasticsearch:9200/_bulk' --data-binary '${body}'; echo`;
 
-  return exec(command);
+  return exec(command).catch(console.error);
 }
 
 const [, , start, stop, VARIATION] = process.argv;

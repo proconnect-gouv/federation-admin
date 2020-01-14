@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { SearchParams } from 'elasticsearch';
 import { StatsServiceParams } from './interfaces/stats-service-params.interface';
 
-const EVENTS_DOC_TYPE = 'entry';
 const METRIC_DOC_TYPE = 'metric';
 
 @Injectable()
@@ -21,12 +20,11 @@ export class StatsQueries {
     }
   }
 
-  createMustQueryParam(type, params: StatsServiceParams) {
+  createMustQueryParam(params: StatsServiceParams) {
     const { filters, start, stop } = params;
 
     // Apply base mandatory params
     const must = [
-      { term: { _type: type } },
       {
         range: {
           date: {
@@ -48,8 +46,8 @@ export class StatsQueries {
   }
 
   streamEvents(params: StatsServiceParams): SearchParams {
-    const index = 'stats';
-    const must = this.createMustQueryParam(EVENTS_DOC_TYPE, params);
+    const index = 'events';
+    const must = this.createMustQueryParam(params);
 
     const query = {
       index,
@@ -77,12 +75,11 @@ export class StatsQueries {
   /**
    * Simple template function for aggregation
    */
-  private generateAggregation(field) {
+  private generateAggregation(field, minCount = 0) {
     return {
       terms: {
         field,
-        size: 0,
-        min_doc_count: 0,
+        min_doc_count: minCount,
         order: { _term: 'asc' },
       },
     };
@@ -111,7 +108,7 @@ export class StatsQueries {
 
     params.columns.forEach(column => {
       // create an aggregation structure for curren column
-      currentColumn[column] = this.generateAggregation(column);
+      currentColumn[column] = this.generateAggregation(column, 1);
       // create an empty `aggs` object and make it our currentColumn
       // for next loop
       currentColumn = currentColumn[column].aggs = {};
@@ -123,10 +120,15 @@ export class StatsQueries {
 
     if (params.granularity === 'all') {
       // Return a single period aggregation for the given date range
+
+      // `to` is excluded from range so we add 1 day
+      const to = new Date(params.stop);
+      to.setDate(to.getDate() + 1);
+
       return {
         date_range: {
           field: 'date',
-          ranges: [{ from: params.start }, { to: params.stop }],
+          ranges: [{ from: params.start, to }],
         },
         aggs: subAggregation,
       };
@@ -144,9 +146,7 @@ export class StatsQueries {
 
   getEvents(params: StatsServiceParams): SearchParams {
     const query = {
-      // This should maybe go in configuration
-      // although I can't see why we would want the ability to change this.
-      index: 'stats',
+      index: 'events',
       // We do not use the documents as result
       size: 0,
       body: {
@@ -161,7 +161,7 @@ export class StatsQueries {
         query: {
           bool: {
             // Main query
-            must: this.createMustQueryParam(EVENTS_DOC_TYPE, params),
+            must: this.createMustQueryParam(params),
           },
         },
         aggs: {
@@ -184,7 +184,7 @@ export class StatsQueries {
     const { visualize, page, limit } = params;
 
     const query = {
-      index: 'stats',
+      index: 'metrics',
       from: page,
       size: visualize === 'list' ? limit : 1000,
       body: {
@@ -195,7 +195,7 @@ export class StatsQueries {
         ],
         query: {
           bool: {
-            must: this.createMustQueryParam(METRIC_DOC_TYPE, params),
+            must: this.createMustQueryParam(params),
           },
         },
         aggs: {
@@ -210,8 +210,7 @@ export class StatsQueries {
 
   getTotalByActionAndRange(params: StatsServiceParams): SearchParams {
     const { action, start, stop } = params;
-    const index = 'stats';
-    const type = EVENTS_DOC_TYPE;
+    const index = 'events';
 
     const query = {
       index,
@@ -221,7 +220,6 @@ export class StatsQueries {
           bool: {
             must: [
               { term: { action } },
-              { term: { _type: type } },
               {
                 range: {
                   date: {
@@ -250,8 +248,7 @@ export class StatsQueries {
     params: StatsServiceParams,
   ): SearchParams {
     const { fi, start, stop } = params;
-    const index = 'stats';
-    const type = EVENTS_DOC_TYPE;
+    const index = 'events';
 
     const query = {
       index,
@@ -261,7 +258,6 @@ export class StatsQueries {
           bool: {
             must: [
               { term: { fi } },
-              { term: { _type: type } },
               {
                 range: {
                   date: {
