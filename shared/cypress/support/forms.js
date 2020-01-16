@@ -150,4 +150,3 @@ export function totp(subject, arg1, arg2) {
   const token = getTotp(secret);
   return formType(input, token, configuration);
 }
-
