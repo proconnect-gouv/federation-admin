@@ -14,16 +14,17 @@ export function paginationStyle(element) {
   if((sortParam ===  undefined || sortParam ===  "")  && (actionParam ===  undefined || actionParam ===  "")) {
   $("#pagination-container").append(`
       <li class="page-item `+ (previous === ''? 'disabled' : '') +`">
-        <a id="previous-link" class="page-link" href="${appRoot}${previous}">Précedente</a>
+        <a id="previous-link" class="page-link" href="${appRoot}${previous}">Précédente</a>
       </li>
   `) 
   } else {
     $("#pagination-container").append(`
       <li class="page-item `+ (previous === ''? 'disabled' : '') +`">
-        <a id="previous-link" class="page-link" href="${appRoot}${previous}&sort=${sortParam}&action=${actionParam}">Précedente</a>
+        <a id="previous-link" class="page-link" href="${appRoot}${previous}&sort=${sortParam}&action=${actionParam}">Précédente</a>
       </li>
   `)
   }
+
   for (let i = 1, length = paginator.length; i <= length; i++) {
     if (paginator[i - 1] === '...') {
       $("#pagination-container").append('<li class="page-item"><a class="page-link" href="#">...</a></li>');
@@ -41,6 +42,7 @@ export function paginationStyle(element) {
       }
     }
   }
+
   if((sortParam ===  undefined || sortParam ===  "")  && (actionParam ===  undefined || actionParam ===  "")) {
   $("#pagination-container").append(`
       <li class="page-item `+ (next === ''? 'disabled' : '') +`">
@@ -54,5 +56,8 @@ export function paginationStyle(element) {
     </li>
 `)
   }
-  
+
+  if(paginator.length > 1 && !$("#pagination-container").children().hasClass('active')) {
+    $("#pagination-container li:nth-child(2)").addClass('active');
+  }
 }

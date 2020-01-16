@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from './lazyinit';
+import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
 import { dateSinglePicker } from './dateSinglePicker';
 import { validateForm } from './validateForm';
 import { copyText } from './clipboard';
-import { paginationStyle } from './pagination-style';
+import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem }  from './modals/confirm-form';
@@ -24,6 +25,7 @@ const initMap = {
   comparePassword: comparePassword,
   removeItem: removeItem,
   validateAccountUpdate: validateAccountUpdate,
+  itemPerPage,
 };
 
 $(document).ready(function() {
