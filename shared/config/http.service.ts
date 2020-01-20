@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectConfig, ConfigService } from 'nestjs-config';
 import * as https from 'https';
+import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as fs from 'fs';
 import { HeadersOptions } from '@fc/shared/rnipp/interface/headers.interface';
 
@@ -28,9 +29,21 @@ export class HttpConfigService implements HttpModuleOptionsFactory {
       httpAgentConfig.cert = fs.readFileSync(httpAgentConfig.cert);
     }
 
+    let httpsAgent;
+
+    const httpsProxy = process.env.https_proxy || process.env.HTTPS_PROXY;
+
+    if (httpsProxy) {
+      httpsAgent = new HttpsProxyAgent(httpsProxy);
+      httpsAgent.options = httpAgentConfig;
+    } else {
+      httpsAgent = new https.Agent(httpAgentConfig);
+    }
+
     return {
       headers,
-      httpsAgent: new https.Agent(httpAgentConfig),
+      httpsAgent,
+      proxy: false,
     };
   }
 }
