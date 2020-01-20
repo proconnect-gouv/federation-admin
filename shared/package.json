@@ -24,6 +24,7 @@
     "commander": "^4.0.0",
     "file-type": "^12.4.0",
     "generate-password": "^1.4.2",
+    "https-proxy-agent": "^4.0.0",
     "lodash": "^4.17.11",
     "nestjs-config": "^1.4.1",
     "nestjs-console": "^1.2.0",
