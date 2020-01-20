@@ -13,7 +13,7 @@
         <div class="card col-12">
           <% include partials/global-errors-handler.ejs %>
           <div class="card-body">
-            <form method="POST">
+            <form method="POST" id="create-account-form" name="create-account-form" data-init="validateAccountCreate" autocomplete="off" novalidate>
               <input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
               <input id="password" type="hidden" required name="password" value="<%= locals.tmpPassword%>">
               <input type="hidden" name="secret" id="secret" value="fakeSecret">
@@ -23,13 +23,16 @@
                   <input id="username" type="text" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].username && 'is-invalid' %>" placeholder="login"
                   name="username" value="<%= locals.messages.values && messages.values[0].username %>">
-                  <% if (locals.messages.errors && messages.errors[0].username) { %>
                   <div class="invalid-feedback">
+                  <% if (locals.messages.errors && messages.errors[0].username) { %>
                     <% messages.errors[0].username.forEach((error) => { %>
-                    <p><%= error %></p>
+                    <%= error %>
+                    <br>
                     <% }) %>
-                  </div>
+                  <% } else { %>
+                    Le nom d'utilisateur doit être renseigné
                   <% } %>
+                  </div>
                 </div>
               </section>
               <section class="form-group row">
@@ -37,14 +40,18 @@
                 <div class="col-10">
                   <input id="email" type="'text" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].email && 'is-invalid' %>" placeholder="mail@to.com"
-                  name="email" value="<%= locals.messages.values && messages.values[0].email %>">
-                  <% if (locals.messages.errors && messages.errors[0].email) { %>
+                  name="email" value="<%= locals.messages.values && messages.values[0].email %>"
+                  pattern="^([a-zA-Z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,10})$">
                   <div class="invalid-feedback">
-                    <% messages.errors[0].email.forEach((error) => { %>
-                    <p><%= error %></p>
-                    <% }) %>
+                    <% if (locals.messages.errors && messages.errors[0].email) { %>
+                      <% messages.errors[0].email.forEach((error) => { %>
+                      <%= error %>
+                      <br>
+                      <% }) %>
+                    <% } else { %>
+                      Veuillez mettre une adresse email valide ( Ex: email@email.com )
+                    <% } %>
                   </div>
-                  <% } %>
                 </div>
               </section>
               <section class="form-group row">
@@ -58,15 +65,16 @@
                     value="<%= roleOption.value %>">
                     <label class="form-check-label <%= locals.messages.errors && messages.errors[0].roles && 'is-invalid' %>"
                     for="role-<%= roleOption.value %>"><%= roleOption.label %></label>
-                    <% if (locals.messages.errors && messages.errors[0].roles && index === USER_ROLES_OPTIONS.length - 1) { %>
-                    <div class="invalid-feedback">
-                      <% messages.errors[0].roles.forEach((error) => { %>
-                      <p><%= error %></p>
-                      <% }) %>
-                    </div>
-                    <% } %>
                   </div>
                   <% }) %>
+                  <div class="invalid-feedback roles-error">
+                    <% if (locals.messages.errors && messages.errors[0].roles) { %>
+                      <% messages.errors[0].roles.forEach((error) => { %>
+                      <%= error %>
+                      <br>
+                      <% }) %>
+                    <% } %>
+                  </div>
                 </div>
               </section>
 
@@ -89,7 +97,7 @@
                       <% }) %>
                     </p>
                     <% } else { %>
-                    Veuillez mettre un code TOTP valide.
+                    Veuillez mettre un code TOTP valide
                     <% } %>
                   </div>
                 </div>

@@ -15,18 +15,20 @@ import 'font-awesome/fonts/fontawesome-webfont.ttf';
 import 'font-awesome/css/font-awesome.css';
 import '../style/main.less';
 import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAccountUpdate';
+import { validateAccountCreate } from '@fc/shared/public/javascript/validateAccountCreate';
 
 
 const initMap = {
   datePicker: dateRangePicker,
-  dropdown: dropdown,
-  paginationStyle: paginationStyle,
-  validateEnrollment: validateEnrollment,
-  comparePassword: comparePassword,
-  removeItem: removeItem,
   graph: initGraph,
   graphSetting: initGraphSetting,
-  validateAccountUpdate: validateAccountUpdate,
+  dropdown,
+  paginationStyle,
+  validateEnrollment,
+  comparePassword,
+  removeItem,
+  validateAccountUpdate,
+  validateAccountCreate,
   itemPerPage,
 };
 
