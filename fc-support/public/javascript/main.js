@@ -15,16 +15,18 @@ import 'font-awesome/fonts/fontawesome-webfont.ttf';
 import 'font-awesome/css/font-awesome.css';
 import '../styles/main.less';
 import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAccountUpdate';
+import { validateAccountCreate } from '@fc/shared/public/javascript/validateAccountCreate';
 
 const initMap = {
   datePicker: dateSinglePicker,
   validateRnippForm: validateForm,
-  copyText: copyText,
-  paginationStyle: paginationStyle,
-  validateEnrollment: validateEnrollment,
-  comparePassword: comparePassword,
-  removeItem: removeItem,
-  validateAccountUpdate: validateAccountUpdate,
+  copyText,
+  paginationStyle,
+  validateEnrollment,
+  comparePassword,
+  removeItem,
+  validateAccountUpdate,
+  validateAccountCreate,
   itemPerPage,
 };
 

@@ -26,7 +26,9 @@ export function createUserAccount(userInfo, basicConfiguration) {
       .check();
   }
 
-  cy.totp(basicConfiguration);
+  if (!basicConfiguration.totpNotFilled) {
+    cy.totp(basicConfiguration);
+  }
 
   // change csrf token
   if (!basicConfiguration._csrf) {
@@ -51,7 +53,7 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
     .find('[id="role-operator"]')
     .check();
 
-  cy.totp({ totp: basicConfiguration.totpAccountCreate });
+  cy.totp(basicConfiguration);
 
   cy.get('#tmpPassword').then(tmpPassword => {
     cy.contains("Créer l'utilisateur").click();

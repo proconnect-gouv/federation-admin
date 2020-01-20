@@ -2,10 +2,12 @@ import {
   USER_ADMIN,
   USER_PASS,
   LIMIT_PAGE,
-} from '../../../../shared/cypress/support/constants';
+} from '../../support/constants';
 import { createUserAccount, createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
-import { testIsCompliantPasswordEnrollment } from '../../support/request'
+import { testIsCompliantPasswordEnrollment } from '../../support/request';
+
+const BASE_URL = Cypress.config('baseUrl');
 
 function logoutAndDeleteUser(username, basicConfiguration) {
   if (basicConfiguration.redirect) {
@@ -29,8 +31,8 @@ describe('Account', () => {
     };
 
     const adminAccount = {
-      admin: 'jean_moust',
-      adminPass: 'georgesmoustaki'
+      admin: USER_ADMIN,
+      adminPass: USER_PASS
     }
 
     const basicConfiguration = {
@@ -41,7 +43,8 @@ describe('Account', () => {
       confirmSuppression: true,
       submit: true,
       redirect: true,
-      totpAccountCreate: true,
+      totp: true,
+      totpNotFilled: false,
       totpFirstLogin: true,
       fast: true,
     };
@@ -170,6 +173,80 @@ describe('Account', () => {
       cy.logout(USER_ADMIN);
     });
 
+    describe('Should fail', () => {
+      it('if an error occured in the form, we display errors ( empty fields )', () => {
+        const userInfo = {
+          username: '',
+          email: '',
+        };
+
+        const configuration = Object.assign({}, basicConfiguration, {
+          adminRole: false,
+          operatorRole: false,
+          securityRole: false,
+          totpNotFilled: true,
+        });
+
+        createUserAccount(userInfo, configuration);
+        cy.contains(`Le nom d'utilisateur doit être renseigné`).should('be.visible');
+        cy.contains(`Veuillez mettre une adresse email valide ( Ex: email@email.com )`).should('be.visible');
+        cy.contains(`Veuillez renseigner au moins un rôle`).should('be.visible');
+      })
+
+      it('if an error occured in the form, we diplays error (name)', () => {
+        const userInfo = {
+          username: '',
+          email: 'email@email.fr',
+        };
+
+        const configuration = Object.assign({}, basicConfiguration, {
+          totpNotFilled: true,
+        });
+
+        createUserAccount(userInfo, configuration);
+        cy.contains(`Le nom d'utilisateur doit être renseigné`).should('be.visible');
+      })
+
+      it('if an error occured in the form, we diplays error (email)', () => {
+        const userInfo = {
+          username: 'username',
+          email: '***',
+        };
+
+        const configuration = Object.assign({}, basicConfiguration, {
+          totpNotFilled: true,
+        });
+
+        createUserAccount(userInfo, configuration);
+        cy.contains(`Veuillez mettre une adresse email valide ( Ex: email@email.com )`).should('be.visible');
+      })
+
+      it('if an error occured in the form, we diplays error (roles)', () => {
+        const configuration = Object.assign({}, basicConfiguration, {
+          adminRole: false,
+          operatorRole: false,
+          securityRole: false,
+          totpNotFilled: true,
+        });
+
+        createUserAccount(userInfo, configuration);
+        cy.contains(`Veuillez renseigner au moins un rôle`).should('be.visible');
+      })
+
+      it('if the totp is invalid', () => {
+        const configuration = Object.assign({}, basicConfiguration, {
+          totpNotFilled: true,
+        });
+
+        createUserAccount(userInfo, configuration);
+        cy.url().should(
+          'eq',
+          `${BASE_URL}/account/create`,
+        );
+        cy.contains(`Veuillez mettre un code TOTP valide`).should('be.visible');
+      })
+    })
+
     describe('Patch enrollment', () => {
       it('should be possible for the new user to update his password, and type his totp token', () => {
         const configuration = Object.assign({}, basicConfiguration, {
@@ -249,7 +326,6 @@ describe('Account', () => {
       it('Should not be possible for the new user to update his password if totp is not valid', () => {
         const configuration = Object.assign({}, basicConfiguration, {
           redirect: false,
-          totpAccountCreate: true,
           totpFirstLogin: false,
         });
         cy.contains('Comptes utilisateurs').click();
