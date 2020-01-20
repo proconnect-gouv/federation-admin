@@ -4,7 +4,7 @@ stages:
   - run
 
 global-install:
-  image: node:8
+  image: node:12
   stage: install
   script:
     - yarn install

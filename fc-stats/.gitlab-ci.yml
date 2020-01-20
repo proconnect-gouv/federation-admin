@@ -1,6 +1,6 @@
 test/stats:
   stage: test
-  image: node:8
+  image: node:12
   dependencies:
     - global-install
   script:
@@ -9,7 +9,7 @@ test/stats:
 
 run/stats:
   stage: run
-  image: node:8
+  image: node:12
   dependencies:
     - global-install
   services:
