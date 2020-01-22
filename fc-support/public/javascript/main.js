@@ -1,14 +1,14 @@
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
-import { lazyInit } from './lazyinit';
+import { lazyInit } from './lazy-init';
 import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
 import { dateSinglePicker } from './dateSinglePicker';
-import { validateForm } from './validateForm';
 import { copyText } from './clipboard';
 import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem }  from './modals/confirm-form';
+import { rnippForm } from './rnipp-form';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/fonts/fontawesome-webfont.ttf';
@@ -19,7 +19,7 @@ import { validateAccountCreate } from '@fc/shared/public/javascript/validateAcco
 
 const initMap = {
   datePicker: dateSinglePicker,
-  validateRnippForm: validateForm,
+  validateRnippForm: rnippForm,
   copyText,
   paginationStyle,
   validateEnrollment,
