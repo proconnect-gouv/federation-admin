@@ -10,7 +10,6 @@ export = {
   password: process.env.DB_PASSWORD,
   synchronize: (process.env.DB_SYNCHRONIZE || 'false') === 'true',
   entities: [
-    resolve(__dirname, '../**/*.entity{.ts,.js}'),
     resolve(
       __dirname,
       '../../../shared/!(node_modules)/**/*.sql.entity{.ts,.js}',

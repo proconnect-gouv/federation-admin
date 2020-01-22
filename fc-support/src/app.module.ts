@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { RouteInfo } from '@nestjs/common/interfaces';
 import { ConsoleModule } from 'nestjs-console';
 import { resolve } from 'path';
@@ -24,6 +25,9 @@ import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { CsurfMiddleware } from '@nest-middlewares/csurf';
 import { LoggerModule } from '@fc/shared/logger/logger.module';
+import { MongoService } from './config/mongoose-service';
+import { CitizenModule } from './citizen/citizen.module';
+import { CitizenController } from './citizen/citizen.controller';
 import * as otplib from 'otplib';
 
 const otplibProvider = {
@@ -38,11 +42,20 @@ const otplibProvider = {
     ConsoleModule,
     CliModule,
     RnippModule,
+    CitizenModule,
     LoggerModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),
       inject: [ConfigService],
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: (config: ConfigService) => config.get('mongo-database'),
+      inject: [ConfigService],
+      name: 'fc-mongo',
+    }),
+    MongooseModule.forRootAsync({
+      useClass: MongoService,
     }),
   ],
   providers: [LocalsInterceptor, otplibProvider],
@@ -58,7 +71,12 @@ export class AppModule implements NestModule {
         RateLimitMiddleware,
         CsurfMiddleware,
       )
-      .forRoutes(AppController, AccountController, RnippController);
+      .forRoutes(
+        AppController,
+        AccountController,
+        RnippController,
+        CitizenController,
+      );
 
     consumer.apply(CsurfMiddleware).forRoutes(AuthenticationController);
 
@@ -81,7 +99,13 @@ export class AppModule implements NestModule {
       },
     ];
 
-    const totpRoutes: RouteInfo[] = [...totpAccount];
+    const totpRoutes: RouteInfo[] = [
+      ...totpAccount,
+      {
+        path: '/citizen',
+        method: RequestMethod.PATCH,
+      },
+    ];
 
     consumer.apply(TotpMiddleware).forRoutes(...totpRoutes);
   }
