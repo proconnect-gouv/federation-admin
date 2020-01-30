@@ -14,9 +14,16 @@ import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RolesGuard } from '@fc/shared/authentication/guard/roles.guard';
 import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.filter';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: false,
+  });
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
   const configService = app.get<ConfigService>(ConfigService);
 
   // View engine initialization
@@ -47,7 +54,9 @@ async function bootstrap() {
   app.use(passport.session());
 
   // Catch http exception
-  app.useGlobalFilters(new AllExceptionFilter(configService.get('app')));
+  app.useGlobalFilters(
+    new AllExceptionFilter(configService.get('app'), logger),
+  );
 
   // Get port from config
   const port = configService.get('http').port;

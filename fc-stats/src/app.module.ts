@@ -19,6 +19,7 @@ import { AuthenticationController } from '@fc/shared/authentication/authenticati
 import { AuthenticatedMiddleware } from '@fc/shared/authentication/middleware/authenticated.middleware';
 import { TotpMiddleware } from '@fc/shared/authentication/middleware/totp.middleware';
 import { CliModule } from '@fc/shared/cli/cli.module';
+import { LoggerModule } from '@fc/shared/logger/logger.module';
 import { StatsModule } from './stats/stats.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import * as otplib from 'otplib';
@@ -34,6 +35,7 @@ const otplibProvider = {
     AccountModule,
     ConsoleModule,
     CliModule,
+    LoggerModule,
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('database'),

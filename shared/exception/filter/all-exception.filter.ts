@@ -2,14 +2,25 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-  constructor(private readonly configuration: any) {}
+  constructor(
+    private readonly configuration: any,
+    private readonly logger: LoggerService,
+  ) {}
+
+  static formatException(exception) {
+    if (exception instanceof Error) {
+      const { message, stack } = exception;
+      return { message, stack };
+    }
+
+    return exception;
+  }
 
   catch(exception: unknown, host: ArgumentsHost): any {
     const ctx = host.switchToHttp();
@@ -40,7 +51,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       status === HttpStatus.FORBIDDEN ||
       status === HttpStatus.BAD_REQUEST
     ) {
-      Logger.error(exception);
+      this.logger.error(AllExceptionFilter.formatException(exception));
 
       res.status(status).render(`exception/${status}.ejs`, {
         APP_ROOT: this.configuration.app_root,
@@ -53,7 +64,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     } else if (status === HttpStatus.UNAUTHORIZED) {
       res.redirect(`${this.configuration.app_root}/login`);
     } else {
-      Logger.error(exception);
+      this.logger.error(AllExceptionFilter.formatException(exception));
 
       res.status(status).json({
         statusCode: status,

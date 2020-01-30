@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CitizenServiceBase } from './citizen-base.service';
 import { ConfigService } from 'nestjs-config';
 import * as crypto from 'crypto';
-import { TraceService } from '@fc/shared/logger/trace.service';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 describe('CitizenService', () => {
   let module: TestingModule;
@@ -19,16 +19,16 @@ describe('CitizenService', () => {
   };
 
   const loggerProvider = {
-    supportUserAcountStatus: jest.fn(),
+    info: jest.fn(),
   };
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      providers: [CitizenServiceBase, cryptoProvider, TraceService],
+      providers: [CitizenServiceBase, cryptoProvider, LoggerService],
     })
       .overrideProvider(ConfigService)
       .useValue(configServiceMock)
-      .overrideProvider(TraceService)
+      .overrideProvider(LoggerService)
       .useValue(loggerProvider)
       .compile();
 

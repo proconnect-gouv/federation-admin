@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { RnippSerializer } from './rnipp-serializer.service';
 import { rawXml } from '../fixtures/xmlMockedString';
+import { LoggerService } from '@fc/shared/logger/logger.service';
+
 describe('RnippSerializer (e2e)', () => {
   let rnippSerializer: RnippSerializer;
 
@@ -33,13 +35,22 @@ describe('RnippSerializer (e2e)', () => {
     supportId: '1234567891234567',
   };
 
+  const loggerProvider = {
+    info: jest.fn(),
+    debug: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         RnippSerializer,
         { provide: 'Xml2js', useValue: mockedXmlService },
+        LoggerService,
       ],
-    }).compile();
+    })
+      .overrideProvider(LoggerService)
+      .useValue(loggerProvider)
+      .compile();
 
     rnippSerializer = module.get<RnippSerializer>(RnippSerializer);
     jest.resetAllMocks();
