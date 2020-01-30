@@ -17,17 +17,21 @@ import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
-import { TraceService } from '@fc/shared/logger/trace.service';
-import { LogActions } from '@fc/shared/logger/enum/log-actions.enum';
-import { RnippCallStates } from '@fc/shared/logger/enum/rnipp-call-states.enum';
+import { LoggerService } from '@fc/shared/logger/logger.service';
+import { RnippActions, RnippStates } from '@fc/shared/rnipp/rnipp-actions.enum';
+import { IRnippTrack } from '@fc/shared/rnipp/rnipp-track.interface';
 
 @Controller()
 export class RnippController {
   prototype: any;
   public constructor(
     private readonly rnippService: RnippService,
-    private readonly logger: TraceService,
+    private readonly logger: LoggerService,
   ) {}
+
+  private track(log: IRnippTrack) {
+    this.logger.businessEvent(log);
+  }
 
   @Get('rnipp')
   @Roles(UserRole.OPERATOR)
@@ -48,9 +52,9 @@ export class RnippController {
   ): Promise<PersonFoundDTO | ErrorControllerInterface> {
     const csrfToken = req.csrfToken();
 
-    this.logger.supportRnippCall({
-      action: LogActions.SUPPORT_RNIPP_CALL,
-      state: RnippCallStates.INITIATED,
+    this.track({
+      action: RnippActions.SUPPORT_RNIPP_CALL,
+      state: RnippStates.INITIATED,
       user: req.user.username,
       reason: `ticket support : ${rectificationRequest.supportId}`,
     });
@@ -62,9 +66,9 @@ export class RnippController {
         requestedIdentity,
       );
 
-      this.logger.supportRnippCall({
-        action: LogActions.SUPPORT_RNIPP_CALL,
-        state: RnippCallStates.SUCCESS,
+      this.track({
+        action: RnippActions.SUPPORT_RNIPP_CALL,
+        state: RnippStates.SUCCESS,
         code: response.rnippCode,
         user: req.user.username,
         reason: `ticket support : ${rectificationRequest.supportId}`,
@@ -84,9 +88,9 @@ export class RnippController {
         csrfToken,
       };
     } catch (error) {
-      this.logger.supportRnippCall({
-        action: LogActions.SUPPORT_RNIPP_CALL,
-        state: RnippCallStates.ERRORED,
+      this.track({
+        action: RnippActions.SUPPORT_RNIPP_CALL,
+        state: RnippStates.ERRORED,
         code: error.rnippCode,
         user: req.user.username,
         reason: `ticket support : ${rectificationRequest.supportId}`,

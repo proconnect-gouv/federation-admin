@@ -1,5 +1,6 @@
-import { Logger, Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import * as _ from 'lodash';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 import {
   IDENTIFICATION,
@@ -22,10 +23,13 @@ import { IIdentity } from '../citizen/interfaces/identity.interface';
 
 @Injectable()
 export class RnippSerializer {
-  public constructor(@Inject('Xml2js') private readonly xml2js) {}
+  public constructor(
+    @Inject('Xml2js') private readonly xml2js,
+    private readonly logger: LoggerService,
+  ) {}
 
   public async serializeXmlFromRnipp(xmlData: string): Promise<ParsedData> {
-    Logger.debug(`Serializer xml ${xmlData}`);
+    this.logger.debug(`Serializer xml ${xmlData}`);
 
     const stripNS = this.xml2js.processors.stripPrefix;
 
@@ -103,7 +107,7 @@ export class RnippSerializer {
     return new Promise((resolve, reject) => {
       this.xml2js.parseString(input, options, (error, result) => {
         if (error) {
-          Logger.error(`Error in xml2js module => (${error})`);
+          this.logger.error(`Error in xml2js module => (${error})`);
           reject(new Error(`Error in xml2js module`));
         } else {
           resolve(result);

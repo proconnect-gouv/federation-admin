@@ -1,4 +1,4 @@
-import { Injectable, HttpService, Logger } from '@nestjs/common';
+import { Injectable, HttpService } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { validate } from 'class-validator';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
@@ -9,6 +9,7 @@ import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { PersonGenericDTO } from './dto/person-generic.dto';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 @Injectable()
 export class RnippService {
@@ -17,6 +18,7 @@ export class RnippService {
     private readonly http: HttpService,
     private readonly serializer: RnippSerializer,
     private readonly citizen: CitizenServiceBase,
+    private readonly logger: LoggerService,
   ) {}
 
   public async requestIdentityRectification(
@@ -26,17 +28,17 @@ export class RnippService {
       identity as IPivotIdentity,
     );
 
-    Logger.debug(`Requested identity hash: ${idpIdentityHash}`);
+    this.logger.debug(`Requested identity hash: ${idpIdentityHash}`);
 
     const rnippUrl: string = this.constructRequestUrl(
       identity as IPivotIdentity,
     );
 
-    Logger.debug(`Calling RNIPP with: ${rnippUrl}...`);
+    this.logger.debug(`Calling RNIPP with: ${rnippUrl}...`);
 
     const axiosResponse = await this.http.get(`${rnippUrl}`).toPromise();
 
-    Logger.debug(`RNIPP Response status: ${axiosResponse.status}`);
+    this.logger.debug(`RNIPP Response status: ${axiosResponse.status}`);
 
     if (axiosResponse.status !== 200 || !axiosResponse.data) {
       throw {
@@ -49,7 +51,7 @@ export class RnippService {
       };
     }
 
-    Logger.debug('Calling serializer to get understandable json');
+    this.logger.debug('Calling serializer to get understandable json');
 
     const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
       axiosResponse.data,
@@ -107,8 +109,8 @@ export class RnippService {
     };
     const query = queryString.stringify(params);
 
-    Logger.debug(`Query for call rnipp API : ${query}`);
-    Logger.debug(
+    this.logger.debug(`Query for call rnipp API : ${query}`);
+    this.logger.debug(
       `Url for call rnipp API : ${protocol}://${hostname}${baseUrl}&${query}`,
     );
 

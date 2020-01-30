@@ -6,7 +6,7 @@ import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
-import { TraceService } from '@fc/shared/logger/trace.service';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 describe('RnippController', () => {
   let rnippController: RnippController;
@@ -47,17 +47,17 @@ describe('RnippController', () => {
   };
 
   const loggerMock = {
-    supportRnippCall: jest.fn(),
+    businessEvent: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RnippController],
-      providers: [RnippService, TraceService],
+      providers: [RnippService, LoggerService],
     })
       .overrideProvider(RnippService)
       .useValue(rnippService)
-      .overrideProvider(TraceService)
+      .overrideProvider(LoggerService)
       .useValue(loggerMock)
       .compile();
 

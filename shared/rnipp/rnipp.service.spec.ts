@@ -5,9 +5,8 @@ import { RnippService } from './rnipp.service';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { RnippSerializer } from './rnipp-serializer.service';
-import { TraceService } from '@fc/shared/logger/trace.service';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
-
+import { LoggerService } from '@fc/shared/logger/logger.service';
 describe('RnippService (e2e)', () => {
   let rnippService: RnippService;
 
@@ -24,7 +23,8 @@ describe('RnippService (e2e)', () => {
   };
 
   const loggerMock = {
-    supportRnippCall: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
   };
 
   const citizenMock = {
@@ -55,7 +55,7 @@ describe('RnippService (e2e)', () => {
         HttpService,
         ConfigService,
         RnippSerializer,
-        TraceService,
+        LoggerService,
         CitizenServiceBase,
       ],
     })
@@ -65,7 +65,7 @@ describe('RnippService (e2e)', () => {
       .useValue(configService)
       .overrideProvider(RnippSerializer)
       .useValue(rnippSerializerMock)
-      .overrideProvider(TraceService)
+      .overrideProvider(LoggerService)
       .useValue(loggerMock)
       .overrideProvider(CitizenServiceBase)
       .useValue(citizenMock)
@@ -107,7 +107,7 @@ describe('RnippService (e2e)', () => {
       jest
         .spyOn(rnippSerializerMock, 'serializeXmlFromRnipp')
         .mockImplementation(() => Promise.resolve(personParsedData));
-      jest.spyOn(loggerMock, 'supportRnippCall');
+      jest.spyOn(loggerMock, 'info');
 
       const person = await rnippService.requestIdentityRectification(
         personParsedData.identity,
@@ -135,7 +135,7 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
-      jest.spyOn(loggerMock, 'supportRnippCall');
+      jest.spyOn(loggerMock, 'info');
 
       try {
         await rnippService.requestIdentityRectification(personData);
@@ -160,7 +160,7 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
-      jest.spyOn(loggerMock, 'supportRnippCall');
+      jest.spyOn(loggerMock, 'info');
 
       try {
         await rnippService.requestIdentityRectification(personData);
@@ -185,7 +185,7 @@ describe('RnippService (e2e)', () => {
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
-      jest.spyOn(loggerMock, 'supportRnippCall');
+      jest.spyOn(loggerMock, 'info');
 
       try {
         await rnippService.requestIdentityRectification(personData);

@@ -1,5 +1,5 @@
 export default {
-  path: process.env.EVT_LOG_FILE || '/tmp/fcexploitation.log',
+  path: process.env.EVT_LOG_FILE || '/tmp/fcstats.log',
   level: process.env.LOG_LEVEL || 'info',
   isDevelopement: process.env.NODE_ENV === 'development',
 };

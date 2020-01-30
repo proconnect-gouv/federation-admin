@@ -2,7 +2,6 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { CitizenController } from './citizen.controller';
 import { CitizenService } from './citizen.service';
-import { PatchCitizenActiveDTO } from './dto/patch-citizen-active.dto';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 
 describe('CitizenController', () => {

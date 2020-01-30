@@ -1,7 +1,12 @@
 import { AuthenticationController } from './authentication.controller';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 describe('AuthenticationController', () => {
-  const authenticationController = new AuthenticationController();
+  const loggerMock = ({
+    businessEvent: jest.fn(),
+  } as unknown) as LoggerService;
+
+  const authenticationController = new AuthenticationController(loggerMock);
   describe('get login', () => {
     it('should return the login page with a csrf token', () => {
       // setup
@@ -18,6 +23,12 @@ describe('AuthenticationController', () => {
   });
   describe('post login', () => {
     // setup
+    const req = {
+      user: {
+        username: 'foo',
+      },
+    };
+
     const res = {
       redirect: jest.fn(),
       locals: {
@@ -25,7 +36,7 @@ describe('AuthenticationController', () => {
       },
     };
     // action
-    authenticationController.login(res);
+    authenticationController.login(req, res);
     // assertion
     expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
   });
@@ -34,6 +45,9 @@ describe('AuthenticationController', () => {
       // setup
       const req = {
         logout: jest.fn(),
+        user: {
+          username: 'foo',
+        },
       };
       const res = {
         redirect: jest.fn(),

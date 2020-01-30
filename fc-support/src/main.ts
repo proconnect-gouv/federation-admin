@@ -12,13 +12,21 @@ import * as methodOverride from 'method-override';
 
 import 'dotenv';
 import { ConfigService } from 'nestjs-config';
+
 import { PASSPORT } from '@fc/shared/authentication/authentication.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RolesGuard } from '@fc/shared/authentication/guard/roles.guard';
 import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.filter';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: false,
+  });
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
   const configService = app.get<ConfigService>(ConfigService);
 
   // View engine initialization
@@ -58,7 +66,9 @@ async function bootstrap() {
   const port = configService.get('http').port;
 
   // Catch http exception
-  app.useGlobalFilters(new AllExceptionFilter(configService.get('app')));
+  app.useGlobalFilters(
+    new AllExceptionFilter(configService.get('app'), logger),
+  );
 
   // Setup locals for all the routes
   const localsInterceptor = app.get<LocalsInterceptor>(LocalsInterceptor);

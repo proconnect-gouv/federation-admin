@@ -8,9 +8,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guard/local.guard';
+import { IAuthenticationTrack } from './authentication-track.interface';
+import {
+  AuthenticationActions,
+  AuthenticationStates,
+} from './authentication-actions.enum';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 @Controller()
 export class AuthenticationController {
+  public constructor(private readonly logger: LoggerService) {}
+
+  private track(log: IAuthenticationTrack) {
+    this.logger.businessEvent(log);
+  }
+
   @Get('login')
   @Render('login')
   public loginView(@Req() req) {
@@ -20,12 +32,23 @@ export class AuthenticationController {
 
   @Post('login')
   @UseGuards(new LocalAuthGuard())
-  public login(@Res() res) {
+  public login(@Req() req, @Res() res) {
+    this.track({
+      action: AuthenticationActions.SIGNIN,
+      state: AuthenticationStates.GRANTED,
+      user: req.user.username,
+    });
     return res.redirect(`${res.locals.APP_ROOT}/`);
   }
 
   @Get('logout')
   public logout(@Req() req, @Res() res) {
+    if (req.user) {
+      this.track({
+        action: AuthenticationActions.SIGNOUT,
+        user: req.user.username,
+      });
+    }
     req.logout();
     return res.redirect(`${res.locals.APP_ROOT}/login`);
   }

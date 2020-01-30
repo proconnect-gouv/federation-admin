@@ -1,5 +1,6 @@
 import { AllExceptionFilter } from './all-exception.filter';
 import { ArgumentsHost, HttpStatus, HttpException } from '@nestjs/common';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 describe('AllExceptionFilter', () => {
   const configurationMock = {
@@ -11,7 +12,21 @@ describe('AllExceptionFilter', () => {
     latestCommitLongHash: 'latestCommitLongHash',
   };
 
+  const loggerMock = {
+    info: jest.fn(),
+    error: jest.fn(),
+  };
+
+  let exceptionFilter: AllExceptionFilter;
+
   beforeEach(() => {
+    jest.resetAllMocks();
+
+    exceptionFilter = new AllExceptionFilter(
+      configurationMock,
+      (loggerMock as unknown) as LoggerService,
+    );
+
     Date.now = jest.fn().mockReturnValue(1570007990164);
   });
 
@@ -39,8 +54,6 @@ describe('AllExceptionFilter', () => {
       getArgByIndex: jest.fn(),
       getType: jest.fn().mockReturnValue('http'),
     };
-
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
 
     exceptionFilter.catch(
       HttpStatus.INTERNAL_SERVER_ERROR,
@@ -85,8 +98,6 @@ describe('AllExceptionFilter', () => {
       getType: jest.fn().mockReturnValue('http'),
     };
 
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
-
     exceptionFilter.catch(
       new HttpException('', HttpStatus.PAYLOAD_TOO_LARGE),
       host as ArgumentsHost,
@@ -130,8 +141,6 @@ describe('AllExceptionFilter', () => {
       getType: jest.fn().mockReturnValue('http'),
     };
 
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
-
     exceptionFilter.catch(
       new HttpException('', HttpStatus.NOT_FOUND),
       host as ArgumentsHost,
@@ -174,8 +183,6 @@ describe('AllExceptionFilter', () => {
       getArgByIndex: jest.fn(),
       getType: jest.fn().mockReturnValue('http'),
     };
-
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
 
     exceptionFilter.catch(
       new HttpException('', HttpStatus.FORBIDDEN),
@@ -222,8 +229,6 @@ describe('AllExceptionFilter', () => {
       getType: jest.fn().mockReturnValue('http'),
     };
 
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
-
     exceptionFilter.catch(
       new HttpException('', HttpStatus.UNAUTHORIZED),
       host as ArgumentsHost,
@@ -257,8 +262,6 @@ describe('AllExceptionFilter', () => {
       getArgByIndex: jest.fn(),
       getType: jest.fn().mockReturnValue('http'),
     };
-
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
 
     exceptionFilter.catch(
       new HttpException('', HttpStatus.BAD_REQUEST),
@@ -302,8 +305,6 @@ describe('AllExceptionFilter', () => {
       getArgByIndex: jest.fn(),
       getType: jest.fn().mockReturnValue('http'),
     };
-
-    const exceptionFilter = new AllExceptionFilter(configurationMock);
 
     exceptionFilter.catch(
       new HttpException('', HttpStatus.EXPECTATION_FAILED),
