@@ -7,7 +7,7 @@ import { copyText } from './clipboard';
 import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
-import { removeItem }  from './modals/confirm-form';
+import { removeItem }  from '@fc/shared/public/javascript/modals/confirm-form';
 import { rnippForm } from './rnipp-form';
 import 'lightpick/css/lightpick.css';
 import 'bootstrap/dist/css/bootstrap.css';
