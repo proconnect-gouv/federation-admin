@@ -24,4 +24,10 @@ export class User {
 
   @Column({ nullable: true })
   secret: string;
+
+  @Column({ nullable: true })
+  token?: string;
+
+  @Column({ nullable: true })
+  tokenCreatedAt?: Date;
 }

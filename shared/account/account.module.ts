@@ -9,6 +9,10 @@ import { AuthenticationModule } from '@fc/shared/authentication/authentication.m
 import { TotpService } from '@fc/shared/authentication/totp/totp.service';
 import { UserService } from '@fc/shared/user/user.service';
 import * as generatePassword from 'generate-password';
+import { MailerModule } from '../mailer/mailer.module';
+import { ConfigModule, ConfigService } from 'nestjs-config';
+import { MailerService } from '../mailer/mailer.service';
+import { EjsAdapter } from '../mailer/ejs.adapter';
 
 const generatePasswordProvider = {
   provide: 'generatePassword',
@@ -21,6 +25,21 @@ const generatePasswordProvider = {
     TypeOrmModule.forFeature([User]),
     FormModule,
     AuthenticationModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        transport: config.get('transporter.transport'),
+        emailOptions: config.get('transporter'),
+        template: {
+          dir: `${__dirname}/templates`,
+          adapter: new EjsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AccountController],
   providers: [
@@ -28,6 +47,7 @@ const generatePasswordProvider = {
     UserService,
     TotpService,
     generatePasswordProvider,
+    MailerService,
   ],
 })
 export class AccountModule {}

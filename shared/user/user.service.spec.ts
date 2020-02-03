@@ -8,6 +8,9 @@ import { UserRole } from './roles.enum';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
 import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
+import { ConfigService, ConfigModule } from 'nestjs-config';
+import { MailerService } from '../mailer/mailer.service';
+import { MailerModule } from '../mailer/mailer.module';
 
 const mockValidate = jest.fn();
 IsPasswordCompliant.prototype.validate = mockValidate;
@@ -23,6 +26,14 @@ describe('UserService', () => {
 
   const generatePasswordMock = {
     generate: jest.fn(),
+  };
+
+  const configServiceMock = {
+    get: jest.fn(),
+  };
+
+  const transporterMock = {
+    send: jest.fn(),
   };
 
   const generatePasswordProvider = {
@@ -46,11 +57,32 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [TypeOrmModule.forFeature([User])],
-      providers: [UserService, generatePasswordProvider, Repository],
+      imports: [
+        TypeOrmModule.forFeature([User]),
+        MailerModule.forRoot({
+          transport: 'log',
+          emailOptions: {
+            mailjetKey: 'someKey',
+            mailjetSecret: 'someSecret',
+            smtpSenderName: 'someName',
+            smtpSenderEmail: 'someEmail',
+          },
+        }),
+      ],
+      providers: [
+        UserService,
+        generatePasswordProvider,
+        Repository,
+        ConfigService,
+        MailerService,
+      ],
     })
       .overrideProvider(getRepositoryToken(User))
       .useValue(userRepositoryMock)
+      .overrideProvider(ConfigService)
+      .useValue(configServiceMock)
+      .overrideProvider(MailerService)
+      .useValue(transporterMock)
       .compile();
 
     userService = await module.get<UserService>(UserService);
@@ -60,6 +92,7 @@ describe('UserService', () => {
   describe('callGeneratePassword', () => {
     it('should be called with the wright arguments', () => {
       // setup
+
       const args = {
         length: 12,
         numbers: true,
@@ -68,6 +101,7 @@ describe('UserService', () => {
         excludeSimilarCharacters: true,
         strict: true,
       };
+
       // action
       userService.callGeneratePassword();
       // assertion
@@ -222,6 +256,16 @@ describe('UserService', () => {
         roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
         secret: '1234',
       };
+
+      configServiceMock.get.mockReturnValueOnce({
+        app_root: '/foo/bar',
+        appName: 'Exploitation',
+        smtpSenderName: 'someString',
+        smtpSenderEmail: 'someString',
+      });
+
+      userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
+
       await userService.createUser(userMock);
       expect(userRepositoryMock.save).toHaveBeenCalledTimes(1);
       const { passwordHash } = userRepositoryMock.save.mock.calls[0][0];
@@ -235,12 +279,22 @@ describe('UserService', () => {
         roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
         secret: '1234',
       };
+
       jest
         .spyOn(bcrypt, 'hash')
         .mockImplementationOnce(() => Promise.resolve('toto'));
       userRepositoryMock.save = jest
         .fn()
         .mockRejectedValueOnce(new Error('The user could not be saved'));
+
+      configServiceMock.get.mockReturnValueOnce({
+        app_root: '/foo/bar',
+        appName: 'Exploitation',
+        smtpSenderName: 'someString',
+        smtpSenderEmail: 'someString',
+      });
+
+      userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
       try {
         await userService.createUser(userMock);
       } catch (err) {
@@ -262,6 +316,9 @@ describe('UserService', () => {
         .mockRejectedValueOnce(
           new Error('password hash could not be generated'),
         );
+      configServiceMock.get.mockReturnValueOnce({
+        app_root: '/foo/bar',
+      });
       try {
         await userService.createUser(userMock);
       } catch (err) {

@@ -2,12 +2,18 @@ import * as bcrypt from 'bcrypt';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult, UpdateResult } from 'typeorm';
+import { InjectConfig, ConfigService } from 'nestjs-config';
+import * as uuid from 'uuid/v4';
+
 import { User } from './user.sql.entity';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
 import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
+import { MailerService } from '../mailer/mailer.service';
+import { IMailerParams } from '../mailer/interfaces';
+import { Email } from '../mailer/mailjet';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -17,6 +23,8 @@ export class UserService implements IUserService {
     @Inject('generatePassword') private readonly generatePassword,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectConfig() private readonly config: ConfigService,
+    private readonly transporterService: MailerService,
   ) {}
 
   callGeneratePassword() {
@@ -95,20 +103,42 @@ export class UserService implements IUserService {
   }
 
   async createUser(user: ICreateUserDTO): Promise<User> {
+    const { app_root } = this.config.get('app');
+    const { username, email, roles, secret } = user;
+    const token: string = uuid();
+
     let passwordHash;
     try {
       passwordHash = await bcrypt.hash(user.password, this.SALT_ROUNDS);
     } catch (err) {
       throw new Error('password hash could not be generated');
     }
+
     try {
-      const { username, email, roles, secret } = user;
+      this.sendNewAccountEmail(
+        { username, email },
+        {
+          baseUrl: app_root,
+          templateName: 'enrollment',
+          token,
+        },
+      );
+    } catch (error) {
+      throw new Error(
+        `Sending email failed. Abandonment of user creation : ${error}`,
+      );
+    }
+    try {
+      const tokenCreatedAt: Date = new Date();
+
       return this.userRepository.save({
         passwordHash,
         username,
         email,
         roles,
         secret,
+        token,
+        tokenCreatedAt,
       });
     } catch (err) {
       throw new Error('The user could not be saved');
@@ -135,5 +165,31 @@ export class UserService implements IUserService {
       throw new Error('password could not be updated');
     }
     return userEntity;
+  }
+
+  sendNewAccountEmail({ username, email }, options: IMailerParams) {
+    return this.transporterService.send(
+      this.createRecipients(username, email),
+      options,
+    );
+  }
+
+  createRecipients(username: string, email: string): Email.SendParamsMessage {
+    const { appName } = this.config.get('app');
+    const { smtpSenderName, smtpSenderEmail } = this.config.get('transporter');
+
+    return {
+      From: {
+        Email: smtpSenderEmail,
+        Name: smtpSenderName,
+      },
+      To: [
+        {
+          Email: email,
+          Name: username,
+        },
+      ],
+      Subject: `Demande de création d'un compte utilisateur sur ${appName}`,
+    };
   }
 }
