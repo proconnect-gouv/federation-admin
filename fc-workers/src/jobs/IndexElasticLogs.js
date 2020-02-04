@@ -13,9 +13,9 @@ class IndexElasticLogs extends Job {
   /**
    Handling data source
   */
-  async fetchData(start, stop, after = null) {
+  async fetchData(start, stop, size, after = null) {
     const statsService = this.container.get('stats');
-    return statsService.getByIntervalByFIFS(start, stop, 'day', after);
+    return statsService.getByIntervalByFIFS(start, stop, 'day', size, after);
   }
 
   static getKey(entry) {
@@ -70,8 +70,8 @@ class IndexElasticLogs extends Job {
 
   async indexLogs(start, stop, after = null, initialDelay = 0) {
     this.log.info('Fetch the value we want from ES');
-    const data = await this.fetchData(start, stop, after);
-
+    const compositeSize = 10000;
+    const data = await this.fetchData(start, stop, compositeSize, after);
     const { buckets, after_key: nextAfter } = data.aggregations.date;
 
     const docList = buckets.map(bucket => ({
@@ -83,9 +83,13 @@ class IndexElasticLogs extends Job {
     this.log.info('Build an array of documents');
 
     const eventCount = IndexElasticLogs.getEventCountFromAggregates(docList);
+    const totalCount = IndexElasticLogs.getEventCountFromAggregates(
+      buckets.map(doc => ({ ...doc, count: doc.doc_count }))
+    );
+
     this.log.info(`   > Created ${docList.length} documents
      with ${eventCount} events
-     from ${data.hits.total} original events`);
+     from ${totalCount} original events`);
 
     this.log.info('Post new entries to stats index');
 
@@ -109,6 +113,10 @@ class IndexElasticLogs extends Job {
     );
 
     if (nextAfter) {
+      this.log.info('ES indcated more results doing another loop...');
+      this.log.info(
+        'There is usually an empty one at the end, this is "normal"'
+      );
       this.indexLogs(start, stop, nextAfter, delay + initialDelay);
     }
   }

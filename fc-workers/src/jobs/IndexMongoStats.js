@@ -6,7 +6,7 @@ class IndexMongoStats extends Job {
   static usage() {
     return `
       Usage:
-      > IndexMongoStats --count=<account|desactivated|registration> --start=<date> --range=<day|week|month|year>
+      > IndexMongoStats --count=<account|desactivated|registration> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>
     `;
   }
 
@@ -15,10 +15,10 @@ class IndexMongoStats extends Job {
 
     switch (metric) {
       case 'account':
-        return account.countDocuments();
+        return account.estimatedDocumentCount();
 
       case 'desactivated':
-        return account.find({ active: false }).countDocuments();
+        return account.countDocuments({ active: false });
 
       case 'registration':
         return IndexMongoStats.getRegistrationMetric(account, start, range);
@@ -37,7 +37,7 @@ class IndexMongoStats extends Job {
       ],
     };
 
-    return account.find(query).countDocuments();
+    return account.countDocuments(query);
   }
 
   static getStopDateForRange(start, range) {
