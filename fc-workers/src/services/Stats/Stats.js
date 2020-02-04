@@ -21,9 +21,15 @@ class Stats {
     return { from, size, total, ids };
   }
 
-  async getByIntervalByFIFS(start, stop, interval, after) {
+  async getByIntervalByFIFS(start, stop, interval, size, after) {
     const api = this.container.get('logApi');
-    const query = queries.getByIntervalByFIFS({ start, stop, interval, after });
+    const query = queries.getByIntervalByFIFS({
+      start,
+      stop,
+      interval,
+      size,
+      after,
+    });
 
     return api.search(query);
   }

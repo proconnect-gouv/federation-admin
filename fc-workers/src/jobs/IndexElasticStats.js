@@ -5,7 +5,7 @@ class IndexElasticStats extends Job {
   static usage() {
     return `
       Usage:
-      > IndexElasticStats --count=<activeAccount|usersPerFsCount> --start=<date> --range=<day|week|month|year>
+      > IndexElasticStats --count=<activeAccount|usersPerFsCount> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>
     `;
   }
 

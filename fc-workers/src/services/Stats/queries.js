@@ -32,7 +32,7 @@ export const getIdsToDelete = params => {
 };
 
 export const getByIntervalByFIFS = params => {
-  const { start, stop, interval, after } = params;
+  const { start, stop, interval, size, after } = params;
   const index = 'franceconnect';
 
   const query = {
@@ -56,7 +56,7 @@ export const getByIntervalByFIFS = params => {
       aggs: {
         date: {
           composite: {
-            size: 10000,
+            size,
             sources: [
               {
                 date: {
