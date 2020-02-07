@@ -91,7 +91,7 @@
                     id="family-name"
                     name="familyName"
                     value="<%= (locals.person && locals.person.requestedIdentity.familyName) ? locals.person.requestedIdentity.familyName : '' %>"
-                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
+                    pattern="<%= VALID_INPUT_STRING_REGEX %>"
                     required
                   >
                   <div class="invalid-feedback">
@@ -106,7 +106,7 @@
                     id="preferred-username"
                     name="preferredUsername"
                     value="<%= (locals.person && locals.person.requestedIdentity.preferredUsername) ? locals.person.requestedIdentity.preferredUsername : '' %>"
-                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
+                    pattern="<%= VALID_INPUT_STRING_REGEX %>"
                   >
                   <div class="invalid-feedback">
                     Veuillez renseigner un nom d'usage
@@ -121,7 +121,7 @@
                     name="givenName"
                     placeholder="exemple : Jean Michel Pierre Marie"
                     value="<%= (locals.person && locals.person.requestedIdentity.givenName) ? locals.person.requestedIdentity.givenName : '' %>"
-                    pattern="[a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+([ -][a-zA-ZàâéêèëîïôùçÀÂÉÊÈËÎÏÔÙÇ]+)*"
+                    pattern="<%= VALID_INPUT_STRING_REGEX %>"
                     required
                   >
                   <div class="invalid-feedback">
