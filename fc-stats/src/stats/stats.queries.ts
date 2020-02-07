@@ -283,8 +283,7 @@ export class StatsQueries {
             aggs: {
               action: {
                 terms: {
-                  field: 'action',
-                  size: 0,
+                  field: 'typeAction',
                 },
                 aggs: {
                   count: {
