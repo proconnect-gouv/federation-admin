@@ -9,6 +9,12 @@ class Config {
     return API_ROOT || 'http://localhost:3000/api/v1';
   }
 
+  getAPIKey() {
+    const { API_KEY = '' } = this.config;
+
+    return API_KEY;
+  }
+
   getMailerType() {
     const { MAILER } = this.config;
 

@@ -84,7 +84,7 @@ describe('WeeklyIdpRepport', () => {
           events: [
             {
               count: 665,
-              label: 'confirmauthentication',
+              label: 'confirmAuthentication',
             },
             {
               count: 660,
@@ -92,11 +92,11 @@ describe('WeeklyIdpRepport', () => {
             },
             {
               count: 396,
-              label: 'identityproviderauthentication',
+              label: 'identityProviderAuthentication',
             },
             {
               count: 726,
-              label: 'identityproviderchoice',
+              label: 'identityProviderChoice',
             },
           ],
         },
@@ -123,21 +123,22 @@ describe('WeeklyIdpRepport', () => {
       const container = new Container();
 
       container.add('input', () => ({ get: (schema, values) => values }));
-      container.add('mailer',() => ( { send }));
-      container.add('config',() => ( { getAPIRoot: () => 'foo' }));
-      container.add('logger',() => ( { info: jest.fn() }));
+      container.add('mailer', () => ({ send }));
+      container.add('config', () => ({
+        getAPIRoot: () => 'foo',
+        getAPIKey: () => 'bar',
+      }));
+      container.add('logger', () => ({ info: jest.fn() }));
       container.add('httpClient', () => ({
         get: () =>
           Promise.resolve({
             data: {
-              payload: {
-                weeks: [
-                  {
-                    startDate: 1514764800000,
-                    events: [{ count: 2, label: 'bar' }],
-                  },
-                ],
-              },
+              weeks: [
+                {
+                  startDate: 1514764800000,
+                  events: [{ count: 2, label: 'bar' }],
+                },
+              ],
             },
           }),
       }));

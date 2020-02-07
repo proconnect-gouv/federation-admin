@@ -1,8 +1,8 @@
 import Job from './Job';
 
 const eventsMap = {
-  identityproviderchoice: 'Clics sur le bouton',
-  identityproviderauthentication: 'Authentifications réussies chez le FI',
+  identityProviderChoice: 'Clics sur le bouton',
+  identityProviderAuthentication: 'Authentifications réussies chez le FI',
   initial: 'Authentifications réussies chez le FS',
 };
 
@@ -61,7 +61,7 @@ class WeeklyIdpRepport extends Job {
     const rows = WeeklyIdpRepport.formatRows(weeks);
     const html = `
       Bonjour,
-      Veuillez trouver ci-après les statistiques d'utilisation de FranceConnect vous concernant, regroupés par semaine :
+      Veuillez trouver ci-après les statistiques d'utilisation de FranceConnect vous concernant, regroupées par semaine :
       <table border="1" cellpadding="10">
         <thead>
           <tr>
@@ -122,10 +122,15 @@ class WeeklyIdpRepport extends Job {
     const url = `${config.getAPIRoot()}/totalByFi?fi=${idp}&start=${start}&stop=${end}`;
 
     // Action
-    const request = await httpClient.get(url);
+    const request = await httpClient.get(url, {
+      headers: {
+        token: config.getAPIKey(),
+      },
+    });
+
     const emailContent = WeeklyIdpRepport.formatMessage(
       idp,
-      request.data.payload.weeks
+      request.data.weeks
     );
     const subject = WeeklyIdpRepport.getSubject(idp);
 
