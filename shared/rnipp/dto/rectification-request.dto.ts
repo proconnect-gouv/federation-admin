@@ -1,11 +1,10 @@
 import { IsString, IsISO8601, Matches, IsIn, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
+import { IsValidInputString } from '../../validators/is-valid-input-string';
 import { toBoolean } from '../../transforms/string.transform';
 import { IIdentity } from '../../citizen/interfaces/identity.interface';
 import { FRANCE_COG } from '../rnipp-constants';
-
-const NAME_REGEX = /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\ \-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/;
 
 export class RectificationRequestDTO {
   @Matches(/^[0-9]{16}$/)
@@ -16,17 +15,17 @@ export class RectificationRequestDTO {
   @IsString()
   readonly gender: string;
 
-  @Matches(NAME_REGEX)
+  @IsValidInputString()
   @IsString()
   @Transform(value => typeof value === 'string' && value.toUpperCase())
   readonly familyName: string;
 
   @IsOptionalExtended()
-  @Matches(NAME_REGEX)
+  @IsValidInputString()
   @IsString()
   readonly preferredUsername: string;
 
-  @Matches(NAME_REGEX)
+  @IsValidInputString()
   @IsString()
   readonly givenName: string;
 

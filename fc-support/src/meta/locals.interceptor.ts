@@ -9,6 +9,7 @@ import { ConfigService } from 'nestjs-config';
 import * as moment from 'moment';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { errorCodeTranslations } from './error-code-translations';
+import { VALID_INPUT_STRING_REGEX } from '@fc/shared/validators/is-valid-input-string';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
@@ -49,6 +50,7 @@ export class LocalsInterceptor implements NestInterceptor {
 
     res.locals.CURRENT_USER = req.user;
 
+    res.locals.VALID_INPUT_STRING_REGEX = VALID_INPUT_STRING_REGEX.source;
     res.locals.REQ_PARAMS = req.params;
     res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
