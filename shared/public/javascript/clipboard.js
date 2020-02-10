@@ -1,40 +1,36 @@
 import ClipboardJS from 'clipboard';
 import $ from 'jquery';
 
+const COPY_BUTTON = '.copy-button';
 export function copyText () {
-	eventCleanerListenerForTooltip('.copy-button');
-	const clipboard = new ClipboardJS('.copy-button');
+	eventCleanerListenerForTooltip(COPY_BUTTON);
+	const clipboard = new ClipboardJS(COPY_BUTTON);
 
-	clipboard.on('success', function(e) {
+	clipboard.on('success', e => {
 		e.clearSelection();
-		console.info('Action:', e.action);
-		console.info('Text:', e.text);
-		console.info('Trigger:', e.trigger);
-
-		showTooltip(e.trigger,'Copié !');     
+		const { action, text, trigger } = e;
+		console.info({ action, text, trigger });
+		showTooltip(trigger,'Copié !');
 	});
 
-	clipboard.on('error', function(e) {
-		console.error('Action:', e.action);
-		console.error('Trigger:', e.trigger);
+	clipboard.on('error',({ action, trigger}) => {
+		console.error({ action, trigger });
 	});
 }
 
 function eventCleanerListenerForTooltip (elm) {
 	$(elm).tooltip('disable');
-	const btns=document.querySelectorAll(elm);
-	for(let i=0;i<btns.length;i++){
-		btns[i].addEventListener('mouseleave',clearTooltip);
-		btns[i].addEventListener('blur',clearTooltip);
-	}
+	const btns = document.querySelectorAll(elm);
+	Array.from(btns).map(btn => {
+		btn.addEventListener('mouseleave', clearTooltip);
+		btn.addEventListener('blur', clearTooltip);
+	});
 }
 
-function clearTooltip(e){
-	$('.copy-button').tooltip('hide');
-	$('.copy-button').tooltip('disable');
+function clearTooltip() {
+	$(COPY_BUTTON).tooltip('hide').tooltip('disable');
 }
 
-function showTooltip(elm){
-	$(elm).tooltip('enable');
-	$(elm).tooltip('show');
+function showTooltip(elm) {
+	$(elm).tooltip('enable').tooltip('show');
 }

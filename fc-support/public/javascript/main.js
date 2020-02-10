@@ -3,7 +3,7 @@ import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from './lazy-init';
 import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
 import { dateSinglePicker } from './dateSinglePicker';
-import { copyText } from './clipboard';
+import { copyText } from '@fc/shared/public/javascript/clipboard';
 import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
@@ -32,7 +32,7 @@ const initMap = {
 
 $(document).ready(function() {
   $('.nav-link[data-prefix]').each(function(index, link) {
-    var prefix = $(link).attr('data-prefix');
+    const prefix = $(link).attr('data-prefix');
     if (window.location.pathname.startsWith(prefix)) {
       $(link).addClass('active');
     }

@@ -9,6 +9,7 @@ import {
   Req,
 } from '@nestjs/common';
 
+import * as beautify from 'xml-beautifier';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { RnippService } from './rnipp.service';
@@ -82,7 +83,7 @@ export class RnippController {
         },
         rnippResponse: {
           code: response.rnippCode,
-          raw: response.rawResponse,
+          raw: beautify(response.rawResponse),
         },
         supportId: rectificationRequest.supportId,
         csrfToken,
