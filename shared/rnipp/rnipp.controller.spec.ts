@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
-import { rawXml } from '../fixtures/xmlMockedString';
+import { formattedXml, rawXml } from '../fixtures/xmlMockedString';
 import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
@@ -77,6 +77,63 @@ describe('RnippController', () => {
           birthPlace: '75107',
           birthCountry: '99100',
         },
+        rawResponse: formattedXml.xmlString,
+        rnippCode: 2,
+        statusCode: 200,
+      };
+
+      const expectedResult: PersonFoundDTO = {
+        person: {
+          requestedIdentity: {
+            gender: 'male',
+            familyName: 'Dupont',
+            preferredUsername: 'Henri',
+            givenName: 'Pierr',
+            birthdate: '1992-03-03',
+            birthPlace: '75107',
+            birthCountry: '99100',
+          },
+          rectifiedIdentity: {
+            gender: 'male',
+            familyName: 'Dupont',
+            preferredUsername: 'Henri',
+            givenName: 'Pierr',
+            birthdate: '1992-03-03',
+            birthPlace: '75107',
+            birthCountry: '99100',
+          },
+        },
+        rnippResponse: {
+          code: 2,
+          raw: formattedXml.xmlString,
+        },
+        supportId: '1234567891234567',
+        csrfToken: 'mygreatcsrftoken',
+      };
+
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
+        return mockedRnippService;
+      });
+
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return information with formatted XML', async () => {
+      const mockedRnippService: IResponseFromRnipp = {
+        rectifiedIdentity: {
+          gender: 'male',
+          familyName: 'Dupont',
+          preferredUsername: 'Henri',
+          givenName: 'Pierr',
+          birthdate: '1992-03-03',
+          birthPlace: '75107',
+          birthCountry: '99100',
+        },
         rawResponse: rawXml.xmlString,
         rnippCode: 2,
         statusCode: 200,
@@ -105,7 +162,7 @@ describe('RnippController', () => {
         },
         rnippResponse: {
           code: 2,
-          raw: rawXml.xmlString,
+          raw: formattedXml.xmlString,
         },
         supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
