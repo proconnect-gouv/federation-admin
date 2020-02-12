@@ -61,7 +61,10 @@ export class RnippSerializer {
       return { rnippCode };
     }
 
-    const dead: boolean = this.getDeadStateAttribute(parsedXml, DEAD);
+    const dead: boolean = this.getDeadStateAttribute(
+      parsedXml,
+      `${IDENTIFICATION}.${DEAD}`,
+    );
 
     const identity: IIdentity = {
       gender: this.getGenderFromParsedXml(

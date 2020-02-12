@@ -22,16 +22,16 @@ export class RnippService {
   ) {}
 
   public async requestIdentityRectification(
-    identity: IIdentity,
+    identityData: IIdentity,
   ): Promise<IResponseFromRnipp | any> {
     const idpIdentityHash = await this.citizen.getPivotIdentityHash(
-      identity as IPivotIdentity,
+      identityData as IPivotIdentity,
     );
 
     this.logger.debug(`Requested identity hash: ${idpIdentityHash}`);
 
     const rnippUrl: string = this.constructRequestUrl(
-      identity as IPivotIdentity,
+      identityData as IPivotIdentity,
     );
 
     this.logger.debug(`Calling RNIPP with: ${rnippUrl}...`);
@@ -53,35 +53,40 @@ export class RnippService {
 
     this.logger.debug('Calling serializer to get understandable json');
 
-    const user: ParsedData = await this.serializer.serializeXmlFromRnipp(
+    const {
+      identity,
+      rnippCode,
+      dead,
+    }: ParsedData = await this.serializer.serializeXmlFromRnipp(
       axiosResponse.data,
     );
 
-    if (!user.identity) {
+    if (!identity) {
       throw {
         rawResponse: axiosResponse.data,
         statusCode: axiosResponse.status,
         message: "Une erreur s'est produite lors de l'appel au RNIPP.",
-        rnippCode: user.rnippCode,
+        rnippCode,
         identityHash: {
           idp: idpIdentityHash,
         },
       };
     }
 
-    const errors = await this.validateIdentityFormat(user.identity);
+    const errors = await this.validateIdentityFormat(identity);
 
     if (errors.length > 0) {
       throw errors;
     }
 
     const rnippIdentityHash = await this.citizen.getPivotIdentityHash(
-      user.identity as IPivotIdentity,
+      identity as IPivotIdentity,
     );
 
     return {
-      rectifiedIdentity: user.identity || {},
-      rnippCode: user.rnippCode,
+      rectifiedIdentity: identity || {},
+      rnippCode,
+      rnippDead: dead === true,
       rawResponse: axiosResponse.data,
       statusCode: axiosResponse.status,
       identityHash: {

@@ -133,18 +133,15 @@
                   <div class="input-group">
                     <input
                       type="text"
-                      class="form-control datepicker"
+                      class="form-control"
                       id="birthdate"
                       name="birthdate"
                       placeholder="exemple : 1987-02-21"
                       value="<%= (locals.person && locals.person.requestedIdentity.birthdate) ? locals.person.requestedIdentity.birthdate : '' %>"
-                      data-init="datePicker"
                       required
                       autocomplete="off"
+                      pattern="^\d{4}-\d{2}-\d{2}$"
                     >
-                    <div class="input-group-append">
-                        <span class="input-group-text fa fa-calendar" aria-hidden="true"></span>
-                    </div>
                     <div class="invalid-feedback">
                       Veuillez renseigner une date au format YYY-mm-dd
                     </div>
@@ -208,6 +205,15 @@
         <div id="result" class="col-md-6 col-sm-12" >
           <% if (locals.person && locals.person.rectifiedIdentity) { %>
             <h3>Résultat du redressement RNIPP</h3>
+            <% if (locals.person && locals.person.dead) { %>
+              <div id="dead" class="alert alert-dark" role="alert">
+                <% if (locals.person.rectifiedIdentity.gender === 'female') { %>
+                <p>L'utilisatrice est déclarée décédée. Aucune autre information n'est disponible.</p>
+                <% } else { %>
+                  <p>L'utilisateur est déclaré décédé. Aucune autre information n'est disponible.</p>
+                <% } %>
+              </div>
+            <% } %>
             <div class="card my-3">
               <div class="card-body">
                 <div class="mb-2">

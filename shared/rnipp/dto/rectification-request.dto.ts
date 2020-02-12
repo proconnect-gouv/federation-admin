@@ -1,5 +1,6 @@
 import { IsString, IsISO8601, Matches, IsIn, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsBirthdate } from '../validator/is-birthdate.validator';
 import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
 import { IsValidInputString } from '../../validators/is-valid-input-string';
 import { toBoolean } from '../../transforms/string.transform';
@@ -29,7 +30,8 @@ export class RectificationRequestDTO {
   @IsString()
   readonly givenName: string;
 
-  @IsISO8601()
+  @IsBirthdate()
+  @IsString()
   readonly birthdate: string;
 
   @IsBoolean()

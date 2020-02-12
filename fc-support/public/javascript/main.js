@@ -2,7 +2,6 @@ import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from './lazy-init';
 import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
-import { dateSinglePicker } from './dateSinglePicker';
 import { copyText } from '@fc/shared/public/javascript/clipboard';
 import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
@@ -18,7 +17,6 @@ import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAcco
 import { validateAccountCreate } from '@fc/shared/public/javascript/validateAccountCreate';
 
 const initMap = {
-  datePicker: dateSinglePicker,
   validateRnippForm: rnippForm,
   copyText,
   paginationStyle,

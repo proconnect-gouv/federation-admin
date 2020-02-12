@@ -109,6 +109,68 @@ describe('Rnipp rectification', () => {
     cy.formControl({ ...person });
   });
 
+  it('Should retrieve userinfo from RNIPP (person from whom we do not know month and day of birth)', () => {
+    cy.url().should('equal', `${BASE_URL}/rnipp`);
+    cy.contains('Rechercher un usager');
+
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_dont_on_ne_connaît_pas_le_mois_et_le_jour_de_naissance'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('FLEURET');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Jean');
+      expect($divs.eq(5)).to.contain('2019-00-00');
+      expect($divs.eq(6)).to.contain('');
+      expect($divs.eq(7)).to.contain('99217');
+    });
+
+    cy.formControl(person);
+  });
+
+  it('Should retrieve userinfo from RNIPP (person from whom we do not know day of birth)', () => {
+    cy.url().should('equal', `${BASE_URL}/rnipp`);
+    cy.contains('Rechercher un usager');
+
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_dont_on_ne_connaît_pas_le_jour_de_naissance'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('FLEURET');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Jean');
+      expect($divs.eq(5)).to.contain('2019-11-00');
+      expect($divs.eq(6)).to.contain('');
+      expect($divs.eq(7)).to.contain('99217');
+    });
+
+    cy.formControl(person);
+  });
+
   it('Should retrieve userinfo rectified from RNIPP', () => {
     cy.url().should('equal', `${BASE_URL}/rnipp`);
     cy.contains('Rechercher un usager');
@@ -138,6 +200,74 @@ describe('Rnipp rectification', () => {
     });
 
     cy.formControl({ ...person, familyName: 'NORRIS' });
+  });
+
+  describe('Dead people', () => {
+    it('Should retrieve userinfo from RNIPP (man who died)', () => {
+      cy.url().should('equal', `${BASE_URL}/rnipp`);
+      cy.contains('Rechercher un usager');
+  
+      const person = {
+        supportId: '1234567891234567',
+        ...rnippIdentities['utilisateur_masculin_décédé'],
+      };
+  
+      cy.formFill(person, configuration);
+  
+      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+  
+      // Should
+      cy.url().should('equal', `${BASE_URL}/research`);
+      cy.get('#result').contains('Résultat du redressement RNIPP');
+      cy.get('#dead').contains("L'utilisateur est déclaré décédé. Aucune autre information n'est disponible.");
+      cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+        // Expect
+        expect($divs).to.have.length(8);
+        expect($divs.eq(0)).to.contain('1234567891234567');
+        expect($divs.eq(1)).to.contain('Masculin');
+        expect($divs.eq(2)).to.contain('BEREGOVOY');
+        expect($divs.eq(3)).to.contain('');
+        expect($divs.eq(4)).to.contain('Pierre');
+        expect($divs.eq(5)).to.contain('1925-12-23');
+        expect($divs.eq(6)).to.contain('76216');
+        expect($divs.eq(7)).to.contain('99100');
+      });
+  
+      cy.formControl({ ...person });
+    });
+
+    it('Should retrieve userinfo from RNIPP (woman who died)', () => {
+      cy.url().should('equal', `${BASE_URL}/rnipp`);
+      cy.contains('Rechercher un usager');
+  
+      const person = {
+        supportId: '1234567891234567',
+        ...rnippIdentities['utilisateur_féminin_décédée'],
+      };
+  
+      cy.formFill(person, configuration);
+  
+      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+  
+      // Should
+      cy.url().should('equal', `${BASE_URL}/research`);
+      cy.get('#result').contains('Résultat du redressement RNIPP');
+      cy.get('#dead').contains("L'utilisatrice est déclarée décédée. Aucune autre information n'est disponible.");
+      cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+        // Expect
+        expect($divs).to.have.length(8);
+        expect($divs.eq(0)).to.contain('1234567891234567');
+        expect($divs.eq(1)).to.contain('Féminin');
+        expect($divs.eq(2)).to.contain('VEIL');
+        expect($divs.eq(3)).to.contain('');
+        expect($divs.eq(4)).to.contain('Simone');
+        expect($divs.eq(5)).to.contain('1927-07-13');
+        expect($divs.eq(6)).to.contain('06000');
+        expect($divs.eq(7)).to.contain('99100');
+      });
+  
+      cy.formControl({ ...person });
+    });
   });
 
   it('Should not send the form if require input are empty', () => {
