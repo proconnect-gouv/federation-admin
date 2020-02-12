@@ -79,6 +79,7 @@ describe('RnippController', () => {
         },
         rawResponse: formattedXml.xmlString,
         rnippCode: 2,
+        rnippDead: false,
         statusCode: 200,
       };
 
@@ -102,6 +103,7 @@ describe('RnippController', () => {
             birthPlace: '75107',
             birthCountry: '99100',
           },
+          dead: false,
         },
         rnippResponse: {
           code: 2,
@@ -134,13 +136,74 @@ describe('RnippController', () => {
           birthPlace: '75107',
           birthCountry: '99100',
         },
-        rawResponse: rawXml.xmlString,
+        rawResponse: formattedXml.xmlString,
         rnippCode: 2,
+        rnippDead: false,
         statusCode: 200,
       };
 
       const expectedResult: PersonFoundDTO = {
         person: {
+          requestedIdentity: {
+            gender: 'male',
+            familyName: 'Dupont',
+            preferredUsername: 'Henri',
+            givenName: 'Pierr',
+            birthdate: '1992-03-03',
+            birthPlace: '75107',
+            birthCountry: '99100',
+          },
+          rectifiedIdentity: {
+            gender: 'male',
+            familyName: 'Dupont',
+            preferredUsername: 'Henri',
+            givenName: 'Pierr',
+            birthdate: '1992-03-03',
+            birthPlace: '75107',
+            birthCountry: '99100',
+          },
+          dead: false,
+        },
+        rnippResponse: {
+          code: 2,
+          raw: formattedXml.xmlString,
+        },
+        supportId: '1234567891234567',
+        csrfToken: 'mygreatcsrftoken',
+      };
+
+      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
+        return mockedRnippService;
+      });
+
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return information with formatted XML', async () => {
+      const mockedRnippService: IResponseFromRnipp = {
+        rectifiedIdentity: {
+          gender: 'male',
+          familyName: 'Dupont',
+          preferredUsername: 'Henri',
+          givenName: 'Pierr',
+          birthdate: '1992-03-03',
+          birthPlace: '75107',
+          birthCountry: '99100',
+        },
+        rawResponse: formattedXml.xmlString,
+        rnippCode: 2,
+        rnippDead: false,
+        statusCode: 200,
+      };
+
+      const expectedResult: PersonFoundDTO = {
+        person: {
+          dead: false,
           requestedIdentity: {
             gender: 'male',
             familyName: 'Dupont',
@@ -190,6 +253,7 @@ describe('RnippController', () => {
       const expectedResult: ErrorControllerInterface = {
         person: {
           requestedIdentity: identity,
+          dead: false,
         },
         rawResponse: 'No Data from rnipp',
         statusCode: 500,
@@ -221,6 +285,7 @@ describe('RnippController', () => {
       const expectedResult: ErrorControllerInterface = {
         person: {
           requestedIdentity: identity,
+          dead: false,
         },
         rawResponse: 'component',
         statusCode: 403,
@@ -255,6 +320,7 @@ describe('RnippController', () => {
       const expectedResult: ErrorControllerInterface = {
         person: {
           requestedIdentity: identity,
+          dead: false,
         },
         supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',

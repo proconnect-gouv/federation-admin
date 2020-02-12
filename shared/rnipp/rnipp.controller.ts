@@ -61,29 +61,30 @@ export class RnippController {
     });
 
     const requestedIdentity = rectificationRequest.toIdentity();
-
+    let responseRNIPP: IResponseFromRnipp;
     try {
-      const response: IResponseFromRnipp = await this.rnippService.requestIdentityRectification(
+      responseRNIPP = await this.rnippService.requestIdentityRectification(
         requestedIdentity,
       );
 
       this.track({
         action: RnippActions.SUPPORT_RNIPP_CALL,
         state: RnippStates.SUCCESS,
-        code: response.rnippCode,
+        code: responseRNIPP.rnippCode,
         user: req.user.username,
         reason: `ticket support : ${rectificationRequest.supportId}`,
-        identityHash: response.identityHash,
+        identityHash: responseRNIPP.identityHash,
       });
 
       return {
         person: {
           requestedIdentity,
-          rectifiedIdentity: response.rectifiedIdentity,
+          rectifiedIdentity: responseRNIPP.rectifiedIdentity,
+          dead: responseRNIPP.rnippDead,
         },
         rnippResponse: {
-          code: response.rnippCode,
-          raw: beautify(response.rawResponse),
+          code: responseRNIPP.rnippCode,
+          raw: beautify(responseRNIPP.rawResponse),
         },
         supportId: rectificationRequest.supportId,
         csrfToken,
@@ -97,10 +98,12 @@ export class RnippController {
         reason: `ticket support : ${rectificationRequest.supportId}`,
         identityHash: error.identityHash,
       });
+      const { rnippDead = false } = responseRNIPP || {};
       return this.handleError(
         error,
         rectificationRequest.supportId,
         requestedIdentity,
+        rnippDead,
         csrfToken,
       );
     }
@@ -110,12 +113,14 @@ export class RnippController {
     error: any,
     supportId: string,
     requestedIdentity: IIdentity,
+    dead: boolean,
     csrfToken: string,
   ): Promise<ErrorControllerInterface> {
     if (error.errors) {
       return {
         person: {
           requestedIdentity,
+          dead,
         },
         supportId,
         message: error.errors,
@@ -125,6 +130,7 @@ export class RnippController {
       return {
         person: {
           requestedIdentity,
+          dead,
         },
         supportId,
         rawResponse: error.rawResponse,

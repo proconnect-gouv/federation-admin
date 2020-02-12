@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ValidateNested, IsOptional } from 'class-validator';
+import { ValidateNested, IsBoolean } from 'class-validator';
 import { PersonGenericDTO } from './person-generic.dto';
 
 export class PersonInformation {
@@ -10,4 +10,7 @@ export class PersonInformation {
   @ValidateNested()
   @Type(() => PersonGenericDTO)
   public rectifiedIdentity?: PersonGenericDTO;
+
+  @IsBoolean()
+  public dead: boolean;
 }

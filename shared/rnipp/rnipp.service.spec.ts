@@ -42,12 +42,6 @@ describe('RnippService (e2e)', () => {
     birthCountry: '99100',
   };
 
-  const req = {
-    user: {
-      email: 'email@IsEmail.fr',
-    },
-  };
-
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
@@ -101,6 +95,7 @@ describe('RnippService (e2e)', () => {
           supportId: '1234567891234567',
         },
         rnippCode: '2',
+        dead: true,
       };
 
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
@@ -116,6 +111,7 @@ describe('RnippService (e2e)', () => {
       expect(person).toEqual({
         rectifiedIdentity: personParsedData.identity,
         rnippCode: personParsedData.rnippCode,
+        rnippDead: personParsedData.dead,
         rawResponse: result.data,
         statusCode: result.status,
         identityHash: {

@@ -13,28 +13,6 @@ describe('RnippSerializer (e2e)', () => {
     },
   };
 
-  const personBornInFrance = {
-    gender: 'male',
-    familyName: 'rrr',
-    givenName: 'trete',
-    preferredUsername: '',
-    birthdate: '2019-07-02',
-    birthCountry: '99100',
-    birthPlace: '55555',
-    supportId: '1234567891234567',
-  };
-
-  const personNotBornInFrance = {
-    gender: 'male',
-    familyName: 'rrr',
-    givenName: 'trete',
-    preferredUsername: '',
-    birthdate: '2019-07-02',
-    birthCountry: '99999',
-    birthPlace: '99350',
-    supportId: '1234567891234567',
-  };
-
   const loggerProvider = {
     info: jest.fn(),
     debug: jest.fn(),
@@ -173,6 +151,93 @@ describe('RnippSerializer (e2e)', () => {
           },
           rnippCode: '2',
           dead: false,
+        });
+      });
+      it('should return a json with xml as template (person who died)', async () => {
+        mockedXmlService.parseString.mockImplementation(
+          (input, options, callback) =>
+            callback(null, {
+              IdentificationsIndividusCitoyens: {
+                IdentificationIndividuCitoyen: [
+                  {
+                    SituationActuelle: [
+                      {
+                        Individu: [
+                          {
+                            Noms: [
+                              {
+                                NomFamille: ['Jedusor'],
+                              },
+                            ],
+                            Prenoms: [
+                              {
+                                Prenom: ['Thomas'],
+                              },
+                            ],
+                            Naissance: [
+                              {
+                                DateNaissance: ['1925-12-23'],
+                                LieuNaissance: [
+                                  {
+                                    Localite: [
+                                      {
+                                        _: 'Déville-lès-Rouen',
+                                        $: {
+                                          code: '76216',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                ],
+                                NumeroActeNaissance: ['333'],
+                              },
+                            ],
+                            Sexe: ['M'],
+                            Deces: [
+                              {
+                                DateDeces: ['1993-05-01'],
+                                LieuDeces: [
+                                  {
+                                    Localite: [
+                                      {
+                                        _: 'Paris 5e  Arrondissement',
+                                        $: {
+                                          code: '75105',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                ],
+                                NumeroActeDeces: ['299'],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                TypeReponseIdentification: ['2'],
+              },
+            }),
+        );
+
+        mockedXmlService.processors.stripPrefix.mockImplementation(() => '');
+
+        const result = await rnippSerializer.serializeXmlFromRnipp(
+          rawXml.xmlString,
+        );
+        expect(result).toMatchObject({
+          identity: {
+            gender: 'male',
+            familyName: 'Jedusor',
+            givenName: 'Thomas',
+            birthdate: '1925-12-23',
+            birthCountry: '99100',
+            birthPlace: '76216',
+          },
+          rnippCode: '2',
+          dead: true,
         });
       });
     });
