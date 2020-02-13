@@ -51,6 +51,7 @@
     "nestjs-config": "^1.4.1",
     "nestjs-console": "^1.2.0",
     "pg": "^7.11.0",
+    "popper.js": "^1.15.0",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.3.3",
     "sqlite3": "^4.0.8",
