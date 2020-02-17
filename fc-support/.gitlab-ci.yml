@@ -1,6 +1,6 @@
 test/support:
   stage: test
-  image: node:12
+  image: node:12.15.0
   dependencies:
     - global-install
   script:
@@ -9,7 +9,7 @@ test/support:
 
 run/support:
   stage: run
-  image: node:12
+  image: node:12.15.0
   dependencies:
     - global-install
   services:
