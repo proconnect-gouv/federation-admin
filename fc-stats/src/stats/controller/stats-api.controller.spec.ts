@@ -6,12 +6,18 @@ import {
   ElasticsearchModule,
   ElasticsearchService,
 } from '@nestjs/elasticsearch';
+import { DummyApiGuard } from '@fc/shared/authentication/guard/dummy-api.guard';
 
 describe('StatsAPIController', () => {
   let statsController;
   const search = jest.fn();
   const elasticsearchService = {
     getClient: () => ({ search }),
+  };
+  const dummyApiGuardMock = {
+    canActivate: async () => {
+      return true;
+    },
   };
   const config = {
     key: 'foo',
@@ -41,6 +47,8 @@ describe('StatsAPIController', () => {
     })
       .overrideProvider(ElasticsearchService)
       .useValue(elasticsearchService)
+      .overrideGuard(DummyApiGuard)
+      .useValue(dummyApiGuardMock)
       .compile();
 
     statsController = module.get<StatsAPIController>(StatsAPIController);
