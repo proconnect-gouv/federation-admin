@@ -103,7 +103,7 @@ export class UserService implements IUserService {
   }
 
   async createUser(user: ICreateUserDTO): Promise<User> {
-    const { app_root } = this.config.get('app');
+    const { appFqdn } = this.config.get('app');
     const { username, email, roles, secret } = user;
     const token: string = uuid();
 
@@ -118,9 +118,11 @@ export class UserService implements IUserService {
       this.sendNewAccountEmail(
         { username, email },
         {
-          baseUrl: app_root,
           templateName: 'enrollment',
-          token,
+          variables: {
+            appFqdn,
+            token,
+          },
         },
       );
     } catch (error) {

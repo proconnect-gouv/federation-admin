@@ -14,12 +14,12 @@ export class EjsAdapter implements ITemplateAdapter {
     mailerParams: IMailerParams,
   ): Promise<string> {
     const templateExt = '.ejs';
-    const templateName = mailerParams.templateName;
+    const { templateName, variables } = mailerParams;
     const templateDir = get(transporterOptions, 'template.dir', '');
     const templatePath = path.join(templateDir, templateName + templateExt);
 
     return new Promise((resolve, reject) => {
-      renderFile(templatePath, mailerParams, (error, html) =>
+      renderFile(templatePath, variables, (error, html) =>
         error ? reject(error) : resolve(html),
       );
     });

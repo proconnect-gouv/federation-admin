@@ -17,14 +17,9 @@ import { EjsAdapter } from '../mailer/ejs.adapter';
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
         transport: config.get('transporter.transport'),
-        emailOptions: {
-          mailjetKey: config.get('transporter.mailjetKey'),
-          mailjetSecret: config.get('transporter.mailjetSecret'),
-          smtpSenderName: config.get('transporter.smtpSenderName'),
-          smtpSenderEmail: config.get('transporter.smtpSenderEmail'),
-        },
+        emailOptions: config.get('transporter'),
         template: {
-          dir: `${__dirname}/templates`,
+          dir: `${__dirname}/emails`,
           adapter: new EjsAdapter(),
           options: {
             strict: true,

@@ -23,6 +23,25 @@ export class AuthenticationController {
     this.logger.businessEvent(log);
   }
 
+  @Get('first-login/:token')
+  @Render('login')
+  public firstLoginView(@Req() req) {
+    const csrfToken = req.csrfToken();
+    return { csrfToken };
+  }
+
+  @Post('first-login/:token')
+  @UseGuards(new LocalAuthGuard())
+  public firstLogin(@Req() req, @Res() res) {
+    this.track({
+      action: AuthenticationActions.TOKEN_SIGNUP,
+      state: AuthenticationStates.GRANTED,
+      user: req.user.username,
+    });
+
+    return res.redirect(`${res.locals.APP_ROOT}/`);
+  }
+
   @Get('login')
   @Render('login')
   public loginView(@Req() req) {

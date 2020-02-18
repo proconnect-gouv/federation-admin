@@ -1,6 +1,7 @@
 import { AuthenticationService } from './authentication.service';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../user/user.service';
+import { UserRole } from '../user/roles.enum';
 
 describe('AuthenticationService', () => {
   let authenticationService: AuthenticationService;
@@ -30,6 +31,8 @@ describe('AuthenticationService', () => {
     beforeEach(() => {
       user = {
         passwordHash: Symbol('password hash'),
+        token: Symbol('2ddeb850-ee40-43ed-903e-44a5dad759d8'),
+        roles: [],
       };
       username = Symbol('username');
       password = Symbol('password');
@@ -46,42 +49,103 @@ describe('AuthenticationService', () => {
         .mockReturnValue(Promise.resolve(true));
     });
 
-    it('calls the UserService findByUsername', async () => {
-      await authenticationService.validateCredentials(username, password);
-      expect(mockedUserService.findByUsername).toHaveBeenCalledTimes(1);
-      expect(mockedUserService.findByUsername).toHaveBeenCalledWith(username);
+    describe('login', () => {
+      it('calls the UserService findByUsername', async () => {
+        await authenticationService.validateCredentials(username, password);
+        expect(mockedUserService.findByUsername).toHaveBeenCalledTimes(1);
+        expect(mockedUserService.findByUsername).toHaveBeenCalledWith(username);
+      });
+
+      it('fails to validate the credentials if no user is found', async () => {
+        return expect(
+          authenticationService.validateCredentials('jeanmoust', password),
+        ).rejects.toBeDefined();
+      });
+
+      it('calls the UserService compareHash', async () => {
+        await authenticationService.validateCredentials(username, password);
+        expect(mockedUserService.compareHash).toHaveBeenCalledTimes(1);
+        expect(mockedUserService.compareHash).toHaveBeenCalledWith(
+          password,
+          user.passwordHash,
+        );
+      });
+
+      it('returns an error if the credentials are invalid', async () => {
+        jest
+          .spyOn(mockedUserService, 'compareHash')
+          .mockReturnValue(Promise.resolve(false));
+        return expect(
+          authenticationService.validateCredentials(username, password),
+        ).resolves.toBe(null);
+      });
+
+      it('returns the user if the credentials are valid', async () => {
+        const actualUser = await authenticationService.validateCredentials(
+          username,
+          password,
+        );
+        expect(actualUser).toBe(user);
+      });
     });
 
-    it('fails to validate the credentials if no user is found', async () => {
-      return expect(
-        authenticationService.validateCredentials('jeanmoust', password),
-      ).rejects.toBeDefined();
-    });
+    describe('first-login', () => {
+      beforeEach(() => {
+        // setup
+        user.roles = [UserRole.NEWUSER];
+      });
 
-    it('calls the UserService compareHash', async () => {
-      await authenticationService.validateCredentials(username, password);
-      expect(mockedUserService.compareHash).toHaveBeenCalledTimes(1);
-      expect(mockedUserService.compareHash).toHaveBeenCalledWith(
-        password,
-        user.passwordHash,
-      );
-    });
+      it('returns the user if the activation token and the credentials are valid', async () => {
+        // action
+        const actualUser = await authenticationService.validateCredentials(
+          username,
+          password,
+          user.token,
+        );
 
-    it('returns an error if the credentials are invalid', async () => {
-      jest
-        .spyOn(mockedUserService, 'compareHash')
-        .mockReturnValue(Promise.resolve(false));
-      return expect(
-        authenticationService.validateCredentials(username, password),
-      ).resolves.toBe(null);
-    });
+        // assert
+        expect(actualUser).toBe(user);
+      });
 
-    it('returns the user if the credentials are valid', async () => {
-      const actualUser = await authenticationService.validateCredentials(
-        username,
-        password,
-      );
-      expect(actualUser).toBe(user);
+      it('returns "null" if the activation token not provided', async () => {
+        // action
+        const actualUser = await authenticationService.validateCredentials(
+          username,
+          password,
+        );
+
+        // assert
+        expect(actualUser).toBeNull();
+      });
+
+      it('returns "null" if the activation token is valid', async () => {
+        // action
+        const actualUser = await authenticationService.validateCredentials(
+          username,
+          password,
+          'Not the token',
+        );
+
+        // assert
+        expect(actualUser).toBeNull();
+      });
+
+      it('returns "null" if the activation token is valid but the credentials are invalid', async () => {
+        // setup
+        jest
+          .spyOn(mockedUserService, 'compareHash')
+          .mockReturnValue(Promise.resolve(false));
+
+        // action
+        const actualUser = await authenticationService.validateCredentials(
+          username,
+          'nop',
+          user.token,
+        );
+
+        // assert
+        expect(actualUser).toBeNull();
+      });
     });
   });
 });
