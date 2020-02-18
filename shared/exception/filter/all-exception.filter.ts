@@ -62,7 +62,16 @@ export class AllExceptionFilter implements ExceptionFilter {
         GIT_LATEST_COMMIT_SHORT_HASH: this.configuration.latestCommitShortHash,
       });
     } else if (status === HttpStatus.UNAUTHORIZED) {
-      res.redirect(`${this.configuration.app_root}/login`);
+      const { params = {} } = req;
+      const { token } = params;
+
+      if (token) {
+        return res.redirect(
+          `${this.configuration.app_root}/first-login/${token}`,
+        );
+      }
+
+      return res.redirect(`${this.configuration.app_root}/login`);
     } else {
       this.logger.error(AllExceptionFilter.formatException(exception));
 

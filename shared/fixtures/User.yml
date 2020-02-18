@@ -9,6 +9,8 @@ items:
       - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   jean_patoche:
     id: '5dd908c4-cb08-405e-96b0-8c9188821dc0'
     username: 'jean_patoche'
@@ -17,6 +19,8 @@ items:
       - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   fred:
     id: 'd3d3f8a1-26ea-4a8b-9ed3-336d3777b529'
     username: 'fred'
@@ -26,6 +30,8 @@ items:
       - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   jack:
     id: 'f8448509-58dd-4fa6-8d45-3d6bc06cf520'
     username: 'jack'
@@ -34,6 +40,8 @@ items:
       - 'security'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   pierre:
     id: '5c340f69-68b0-4de5-bf18-7cf16cc491c6'
     username: 'pierre'
@@ -44,6 +52,8 @@ items:
       - 'inactive_operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   paul:
     id: '0a0c748a-6ad1-4408-9d6f-1dbc163f2b26'
     username: 'paul'
@@ -53,6 +63,8 @@ items:
       - 'inactive_admin'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   bob:
     id: 'a8360632-0c24-4324-bc4a-f39087af98b5'
     username: 'bob'
@@ -61,10 +73,15 @@ items:
       - 'admin'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
     secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
   user{1..10}:
     username: '{{name.firstName}}($current)'
     email: '{{internet.email}}'
     roles:
       - 'operator'
     passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '1970-01-01'
 

@@ -31,7 +31,7 @@ const generatePasswordProvider = {
         transport: config.get('transporter.transport'),
         emailOptions: config.get('transporter'),
         template: {
-          dir: `${__dirname}/templates`,
+          dir: `${__dirname}/emails`,
           adapter: new EjsAdapter(),
           options: {
             strict: true,
