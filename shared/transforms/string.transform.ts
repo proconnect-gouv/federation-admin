@@ -24,3 +24,7 @@ export function linesToArray(value: string): string[] | undefined {
   }
   return result;
 }
+
+export function toArray(value: string) {
+  return Array.isArray(value) ? value : [value];
+}
