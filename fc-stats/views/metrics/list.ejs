@@ -16,3 +16,8 @@
       <% }) %>
     </tbody>
   </table>
+
+  <%- include('partials/pagination.ejs', {
+    total: meta.total.value,
+    baseHref: `${APP_ROOT}/metrics`,
+  }) %>

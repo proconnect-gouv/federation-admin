@@ -12,7 +12,7 @@
         <div class="flex-grow-1">
           <p class="h2">Gestion des utilisateurs</p>
           <form id="itemPerPage" data-init="itemPerPage" method="GET" action="<%= APP_ROOT %>/account">
-            <p id="users-count"><i><%= totalUsers %> utilisateurs - Résultats par page :</i>
+            <p id="users-count"><i><%= total %> utilisateurs - Résultats par page :</i>
             <% include partials/choose-items-number-to-show.ejs %>
           </form>
           <% include partials/global-errors-handler.ejs %>
@@ -66,7 +66,11 @@
             </tbody>
           </table>
           <div class="container-fluid">
-            <% include partials/pagination.ejs %>
+          <%- include('partials/pagination.ejs', {
+              total,
+              baseHref: `${APP_ROOT}/account`,
+            }) %>
+
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { ConfigService } from 'nestjs-config';
 import * as moment from 'moment';
+import * as queryString from 'query-string';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { errorCodeTranslations } from './error-code-translations';
 import { VALID_INPUT_STRING_REGEX } from '@fc/shared/validators/is-valid-input-string';
@@ -54,6 +55,7 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.REQ_PARAMS = req.params;
     res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
+    res.locals.queryString = queryString;
 
     return next.handle();
   }

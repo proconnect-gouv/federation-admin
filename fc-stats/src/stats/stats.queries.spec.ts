@@ -233,6 +233,7 @@ describe('StatsQueries', () => {
               field: 'fi',
               min_doc_count: 1,
               order: { _term: 'asc' },
+              size: 1000,
             },
             aggs: {
               typeAction: {
@@ -240,6 +241,7 @@ describe('StatsQueries', () => {
                   field: 'typeAction',
                   min_doc_count: 1,
                   order: { _term: 'asc' },
+                  size: 1000,
                 },
                 aggs: {
                   count: {
@@ -276,6 +278,7 @@ describe('StatsQueries', () => {
               field: 'fi',
               min_doc_count: 1,
               order: { _term: 'asc' },
+              size: 1000,
             },
             aggs: {
               typeAction: {
@@ -283,6 +286,7 @@ describe('StatsQueries', () => {
                   field: 'typeAction',
                   min_doc_count: 1,
                   order: { _term: 'asc' },
+                  size: 1000,
                 },
                 aggs: {
                   count: {

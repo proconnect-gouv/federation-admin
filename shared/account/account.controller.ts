@@ -234,11 +234,8 @@ export class AccountController {
 
     return {
       users: users.items,
-      totalUsers: users.totalItems,
+      total: users.totalItems,
       csrfToken,
-      next: users.next,
-      previous: users.previous,
-      pageCount: users.pageCount,
       page,
       limit,
     };

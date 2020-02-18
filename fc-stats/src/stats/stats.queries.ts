@@ -75,12 +75,13 @@ export class StatsQueries {
   /**
    * Simple template function for aggregation
    */
-  private generateAggregation(field, minCount = 0) {
+  private generateAggregation(field: string, minCount = 0) {
     return {
       terms: {
         field,
         min_doc_count: minCount,
         order: { _term: 'asc' },
+        size: 1000,
       },
     };
   }

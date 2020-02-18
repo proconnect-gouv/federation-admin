@@ -270,10 +270,8 @@ describe('AccountController', () => {
 
       // Expected
       expect(spy).toHaveBeenCalled();
-      expect(resultat.totalUsers).toEqual(12);
-      expect(resultat.pageCount).toEqual(2);
+      expect(resultat.total).toEqual(12);
       expect(resultat.users.length).toEqual(12);
-      expect(resultat.next).toEqual('/account?page=2&limit=10');
     });
   });
 
