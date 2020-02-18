@@ -3,7 +3,6 @@ import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from './lazy-init';
 import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
 import { copyText } from '@fc/shared/public/javascript/clipboard';
-import { paginationStyle } from '@fc/shared/public/javascript/pagination-style';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem }  from '@fc/shared/public/javascript/modals/confirm-form';
@@ -19,7 +18,6 @@ import { validateAccountCreate } from '@fc/shared/public/javascript/validateAcco
 const initMap = {
   validateRnippForm: rnippForm,
   copyText,
-  paginationStyle,
   validateEnrollment,
   comparePassword,
   removeItem,
