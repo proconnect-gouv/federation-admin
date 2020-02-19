@@ -35,7 +35,8 @@ export class AuthenticationService implements IAuthenticationService {
       return null;
     }
 
-    if (user.roles.includes(UserRole.NEWUSER) && token !== user.token) {
+    // FCP-657 -> user.roles.includes(UserRole.NEWUSER) + edit tests
+    if (token && token !== user.token) {
       return null;
     }
 
