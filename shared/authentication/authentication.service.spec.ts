@@ -107,7 +107,7 @@ describe('AuthenticationService', () => {
         expect(actualUser).toBe(user);
       });
 
-      it('returns "null" if the activation token not provided', async () => {
+      it('returns the user if the activation token not provided', async () => {
         // action
         const actualUser = await authenticationService.validateCredentials(
           username,
@@ -115,7 +115,7 @@ describe('AuthenticationService', () => {
         );
 
         // assert
-        expect(actualUser).toBeNull();
+        expect(actualUser).toBe(user);
       });
 
       it('returns "null" if the activation token is valid', async () => {
