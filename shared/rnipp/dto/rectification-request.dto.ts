@@ -1,4 +1,4 @@
-import { IsString, IsISO8601, Matches, IsIn, IsBoolean } from 'class-validator';
+import { IsString, Matches, IsIn, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { IsBirthdate } from '../validator/is-birthdate.validator';
 import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';

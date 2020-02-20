@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
-import { lazyInit } from './lazyinit';
+import { lazyInit } from '@fc/shared/public/javascript/lazy-init';
 import { itemPerPage } from '@fc/shared/public/javascript/item-par-page';
-import { dateRangePicker } from './dateRangePicker';
-import { dropdown } from './dropdown';
+import { dateRangePicker } from './dateRangePicker';
+import { dropdown } from './dropdown';
 import { validateEnrollment } from './validate-enrollment';
 import { comparePassword } from '../../../shared/public/javascript/compare-password';
 import { removeItem } from '@fc/shared/public/javascript/modals/confirm-form';
@@ -30,8 +30,8 @@ const initMap = {
   itemPerPage,
 };
 
-$(document).ready(function() {
-  $('.nav-link[data-prefix]').each(function(index, link) {
+$(document).ready(function () {
+  $('.nav-link[data-prefix]').each(function (index, link) {
     var prefix = $(link).attr('data-prefix');
     if (window.location.pathname.startsWith(prefix)) {
       $(link).addClass('active');
