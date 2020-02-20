@@ -1,8 +1,8 @@
 import { validateRnippForm } from '@fc/shared/public/javascript/validateForm';
-import { checkUserStatus, initUIActiveButton } from '@fc/shared/public/javascript/rnipp-utils';
+import { checkUserStatus } from './rnipp-utils';
 
 export function rnippForm(element) {
   // Generic RNIPP form managment
   validateRnippForm(element);
-  checkUserStatus(initUIActiveButton);
+  checkUserStatus();
 }

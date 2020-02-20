@@ -9,9 +9,12 @@
  */
 export function lazyInit(initMap, selector) {
   document.querySelectorAll(`${selector} [data-init]`).forEach(element => {
-    const initKey = element.getAttribute('data-init');
-    if (initKey && typeof initMap[initKey] != 'undefined') {
-      initMap[initKey].call(null, element);
-    }
+    const initKeys = element.getAttribute('data-init');
+    initKeys.split(',')
+      .filter(key => key && typeof initMap[key] != 'undefined')
+      .map(key => initMap[key])
+      .forEach(fn => {
+        fn.call(null, element);
+      })
   });
 }

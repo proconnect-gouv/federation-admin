@@ -270,6 +270,39 @@ describe('Rnipp rectification', () => {
     });
   });
 
+  it('Should not display Citizen management button', () => {
+    cy.url().should('equal', `${BASE_URL}/rnipp`);
+    cy.contains('Rechercher un usager');
+
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_français_actif_à_redresser'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('NORRIS');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('Chuck');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('00000');
+      expect($divs.eq(7)).to.contain('99100');
+    });
+
+    cy.formControl({ ...person, familyName: 'NORRIS' });
+
+    cy.get('#citizen-management').should('not.exist')
+  });
+
   it('Should not send the form if require input are empty', () => {
     cy.url().should('equal', `${BASE_URL}/rnipp`);
     cy.contains('Rechercher un usager');
