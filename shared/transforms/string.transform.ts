@@ -25,6 +25,10 @@ export function linesToArray(value: string): string[] | undefined {
   return result;
 }
 
+/**
+ * Force the input to be an array in DTO
+ * @param {string} value
+ */
 export function toArray(value: string) {
   return Array.isArray(value) ? value : [value];
 }
