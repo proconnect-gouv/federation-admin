@@ -8,23 +8,33 @@ import {
 
 import * as fileType from 'file-type';
 
+import { JSDOM } from 'jsdom';
+import * as sharp from 'sharp';
+
 const VALIDATOR_NAME = 'IsDataURI';
 // Standard max size of HTTP request
 const HTTP_MAX_SIZE = 20 * 1024 * 1024;
 // minimum extension name size (jpg,png...);
 const MIN_EXTENSION_LENGTH = 3;
 
+// number of character per data in base64
+const BASE64_WORD = 4;
+
+const SVG_MIME = 'image/svg+xml';
+
+// maxinum number of pixels allowed in width or height
+const MAX_PIXEL_SIZE = 1000;
+
+const DATA_URI_FORMAT_REGEX = new RegExp(/^data:(image\/[a-zA-Z+]+);base64$/);
+
 /**
- * Permet de fabriquer la structure complète du Regex pour vérifier les dataURIs
- * Par défaut: ^(data:image\/(?:png|jpe?g|gif|svg\+xml))(;base64,)(?:[A-Za-z0-9\+/]{4})*(?:[A-Za-z0-9\+/]{2}==|[A-Za-z0-9\+/]{3}=|[A-Za-z0-9\+/]{4})
+ * Permet de fabriquer la structure complète du Regex pour vérifier les dataURIs. On utilise ici
+ * une version basique pour vérifier le base64 car la taille de l'image sature le moteur du Regex.
+ * Par défaut: ^(data:image\/(?:png|jpe?g|gif|svg\+xml))(;base64,)([a-zA-Z0-9/+]*={0,3})
  * @param {string} mime regex au format string pour décrire les formats d'images autorisées
  */
-const buildDataURIRegex = (mime: string): RegExp => {
-  // tslint:disable-next-line: prettier
-  const base64 = '(?:[A-Za-z0-9\\\+/]{4})*(?:[A-Za-z0-9\\\+/]{2}==|[A-Za-z0-9\\\+/]{3}=|[A-Za-z0-9\\\+/]{4})';
-  const regex = `^(data:image\/(?:${mime}))(;base64,)${base64}`;
-  return new RegExp(regex);
-};
+const buildDataURIRegex = (mime: string): RegExp =>
+  new RegExp(`^(data:image\/(?:${mime}))(;base64,[a-zA-Z0-9/+]*={0,2})`);
 
 /**
  * Calcul la taille des data base64 en fonction du nombre de caractère
@@ -41,17 +51,52 @@ const sizeOf = (length: number, blockSize: number = 2): number => {
   return Math.ceil(((length * 3 + 1) >> 2) / blockSize) * blockSize;
 };
 
+/**
+ * check for hacking SVG script injection
+ * @see {link:https://fr.slideshare.net/x00mario/the-image-that-called-me| SVG attack}
+ * @param {Buffer} blob l'image à tester en buffer
+ */
+const isDirtySVG = (blob: Buffer): boolean => {
+  const content = blob.toString();
+  if (content.includes('script')) {
+    return true;
+  }
+  const DOM = new JSDOM(content);
+  const doc = DOM.window.document;
+  const foreign = doc.querySelector('foreignObject');
+  return !!foreign;
+};
+
+/**
+ * check for hacking image bomb
+ * @see {link:https://en.wikipedia.org/wiki/Zip_bomb| zip bomb}
+ * @param {Buffer} blob l'image à tester en buffer
+ */
+const isImageBomb = async (blob: Buffer): Promise<boolean> => {
+  const { width, height } = await sharp(blob).metadata();
+  return width > MAX_PIXEL_SIZE || height > MAX_PIXEL_SIZE;
+};
+
+/**
+ * check for hacking script injection
+ * @see {link:https://www.opswat.com/blog/hacking-pictures-stegosploit-and-how-stop-it| Image Injection}
+ * @param {Buffer} blob l'image à tester en buffer
+ */
+const isInjectedImage = (blob: Buffer): boolean => {
+  const content = blob.toString();
+  return content.includes('script');
+};
+
 @ValidatorConstraint()
 export class IValidateDataURI implements ValidatorConstraintInterface {
-  validate(value: any, { constraints }) {
+  async validate(value: any, { constraints }) {
     const [maxSize, regex] = constraints;
 
     const input = (value as string) || '';
 
     /**
-     * Teste si les données de la requête ne dépasse pas la taille max d'une requête web
+     * Teste si les données de la requête ne dépassent pas la taille max d'une requête web
      * selon NodeJS
-     *
      */
     const inputSize = sizeOf(input.length);
     if (input.length === 0 || inputSize > HTTP_MAX_SIZE) {
@@ -72,7 +117,8 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
     }
 
     // on vérifie que la taille du base64 est inférieur au max autorisé
-    const [mime, image] = infos;
+    const [format, image] = infos;
+
     const { length } = image;
     if (length === 0) {
       return false;
@@ -83,17 +129,45 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
       return false;
     }
 
+    // les données base64 sont des multiples de 4 caractères
+    if (length % BASE64_WORD) {
+      return false;
+    }
+
+    const blob = Buffer.from(image, 'base64');
+
     // on vérifie le "vrai" type de l'élément
-    const { ext } = fileType(Buffer.from(image, 'base64')) || { ext: null };
+    const { ext } = fileType(blob) || { ext: null };
     if (!ext || typeof ext !== 'string') {
       return false;
     }
 
-    return ext.length >= MIN_EXTENSION_LENGTH && mime.includes(ext);
+    // on vérifie l'extension de l'image
+    const [, mime = ''] = format.match(DATA_URI_FORMAT_REGEX);
+    const hasGoodExtension =
+      ext.length >= MIN_EXTENSION_LENGTH && mime.includes(ext);
+    if (!hasGoodExtension) {
+      return false;
+    }
+
+    if (mime === SVG_MIME) {
+      if (isDirtySVG(blob)) {
+        return false;
+      }
+    } else {
+      if (await isImageBomb(blob)) {
+        return false;
+      }
+
+      if (isInjectedImage(blob)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   defaultMessage(args: ValidationArguments) {
-    return "Votre image n'est pas à la bonne taille ou bon format";
+    return 'Votre image ne respecte pas les paramètres demandées (taille, format...)';
   }
 }
 
@@ -104,7 +178,9 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
  * @param {ValidationOptions} validationOptions options fournies par le decorator au validator
  */
 export function IsDataURI(
-  imageSize: number = 1048576, // 1Mo
+  imgSize: number = 1048576, // 1Mo
+
+  // desactivate prettier in order to keep the \\\ in regex
   // tslint:disable-next-line: prettier
   mimeRegex: string = 'png|jpe?g|gif|svg\\\+xml',
   validationOptions?: ValidationOptions,
@@ -114,7 +190,7 @@ export function IsDataURI(
       name: VALIDATOR_NAME,
       target: constructor,
       propertyName: imageProp,
-      constraints: [imageSize, mimeRegex],
+      constraints: [imgSize, mimeRegex],
       options: validationOptions,
       validator: IValidateDataURI,
     });

@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap';
 import { lazyInit } from '@fc/shared/public/javascript/lazy-init';
@@ -16,7 +17,6 @@ import '../style/main.less';
 import { validateAccountUpdate } from '@fc/shared/public/javascript/validateAccountUpdate';
 import { validateAccountCreate } from '@fc/shared/public/javascript/validateAccountCreate';
 
-
 const initMap = {
   datePicker: dateRangePicker,
   graph: initGraph,
@@ -30,9 +30,9 @@ const initMap = {
   itemPerPage,
 };
 
-$(document).ready(function () {
-  $('.nav-link[data-prefix]').each(function (index, link) {
-    var prefix = $(link).attr('data-prefix');
+$(document).ready(function() {
+  $('.nav-link[data-prefix]').each(function(index, link) {
+    const prefix = $(link).attr('data-prefix');
     if (window.location.pathname.startsWith(prefix)) {
       $(link).addClass('active');
     }
