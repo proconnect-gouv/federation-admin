@@ -60,7 +60,7 @@ function updateUISuccess(data) {
 
   $('#citizen-status').html(`
     <ul>
-      <li><b>Actif :</b> ${data.active ? 'oui' : 'non'}</li>
+      <li><b>Actif :</b> ${data.active ? '<span class="badge badge-success">Oui</span>' : '<span class="badge badge-danger">Non</span>' }</li>
       <li><b>Dernière connexion :</b> ${lastConnection}</li>
     </ul>
   `);
