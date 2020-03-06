@@ -116,29 +116,31 @@ export class RnippController {
     dead: boolean,
     csrfToken: string,
   ): Promise<ErrorControllerInterface> {
-    if (error.errors) {
-      return {
-        person: {
-          requestedIdentity,
-          dead,
-        },
-        supportId,
-        message: error.errors,
-        csrfToken,
-      };
-    } else {
-      return {
-        person: {
-          requestedIdentity,
-          dead,
-        },
-        supportId,
-        rawResponse: error.rawResponse,
-        rnippCode: error.rnippCode || '',
-        statusCode: error.statusCode || 500,
-        message: error.message,
-        csrfToken,
-      };
-    }
+    const {
+      errors,
+      rawResponse,
+      rnippCode = '',
+      statusCode = 500,
+      message,
+    } = error;
+
+    const data = errors
+      ? { message: errors }
+      : {
+          rawResponse: rawResponse ? beautify(rawResponse) : rawResponse,
+          rnippCode,
+          statusCode,
+          message,
+        };
+
+    return {
+      person: {
+        requestedIdentity,
+        dead,
+      },
+      supportId,
+      csrfToken,
+      ...data,
+    };
   }
 }

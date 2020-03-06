@@ -1,6 +1,5 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
-import { validate } from 'class-validator';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
 import { RnippSerializer } from './rnipp-serializer.service';
@@ -8,8 +7,9 @@ import * as queryString from 'query-string';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
-import { PersonGenericDTO } from './dto/person-generic.dto';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { PersonGenericDTO } from './dto/person-generic.dto';
+import { ValidationError, validateSync } from 'class-validator';
 
 @Injectable()
 export class RnippService {
@@ -36,47 +36,59 @@ export class RnippService {
 
     this.logger.debug(`Calling RNIPP with: ${rnippUrl}...`);
 
-    const axiosResponse = await this.http.get(`${rnippUrl}`).toPromise();
+    const {
+      status: statusCode,
+      data: rawResponse,
+      statusText: message,
+    } = await this.http.get(rnippUrl).toPromise();
 
-    this.logger.debug(`RNIPP Response status: ${axiosResponse.status}`);
+    this.logger.debug(`RNIPP Response status: ${statusCode}`);
 
-    if (axiosResponse.status !== 200 || !axiosResponse.data) {
+    const templateError = {
+      identityHash: {
+        idp: idpIdentityHash,
+      },
+      rawResponse,
+      statusCode,
+      message,
+    };
+
+    if (statusCode !== 200 || !rawResponse) {
       throw {
-        rawResponse: axiosResponse.data || 'No Data from rnipp',
-        statusCode: axiosResponse.status,
-        message: axiosResponse.statusText,
-        identityHash: {
-          idp: idpIdentityHash,
-        },
+        ...templateError,
+        rawResponse: rawResponse || 'No Data from rnipp',
       };
     }
 
     this.logger.debug('Calling serializer to get understandable json');
 
-    const {
-      identity,
-      rnippCode,
-      dead,
-    }: ParsedData = await this.serializer.serializeXmlFromRnipp(
-      axiosResponse.data,
-    );
-
-    if (!identity) {
+    let parsedIdentity: ParsedData;
+    try {
+      parsedIdentity = await this.serializer.serializeXmlFromRnipp(rawResponse);
+    } catch (error) {
       throw {
-        rawResponse: axiosResponse.data,
-        statusCode: axiosResponse.status,
+        ...templateError,
+        rawResponse: undefined, // hide RNIPP response data
         message: "Une erreur s'est produite lors de l'appel au RNIPP.",
-        rnippCode,
-        identityHash: {
-          idp: idpIdentityHash,
-        },
       };
     }
 
-    const errors = await this.validateIdentityFormat(identity);
+    const { identity, rnippCode, dead } = parsedIdentity;
+    if (!identity) {
+      throw {
+        ...templateError,
+        message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+        rnippCode,
+      };
+    }
 
-    if (errors.length > 0) {
-      throw errors;
+    this.logger.debug('Check the format of the returned Identity');
+    const errors = this.validateIdentityFormat(identity);
+    if (errors.length) {
+      const failures = errors.map(({ constraints }) =>
+        Object.values(constraints).join(','),
+      );
+      throw { errors: failures };
     }
 
     const rnippIdentityHash = await this.citizen.getPivotIdentityHash(
@@ -84,11 +96,11 @@ export class RnippService {
     );
 
     return {
-      rectifiedIdentity: identity || {},
+      rectifiedIdentity: identity,
       rnippCode,
       rnippDead: dead === true,
-      rawResponse: axiosResponse.data,
-      statusCode: axiosResponse.status,
+      rawResponse,
+      statusCode,
       identityHash: {
         idp: idpIdentityHash,
         rnipp: rnippIdentityHash,
@@ -96,8 +108,10 @@ export class RnippService {
     };
   }
 
-  private async validateIdentityFormat(identity: PersonGenericDTO) {
-    return validate(identity);
+  private validateIdentityFormat(
+    identity: PersonGenericDTO,
+  ): ValidationError[] {
+    return validateSync(identity);
   }
 
   private constructRequestUrl(pivotIdentity: IPivotIdentity): string {

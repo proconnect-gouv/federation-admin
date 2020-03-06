@@ -94,7 +94,7 @@ describe('RnippSerializer (e2e)', () => {
       });
     });
 
-    describe('serializeXmlFromRnipp', () => {
+    describe('XML parser', () => {
       it('should return a json with xml as template (person who in not born in France)', async () => {
         mockedXmlService.parseString.mockImplementation(
           (input, options, callback) =>
@@ -252,9 +252,7 @@ describe('RnippSerializer (e2e)', () => {
           }),
       );
 
-      mockedXmlService.processors.stripPrefix.mockImplementation(() => {
-        return '';
-      });
+      mockedXmlService.processors.stripPrefix.mockImplementation(() => '');
 
       const result = await rnippSerializer.serializeXmlFromRnipp(
         rawXml.xmlString,
@@ -290,7 +288,7 @@ describe('RnippSerializer (e2e)', () => {
                               NumeroActeNaissance: ['55555'],
                             },
                           ],
-                          Sexe: ['male'],
+                          Sexe: ['M'],
                         },
                       ],
                     },
@@ -307,7 +305,9 @@ describe('RnippSerializer (e2e)', () => {
       });
 
       const expectedContraints = {
-        errors: ['familyName must be a string'],
+        errors: [
+          'familyName must be a string,familyName must match /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\\ \\-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/ regular expression',
+        ],
       };
 
       try {
@@ -343,7 +343,7 @@ describe('RnippSerializer (e2e)', () => {
                               NumeroActeNaissance: ['55555'],
                             },
                           ],
-                          Sexe: ['male'],
+                          Sexe: ['M'],
                         },
                       ],
                     },
@@ -398,7 +398,7 @@ describe('RnippSerializer (e2e)', () => {
                               NumeroActeNaissance: ['55555'],
                             },
                           ],
-                          Sexe: ['male'],
+                          Sexe: ['M'],
                         },
                       ],
                     },
@@ -451,7 +451,7 @@ describe('RnippSerializer (e2e)', () => {
                               NumeroActeNaissance: ['55555'],
                             },
                           ],
-                          Sexe: ['female'],
+                          Sexe: ['F'],
                         },
                       ],
                     },
@@ -463,13 +463,11 @@ describe('RnippSerializer (e2e)', () => {
           }),
       );
 
-      mockedXmlService.processors.stripPrefix.mockImplementation(() => {
-        return '';
-      });
+      mockedXmlService.processors.stripPrefix.mockImplementation(() => '');
 
       const expectedContraints = {
         errors: [
-          'familyName must be a string',
+          'familyName must be a string,familyName must match /^[a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+([\\ \\-][a-zA-ZÀÂÉÊÈËÎÏÔÙÇàâéêèëîïôùç]+)*$/ regular expression',
           'birthdate must be a valid ISO 8601 date string',
         ],
       };

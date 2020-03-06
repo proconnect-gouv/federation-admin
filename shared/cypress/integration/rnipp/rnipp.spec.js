@@ -15,11 +15,11 @@ describe('Rnipp rectification', () => {
   beforeEach(() => {
     cy.login(USER_OPERATOR, USER_PASS);
     cy.visit(`${BASE_URL}/rnipp`);
+    cy.url().should('equal', `${BASE_URL}/rnipp`);
+    cy.contains('Rechercher un usager');
   });
 
   it('Should retrieve userinfo from RNIPP (person who is born in France)', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -50,8 +50,7 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should retrieve userinfo with accented character and ç from RNIPP (person who is born in France)', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
+
     const person = {
       supportId: '1234567891234567',
       ...rnippIdentities['utilisateur_français_actif_caractère_spéciaux'],
@@ -79,8 +78,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should retrieve userinfo from RNIPP (person who is not born in France)', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -110,8 +107,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should retrieve userinfo from RNIPP (person from whom we do not know month and day of birth)', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -141,8 +136,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should retrieve userinfo from RNIPP (person from whom we do not know day of birth)', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -172,8 +165,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should retrieve userinfo rectified from RNIPP', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -204,8 +195,6 @@ describe('Rnipp rectification', () => {
 
   describe('Dead people', () => {
     it('Should retrieve userinfo from RNIPP (man who died)', () => {
-      cy.url().should('equal', `${BASE_URL}/rnipp`);
-      cy.contains('Rechercher un usager');
   
       const person = {
         supportId: '1234567891234567',
@@ -237,9 +226,7 @@ describe('Rnipp rectification', () => {
     });
 
     it('Should retrieve userinfo from RNIPP (woman who died)', () => {
-      cy.url().should('equal', `${BASE_URL}/rnipp`);
-      cy.contains('Rechercher un usager');
-  
+
       const person = {
         supportId: '1234567891234567',
         ...rnippIdentities['utilisateur_féminin_décédée'],
@@ -271,8 +258,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should not display Citizen management button', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     const person = {
       supportId: '1234567891234567',
@@ -304,8 +289,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should not send the form if require input are empty', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     cy.get('form[name="rnipp-form"] button[type="submit"]').click();
 
@@ -327,8 +310,6 @@ describe('Rnipp rectification', () => {
   });
 
   it('Should not send the form if require input are empty and keep value already fill in', () => {
-    cy.url().should('equal', `${BASE_URL}/rnipp`);
-    cy.contains('Rechercher un usager');
 
     cy.formFill(
       {
@@ -354,5 +335,76 @@ describe('Rnipp rectification', () => {
     cy.get('input[name=familyName]').should('have.value', 'Jack');
     cy.get('input[name=birthdate]').should('have.value', '1990-11-12');
     cy.get('input[name=isFrench]').should('be.checked');
+  });
+
+  describe('XML Format', () => {
+
+    const hasReturnCarriage = (element, number) => {
+      const match = element.html().match(/\n|\r\n/g);
+      const endlCount = match ? match.length - 1 : 0; 
+      expect(endlCount).to.be.above(number);
+    }
+    it('Should display a formatted XML answer with a correct RNIPP answer', () => {
+      // Arrange
+      const person = {
+        supportId: '1234567891234567',
+        ...rnippIdentities['utilisateur_français_actif'],
+      };
+  
+      // Action
+      cy.formFill(person, configuration);
+  
+      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+      cy.url().should('equal', `${BASE_URL}/research`);
+      cy.get('#result > div.card.my-3 > div').within($result => {
+        cy.get('div:nth-child(1) > div.font-weight-bold').contains(person.supportId);
+        cy.get('div:nth-child(10) > div.row > div.col-md-2.text-right > button').click();
+      });
+
+      // Assert
+      cy.get('#rnippModal > div > div > div.modal-header > h4', { timeout: 3000 }).contains('Retour brut du RNIPP');
+
+      cy.get('#xml-raw').then(value => hasReturnCarriage(value, 42));
+    });
+
+    it('Should display a formatted XML answer with an incorrect RNIPP answer', () => {
+      // Arrange
+      const person = {
+        supportId: '1234567891234567',
+        ...rnippIdentities['utilisateur_divergent'],
+      };
+
+      // Action
+      cy.formFill(person, configuration);
+      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+      cy.url().should('equal', `${BASE_URL}/research`);
+
+      cy.get('#message').contains("Une erreur s'est produite lors de l'appel au RNIPP.");
+      cy.get('#message > div.row > div.col-md-2.text-right > button').click();
+
+      // Assert
+      cy.get('#rnippModal > div > div > div.modal-header > h4', { timeout: 3000 }).contains('Retour brut du RNIPP');
+
+      cy.get('#xml-raw').then(value => hasReturnCarriage(value, 30));
+    });
+
+    it('Should display an error message if RNIPP failed', () => {
+      // Arrange
+      const person = {
+        supportId: '1234567891234567',
+        ...rnippIdentities['utilisateur_mauvais_format'],
+      };
+
+      // Action
+      cy.formFill(person, configuration);
+      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+      cy.url().should('equal', `${BASE_URL}/research`);
+
+      // Assert
+      cy.get('#message').contains("Une erreur s'est produite lors de l'appel au RNIPP.");
+    });
   });
 });
