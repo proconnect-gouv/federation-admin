@@ -29,29 +29,20 @@ export class RnippSerializer {
   ) {}
 
   public async serializeXmlFromRnipp(xmlData: string): Promise<ParsedData> {
-    this.logger.debug(`Serializer xml ${xmlData}`);
-
-    const stripNS = this.xml2js.processors.stripPrefix;
-
+    this.logger.debug(`Serializer XML ${xmlData}`);
+    const options = {
+      tagNameProcessors: [this.xml2js.processors.stripPrefix],
+    };
     try {
-      const json = await this.xml2jsToPromise(xmlData, {
-        tagNameProcessors: [stripNS],
-      });
-
-      const response = await this.handleResponse(json);
-      return response;
+      const json = await this.xml2jsToPromise(xmlData, options);
+      return this.parseToJSON(json);
     } catch (error) {
-      const constraints = error.map(validationErrors => {
-        // tslint:disable-next-line: forin
-        for (const key in validationErrors.constraints) {
-          return validationErrors.constraints[key];
-        }
-      });
-      throw { errors: constraints };
+      this.logger.error(error);
+      throw error;
     }
   }
 
-  private async handleResponse(parsedXml: JSON): Promise<ParsedData> {
+  private parseToJSON(parsedXml: JSON): ParsedData {
     const rnippCode: string = this.getJsonAttribute(parsedXml, RNIPP_CODE);
 
     if (

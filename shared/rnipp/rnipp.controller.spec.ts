@@ -125,7 +125,7 @@ describe('RnippController', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should return information with formatted XML', async () => {
+    it('should return information with formatted XML from formatted XML', async () => {
       const mockedRnippService: IResponseFromRnipp = {
         rectifiedIdentity: {
           gender: 'male',
@@ -184,7 +184,7 @@ describe('RnippController', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should return information with formatted XML', async () => {
+    it('should return information with formatted XML from raw XML', async () => {
       const mockedRnippService: IResponseFromRnipp = {
         rectifiedIdentity: {
           gender: 'male',
@@ -195,7 +195,7 @@ describe('RnippController', () => {
           birthPlace: '75107',
           birthCountry: '99100',
         },
-        rawResponse: formattedXml.xmlString,
+        rawResponse: rawXml.xmlString,
         rnippCode: 2,
         rnippDead: false,
         statusCode: 200,
@@ -234,6 +234,50 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
+
+      const result = await rnippController.researchRnipp(
+        rectificationRequest,
+        req,
+      );
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return error with formatted XML from raw XML', async () => {
+      const mockedRnippService: any = {
+        rawResponse: rawXml.xmlString,
+        statusCode: 404,
+        message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+        rnippCode: '2',
+        identityHash: {
+          idp: 'd12f4rg4thyjh8ytjyt8j4yte4gezg4zrg4zeh4etj4ry',
+        },
+      };
+
+      const expectedResult: ErrorControllerInterface = {
+        csrfToken: 'mygreatcsrftoken',
+        person: {
+          dead: false,
+          requestedIdentity: {
+            birthCountry: '99100',
+            birthPlace: '75107',
+            birthdate: '1992-03-03',
+            familyName: 'Dupont',
+            gender: 'male',
+            givenName: 'Pierr',
+            preferredUsername: 'Henri',
+          },
+        },
+        rawResponse: formattedXml.xmlString,
+        rnippCode: '2',
+        statusCode: 404,
+        supportId: '1234567891234567',
+        message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+      };
+
+      rnippService.requestIdentityRectification.mockRejectedValue(
+        mockedRnippService,
+      );
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,

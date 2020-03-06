@@ -284,7 +284,7 @@
     <%/** Make RNIPP response data easily available for ajax requests (fc-exploitation) */%>
     <% if (locals.person) { %>
     <script type="text/javascript">
-      const __RNIPP_DATA__ = <%- JSON.stringify(locals.person.rectifiedIdentity) %>;
+      const __RNIPP_DATA__ = <%- locals.person.rectifiedIdentity ? JSON.stringify(locals.person.rectifiedIdentity) : 'undefined' %>;
       const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
     </script>
     <% } %>

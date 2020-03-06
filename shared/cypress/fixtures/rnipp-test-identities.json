@@ -78,5 +78,21 @@
     "birthdate": "1927-07-13",
     "isFrench": "false",
     "cog": "06000"
+  },
+  "utilisateur_divergent": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "E010008",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "cog": "00000"
+  },
+  "utilisateur_mauvais_format": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "E010012",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "cog": "00000"
   }
 }
