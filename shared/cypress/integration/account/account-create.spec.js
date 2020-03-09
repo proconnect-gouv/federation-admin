@@ -251,9 +251,14 @@ describe('Account', () => {
       it('should be possible for the new user to update his password, and type his totp token', () => {
         const configuration = Object.assign({}, basicConfiguration, {
           redirect: false,
-          password: 'S:z,s.xS3',
-          confirmPassword: 'S:z,s.xS3',
         });
+        const userInfo = {
+          username: 'newUser',
+          email: 'user@email.com',
+          password: 'MyNewPassword10!!',
+          confirmPassword: 'MyNewPassword10!!',
+        };
+
         createUserAndLogWith(userInfo, configuration);
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
@@ -269,6 +274,18 @@ describe('Account', () => {
 
         logoutAndDeleteUser(userInfo.username, configuration);
       });
+
+      it.skip('should not be possible for the user to authenticate himself if his token has expired', () => {
+        const username ='activationTokenAlwaysExpired';
+
+        const password = 'georgesmoustaki';
+        const activationToken = '84bc8f7e-33ad-441c-826b-0c8e9c3b4044';
+        cy.visit(`/first-login/${activationToken}`);
+        cy.formFill({ username, password }, { fast: true });
+        cy.get('button[type="submit"]').click();
+
+        cy.get('.login-form').contains('Informations de connexion erronées');
+      })
 
       it('Should not be possible for the new user to update his password if he is not respecting password format', () => {
         const configuration = Object.assign({}, basicConfiguration, {

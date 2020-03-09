@@ -1,6 +1,7 @@
 import { formType, formFill, formControl, totp } from './forms';
 import { resetMongoFC, resetPostgres, resetElasticStats } from './reset';
-import { login, logout } from './login';
+import { firstLogin, login, logout } from './login';
+import { getUserActivationToken } from './get-user-activation-token';
 
 Cypress.Commands.add('resetEnv', type => {
   switch (type) {
@@ -19,9 +20,11 @@ Cypress.Commands.add('resetEnv', type => {
   }
 });
 
+Cypress.Commands.add('getUserActivationToken', getUserActivationToken);
 Cypress.Commands.add('formFill', formFill);
 Cypress.Commands.add('formControl', formControl);
 Cypress.Commands.add('formType', formType);
 Cypress.Commands.add('totp', { prevSubject: 'optional' }, totp);
 Cypress.Commands.add('login', login);
+Cypress.Commands.add('firstLogin', firstLogin);
 Cypress.Commands.add('logout', logout);

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult, UpdateResult } from 'typeorm';
 import { InjectConfig, ConfigService } from 'nestjs-config';
-import * as uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import { User } from './user.sql.entity';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
@@ -18,6 +18,7 @@ import { Email } from '../mailer/mailjet';
 @Injectable()
 export class UserService implements IUserService {
   private readonly SALT_ROUNDS = 10;
+  private readonly userTokenExpiresIn;
 
   constructor(
     @Inject('generatePassword') private readonly generatePassword,
@@ -25,7 +26,10 @@ export class UserService implements IUserService {
     private readonly userRepository: Repository<User>,
     @InjectConfig() private readonly config: ConfigService,
     private readonly transporterService: MailerService,
-  ) {}
+  ) {
+    this.userTokenExpiresIn =
+      this.config.get('app').userTokenExpiresIn * 60 * 1000;
+  }
 
   callGeneratePassword() {
     return this.generatePassword.generate({
@@ -131,8 +135,10 @@ export class UserService implements IUserService {
       );
     }
     try {
-      const tokenCreatedAt: Date = new Date();
-
+      const {
+        tokenCreatedAt,
+        tokenExpiresAt,
+      } = this.setAuthenticationTokenExpirationDate();
       return this.userRepository.save({
         passwordHash,
         username,
@@ -141,6 +147,7 @@ export class UserService implements IUserService {
         secret,
         token,
         tokenCreatedAt,
+        tokenExpiresAt,
       });
     } catch (err) {
       throw new Error('The user could not be saved');
@@ -193,5 +200,13 @@ export class UserService implements IUserService {
       ],
       Subject: `Demande de création d'un compte utilisateur sur ${appName}`,
     };
+  }
+
+  private setAuthenticationTokenExpirationDate() {
+    const now = new Date();
+    const tokenCreatedAt = now;
+    const tokenExpiresAt = new Date(now.getTime() + this.userTokenExpiresIn);
+
+    return { tokenCreatedAt, tokenExpiresAt };
   }
 }
