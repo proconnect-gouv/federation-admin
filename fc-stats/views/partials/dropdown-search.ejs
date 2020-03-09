@@ -1,0 +1,71 @@
+<%
+const { filters = [] } = params;
+
+const result = filters
+  .filter(({ key: k }) => k === key)
+  .map(({ value }) => value);
+%>
+<div id="<%= key %>-dropdown" class="dropdown m-1">
+  <button class="btn btn-<%= locals.className || 'secondary' %> btn-sm dropdown-toggle search"
+    type="button" id="<%= key %>-dropdownMenuButton"
+    data-init="dropdown"
+    data-toggle="dropdown"
+    data-items="<%= JSON.stringify(values); %>"
+    data-filters="<%= JSON.stringify(result); %>"
+    data-name="<%= name %>"
+    aria-haspopup="true"
+    aria-expanded="false">
+    <%= label %>
+    <% if (result.length > 0) { %>
+      <span class="badge badge-light"><%= result.length %></span>
+    <% } %>
+  </button>
+
+  <nav class="dropdown-menu search p-3" aria-labelledby="dropdownMenuButton">
+
+    <% if (type === 'unique' && !locals.mandatory) { %>
+
+      <div class="custom-control custom-radio my-1 mr-sm-2">
+        <input
+          class="custom-control-input"
+          type="radio"
+          id="<%= name + ':reset' %>"
+          data-init="filters"
+          value=""
+          name="<%= name %>"
+          data-form="search"
+          <% if (!params[name]) { %>
+          checked
+          <% } %>
+        >
+        <label
+          class="custom-control-label justify-content-start"
+          for="<%= name + ':reset'%>"><i> - aucun - </i></label>
+      </div>
+
+    <% } else { %>
+
+      <div class="form-row">
+        <input type="text" name="search" class="form-control" style="width: 100%;" autocomplete="off"
+          placeholder="Rechercher">
+      </div>
+
+      <div class="dropdown-container">
+        <% values
+             .filter(item => result.includes(item.key))
+             .map(item => {
+        %>
+          <input
+            class="custom-control-input"
+            type="checkbox"
+            id="<%= name + item.value %>"
+            data-init="filters"
+            value="<%= item.value %>"
+            name="<%= name %>"
+            data-form="search"
+            checked>
+        <% }) %>
+      </div>
+    <% } %>
+    </nav>
+</div>

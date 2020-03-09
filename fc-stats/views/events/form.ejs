@@ -62,7 +62,7 @@ function computeFilterValues(items, key) {
             valueType: 'composed',
             values: computeFilterValues(locals.meta.fiList, 'fi')
           }) %>
-          <%- include('../partials/dropdown', { name: 'filters[]',
+          <%- include('../partials/dropdown-search', { name: 'filters[]',
             label: 'FS',
             key: 'fs',
             type: 'multiple',
@@ -78,7 +78,7 @@ function computeFilterValues(items, key) {
             values: computeFilterValues(locals.meta.actionList, 'action'),
             mapping: locals.helpers.MAPPINGS.action
           }) %>
-          <%- include('../partials/dropdown', {
+          <%- include('../partials/dropdown-search', {
             name: 'filters[]',
             label: 'Type Action',
             key: 'typeAction',

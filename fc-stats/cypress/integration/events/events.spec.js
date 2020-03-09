@@ -64,6 +64,70 @@ describe('Events visualisation UI', () => {
       .should('contain', 'ameli');
   });
 
+  it('display first ten elements "Types Actions" in dropdown', () => {
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('.dropdown-item').should('have.length', 10);
+    });
+  });
+
+  it('display elements "Types actions" that match with search', () => {
+    const searchString1 = 'iden';
+    const searchString2 = 'div';
+
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('input[type=text]').type(searchString1);
+      cy.get('.dropdown-item').should('have.length', 2);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString2);
+      cy.get('.dropdown-item').should('have.length', 1);
+    });
+  });
+
+  it('display elements "Types actions" that match with search', () => {
+    const searchString1 = 'iden';
+    const searchString2 = 'div';
+
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('input[type=text]').type(searchString1);
+      cy.get('.dropdown-item').should('have.length', 2);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString2);
+      cy.get('.dropdown-item').should('have.length', 1);
+    });
+  });
+
+  it('display elements "Types actions" checked even after a search', () => {
+    const searchString = 'iden';
+    
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('.dropdown-item').eq(1).click();
+      cy.get('input[type=text]').type(searchString);
+      cy.get('.dropdown-item').eq(1).click();
+      cy.get('input[type=text]').clear();
+      cy.get('.dropdown-item').eq(0).children('input').should('be.checked');
+      cy.get('.dropdown-item').eq(1).children('input').should('be.checked');
+    });
+  });
+
   it('displays bar chart page without JS error', () => {
     cy.visit(
       `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=bar&granularity=month&x=date&y=fs`,
