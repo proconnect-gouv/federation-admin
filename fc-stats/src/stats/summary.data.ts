@@ -70,6 +70,14 @@ export function getData(baseQuery): ISummary[] {
             y: 'fs',
           })}`,
         },
+
+        {
+          label: 'Courbe du nombre de FS depuis l’origine',
+          href: `/metrics?${queryString.stringify({
+            ...baseQuery,
+            'filters[]': ['key:activeFsCount', 'range:month'],
+          })}`,
+        },
       ],
     },
   ];

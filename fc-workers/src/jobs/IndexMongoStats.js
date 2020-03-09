@@ -6,16 +6,23 @@ class IndexMongoStats extends Job {
   static usage() {
     return `
       Usage:
-      > IndexMongoStats --count=<account|desactivated|registration> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>
+      > IndexMongoStats --count=<account|activeFsCount|desactivated|registration> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>
     `;
   }
 
   async getMetric(metric, start, range) {
-    const { account } = this.db.models;
+    const { account, clientProduction } = this.db.models;
 
     switch (metric) {
       case 'account':
         return account.estimatedDocumentCount();
+
+      case 'activeFsCount':
+        return IndexMongoStats.getActiveFsMetric(
+          clientProduction,
+          start,
+          range
+        );
 
       case 'desactivated':
         return account.countDocuments({ active: false });
@@ -26,6 +33,19 @@ class IndexMongoStats extends Job {
       default:
         throw new Error(`Unknown metric: <${metric}>`);
     }
+  }
+
+  static getActiveFsMetric(clientProduction, start, range) {
+    const stop = IndexMongoStats.getStopDateForRange(start, range);
+    const query = {
+      active: true,
+      $and: [
+        { createdAt: { $gte: new Date(start) } },
+        { createdAt: { $lt: new Date(stop) } },
+      ],
+    };
+
+    return clientProduction.countDocuments(query);
   }
 
   static getRegistrationMetric(account, start, range) {
