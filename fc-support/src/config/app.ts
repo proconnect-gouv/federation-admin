@@ -11,4 +11,5 @@ export default {
   latestCommitLongHash: process.env.GIT_LATEST_COMMIT_LONG_HASH || '',
   isProduction: process.env.IS_PRODUCTION || false,
   appVersion: process.env.APP_VERSION || 'no-version',
+  userTokenExpiresIn: 2880,
 };

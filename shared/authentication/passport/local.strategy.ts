@@ -9,6 +9,7 @@ import {
   AuthenticationStates,
 } from '../authentication-actions.enum';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { UserRole } from '../../user/roles.enum';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -41,13 +42,29 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new Error('The user could not be found due to a database error');
     }
     if (!user) {
-      req.flash('error', "Nom d'utilisateur ou mot de passe incorrect.");
       this.track({
         action: AuthenticationActions.TOKEN_SIGNUP,
         state: AuthenticationStates.DENIED,
         user: username,
       });
+      req.flash('error', 'Informations de connexion erronées.');
+      return null;
     }
+
+    const date = new Date();
+    if (
+      user.roles.includes(UserRole.NEWUSER) &&
+      user.tokenExpiresAt.getTime() - date.getTime() < 0
+    ) {
+      this.track({
+        action: AuthenticationActions.TOKEN_SIGNUP,
+        state: AuthenticationStates.DENIED,
+        user: username,
+      });
+      req.flash('error', 'Informations de connexion erronées.');
+      return null;
+    }
+
     return user;
   }
 }

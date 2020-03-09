@@ -59,7 +59,7 @@ export function createUserAndLogWith(userInfo, basicConfiguration) {
     cy.contains("Créer l'utilisateur").click();
     cy.logout(USER_ADMIN);
     // login with new user created
-    cy.login(
+    cy.firstLogin(
       userInfo.username, 
       tmpPassword[0].textContent
     )

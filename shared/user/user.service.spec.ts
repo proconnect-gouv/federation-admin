@@ -8,9 +8,10 @@ import { UserRole } from './roles.enum';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
 import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
-import { ConfigService, ConfigModule } from 'nestjs-config';
+import { ConfigService } from 'nestjs-config';
 import { MailerService } from '../mailer/mailer.service';
 import { MailerModule } from '../mailer/mailer.module';
+import * as uuid from 'uuid';
 
 const mockValidate = jest.fn();
 IsPasswordCompliant.prototype.validate = mockValidate;
@@ -55,7 +56,13 @@ describe('UserService', () => {
       '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
   };
 
+  const mockToken = '3a95ebfa-cd28-40f1-ab6e-5eb4cef352e3';
+  const userTokenExpiresIn = 2880;
   beforeEach(async () => {
+    configServiceMock.get.mockReturnValue({
+      userTokenExpiresIn,
+    });
+
     const module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forFeature([User]),
@@ -86,7 +93,10 @@ describe('UserService', () => {
       .compile();
 
     userService = await module.get<UserService>(UserService);
+
     jest.resetAllMocks();
+
+    jest.spyOn(uuid, 'v4').mockReturnValueOnce(mockToken);
   });
 
   describe('callGeneratePassword', () => {
@@ -264,13 +274,33 @@ describe('UserService', () => {
         smtpSenderEmail: 'someString',
       });
 
+      // Private method testing https://stackoverflow.com/a/35991491/1071169
+      userService[
+        // tslint:disable-next-line no-string-literal
+        'setAuthenticationTokenExpirationDate'
+      ] = jest.fn().mockReturnValue({
+        tokenCreatedAt: '2020-03-03T16:36:56.135Z',
+        tokenExpiresAt: '2020-03-05T16:36:56.135Z',
+      });
+
       userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
 
       await userService.createUser(userMock);
       expect(userRepositoryMock.save).toHaveBeenCalledTimes(1);
       const { passwordHash } = userRepositoryMock.save.mock.calls[0][0];
       expect(bcrypt.compare(userMock.password, passwordHash)).toBeTruthy();
+      expect(userRepositoryMock.save).toHaveBeenCalledWith({
+        email: 'jean@moust.lol',
+        passwordHash,
+        roles: ['admin', 'operator', 'security'],
+        secret: '1234',
+        token: mockToken,
+        tokenCreatedAt: '2020-03-03T16:36:56.135Z',
+        tokenExpiresAt: '2020-03-05T16:36:56.135Z',
+        username: 'jean_moust',
+      });
     });
+
     it('does not create the user because of a database failure', async () => {
       const userMock: ICreateUserDTO = {
         username: 'jean_moust',
@@ -303,6 +333,7 @@ describe('UserService', () => {
       }
       expect.hasAssertions();
     });
+
     it('does not create the user because of a bcrypt failure', async () => {
       const userMock: ICreateUserDTO = {
         username: 'jean_moust',
@@ -326,6 +357,38 @@ describe('UserService', () => {
         expect(message).toEqual('password hash could not be generated');
       }
       expect.hasAssertions();
+    });
+  });
+
+  describe('setAuthenticationTokenExpirationDate', () => {
+    it('should return an object with two objects of type date', () => {
+      // action
+      // tslint:disable-next-line no-string-literal
+      const result = userService['setAuthenticationTokenExpirationDate']();
+      // assert
+      expect(result.tokenCreatedAt).toBeInstanceOf(Date);
+      expect(result.tokenExpiresAt).toBeInstanceOf(Date);
+    });
+
+    it('should return an object with two objects of type date', () => {
+      // action
+      // tslint:disable-next-line no-string-literal
+      const result = userService['setAuthenticationTokenExpirationDate']();
+      // assert
+      expect(Object.keys(result)).toMatchObject([
+        'tokenCreatedAt',
+        'tokenExpiresAt',
+      ]);
+    });
+
+    it('should set "tokenExpiresAt" to "userTokenExpiresIn" minutes after "tokenCreatedAt"', () => {
+      // action
+      // tslint:disable-next-line no-string-literal
+      const result = userService['setAuthenticationTokenExpirationDate']();
+      // assert
+      expect(
+        result.tokenExpiresAt.getTime() - result.tokenCreatedAt.getTime(),
+      ).toBe(userTokenExpiresIn * 60 * 1000);
     });
   });
 

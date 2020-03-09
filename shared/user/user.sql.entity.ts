@@ -30,4 +30,7 @@ export class User {
 
   @Column({ nullable: true })
   tokenCreatedAt?: Date;
+
+  @Column({ nullable: true })
+  tokenExpiresAt?: Date;
 }

@@ -107,17 +107,6 @@ describe('AuthenticationService', () => {
         expect(actualUser).toBe(user);
       });
 
-      it('returns the user if the activation token not provided', async () => {
-        // action
-        const actualUser = await authenticationService.validateCredentials(
-          username,
-          password,
-        );
-
-        // assert
-        expect(actualUser).toBe(user);
-      });
-
       it('returns "null" if the activation token is valid', async () => {
         // action
         const actualUser = await authenticationService.validateCredentials(

@@ -1,4 +1,14 @@
 
+export function firstLogin(username, password) {
+  cy.getUserActivationToken(username).then(result => {
+    const activationToken = result.stdout;
+
+    cy.visit(`/first-login/${activationToken}`);
+    cy.formFill({ username, password }, { fast: true });
+    cy.get('button[type="submit"]').click();
+  });
+}
+
 export function login(username, password) {
   cy.visit('/login');
   cy.formFill({ username, password }, { fast: true });
