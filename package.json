@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "lint": "tslint 'fc-exploitation/src/**/*.ts' 'shared/**/*.ts' 'fc-support/**/*.ts' 'fc-stats/**/*.ts' --exclude '**/node_modules/**/*'",
-    "lint:commit": "./node-scripts/lint-commit.sh"
+    "lint:commit": "./node-scripts/lint-commit.sh",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -17,6 +20,27 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.5.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/fc-stats/",
+      "<rootDir>/fc-exploitation/",
+      "<rootDir>/fc-support/",
+      "<rootDir>/fc-workers/",
+      "<rootDir>/shared/"
+    ]
   },
   "workspaces": [
     "fc-stats",
