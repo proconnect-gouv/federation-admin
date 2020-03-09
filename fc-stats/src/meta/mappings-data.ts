@@ -35,6 +35,7 @@ export const MAPPINGS = {
   metrics: {
     account: 'Comptes',
     activeAccount: 'Comptes actifs',
+    activeFsCount: 'FS actifs',
     disabled: 'Comptes désactivés',
     registration: 'Comptes créés',
   },

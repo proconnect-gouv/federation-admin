@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import './models/accountModel';
+import './models/clientProductionModel';
 
 class FcDatabase {
   static getInstance(config) {
