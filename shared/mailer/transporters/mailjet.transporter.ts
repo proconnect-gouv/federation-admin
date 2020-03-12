@@ -38,13 +38,14 @@ export class MailjetTransport extends Transport {
     }
 
     const {
-      emailOptions: { mailjetKey, mailjetSecret },
+      emailOptions: { mailjetKey, mailjetSecret, options },
     } = transporterOptions;
 
     try {
       const mailjetConnection = await this.mailjetAuthenticate(
         mailjetKey,
         mailjetSecret,
+        options,
       );
 
       return mailjetConnection
@@ -56,7 +57,7 @@ export class MailjetTransport extends Transport {
     }
   }
 
-  async mailjetAuthenticate(key, secret) {
-    return mailjet.connect(key, secret);
+  async mailjetAuthenticate(key, secret, options) {
+    return mailjet.connect(key, secret, options);
   }
 }

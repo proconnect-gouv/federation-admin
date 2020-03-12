@@ -71,7 +71,7 @@ describe('WeeklyIdpRepport', () => {
       // When
       const result = WeeklyIdpRepport.getDateRange(input);
       // Then
-      expect(result).toEqual({ start: '2019-01-01', end: '2019-04-30' });
+      expect(result).toEqual({ start: '2019-01-01', stop: '2019-04-30' });
     });
   });
 
@@ -122,6 +122,37 @@ describe('WeeklyIdpRepport', () => {
       const send = jest.fn();
       const container = new Container();
 
+      const data = [
+        {
+          startDate: 1516579200000,
+          events: [
+            {
+              count: 665,
+              label: 'confirmAuthentication',
+            },
+            {
+              count: 660,
+              label: 'initial',
+            },
+            {
+              count: 396,
+              label: 'identityProviderAuthentication',
+            },
+            {
+              count: 726,
+              label: 'identityProviderChoice',
+            },
+          ],
+        },
+      ];
+
+      const resultBody =   [
+             '<tr><td>Semaine du 2018-01-22</td>',
+             '<td>660</td>',
+             '<td>396</td>',
+             '<td>726</td></tr>',
+           ].join('\n');
+
       container.add('input', () => ({ get: (schema, values) => values }));
       container.add('mailer', () => ({ send }));
       container.add('config', () => ({
@@ -129,18 +160,8 @@ describe('WeeklyIdpRepport', () => {
         getAPIKey: () => 'bar',
       }));
       container.add('logger', () => ({ info: jest.fn() }));
-      container.add('httpClient', () => ({
-        get: () =>
-          Promise.resolve({
-            data: {
-              weeks: [
-                {
-                  startDate: 1514764800000,
-                  events: [{ count: 2, label: 'bar' }],
-                },
-              ],
-            },
-          }),
+      container.add('stats', () => ({
+        getTotalForActionsAndFiAndRangeByWeek: () => Promise.resolve(data),
       }));
 
       const params = { idp: 'foo', email: 'fizz@buzz.com' };
@@ -158,6 +179,9 @@ describe('WeeklyIdpRepport', () => {
       ]);
       expect(send.mock.calls[0][0].subject).toEqual(
         expect.stringContaining(params.idp)
+      );
+      expect(send.mock.calls[0][0].body).toEqual(
+        expect.stringContaining(resultBody)
       );
       expect(send.mock.calls[0][0].recipients).toEqual([
         { Email: params.email },

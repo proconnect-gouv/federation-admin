@@ -126,58 +126,6 @@ describe('StatsQueries', () => {
     });
   });
 
-  describe('getTotalByActionAndRange', () => {
-    it('Should return a query', () => {
-      // Given
-      const params = {
-        action: 'foo',
-        start: START_DATE,
-        stop: STOP_DATE,
-        columns: ['fi', 'fs', 'action', 'typeAction'],
-      };
-      // When
-      const result = statsQueries.getTotalByActionAndRange(params);
-      // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('events');
-      expect(result.body.query.bool.must[0].term).toEqual({ action: 'foo' });
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
-        START_DATE.getTime(),
-      );
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
-        START_DATE.getTime(),
-      );
-      expect(result.body.query.bool.must[1].range.date.lte).toBe(
-        STOP_DATE.getTime(),
-      );
-    });
-  });
-
-  describe('getTotalForActionsAndFiAndRangeByWeek', () => {
-    it('Should return a query', () => {
-      // Given
-      const params = {
-        fi: 'foo',
-        start: START_DATE,
-        stop: STOP_DATE,
-        columns: ['fi', 'fs', 'action', 'typeAction'],
-      };
-      // When
-      const result = statsQueries.getTotalForActionsAndFiAndRangeByWeek(params);
-      // Then
-      expect(result).toBeDefined(), expect(result.index).toBe('events');
-      expect(result.body.query.bool.must[0].term).toEqual({ fi: 'foo' });
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
-        START_DATE.getTime(),
-      );
-      expect(result.body.query.bool.must[1].range.date.gte).toBe(
-        START_DATE.getTime(),
-      );
-      expect(result.body.query.bool.must[1].range.date.lte).toBe(
-        STOP_DATE.getTime(),
-      );
-    });
-  });
-
   describe('getMetrics', () => {
     it('Should limit the query to 1000 result for graph views', () => {
       // Given

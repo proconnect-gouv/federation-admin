@@ -22,9 +22,15 @@ class Config {
   }
 
   getMailjet() {
-    const { MAILJET_KEY, MAILJET_SECRET } = this.config;
+    const { MAILJET_KEY, MAILJET_SECRET, HTTPS_PROXY } = this.config;
 
-    return { key: MAILJET_KEY, secret: MAILJET_SECRET };
+    return {
+      key: MAILJET_KEY,
+      secret: MAILJET_SECRET,
+      options: {
+        proxyUrl: HTTPS_PROXY,
+      },
+    };
   }
 
   getElastic() {

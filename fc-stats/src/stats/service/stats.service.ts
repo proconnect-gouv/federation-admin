@@ -8,7 +8,6 @@ import { EventDTO } from '../dto/event.dto';
 import { MetricDTO } from '../dto/metric.dto';
 import { StatsQueries } from '../stats.queries';
 import { StatsServiceParams } from '../interfaces/stats-service-params.interface';
-import { TotalByFIWeek } from '../interfaces/total-by-fi-response.interface';
 import { EventUIListOutputDTO } from '../dto/event-ui-list-output.dto';
 import { EventMetaDTO } from '../dto/event-meta.dto';
 import { MetricMetaDTO } from '../dto/metric-meta.dto';
@@ -139,38 +138,5 @@ export class StatsService {
     let aggregateKeys: string[] = [];
     aggregateKeys = aggregation.buckets;
     return aggregateKeys;
-  }
-
-  async getTotalByActionAndRange(params: StatsServiceParams): Promise<number> {
-    const { action } = params;
-    const query: SearchParams = this.statsQueries.getTotalByActionAndRange(
-      params,
-    );
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
-
-    return data.aggregations[action].value;
-  }
-
-  async getTotalForActionsAndFiAndRangeByWeek(
-    params: StatsServiceParams,
-  ): Promise<TotalByFIWeek[]> {
-    const query: SearchParams = this.statsQueries.getTotalForActionsAndFiAndRangeByWeek(
-      params,
-    );
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
-
-    const weeks: TotalByFIWeek[] = data.aggregations.week.buckets.map(week => ({
-      startDate: week.key,
-      events: week.action.buckets.map(event => ({
-        label: event.key,
-        count: event.count.value,
-      })),
-    }));
-
-    return weeks;
   }
 }

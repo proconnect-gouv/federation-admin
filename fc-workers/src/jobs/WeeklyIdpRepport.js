@@ -95,43 +95,31 @@ class WeeklyIdpRepport extends Job {
     const endDate = WeeklyIdpRepport.getDateAtMidnight(
       WeeklyIdpRepport.getShiftedDate(date, -1)
     );
-    const end = WeeklyIdpRepport.formatDate(endDate);
+    const stop = WeeklyIdpRepport.formatDate(endDate);
     const start = WeeklyIdpRepport.formatDate(
       new Date(String(endDate.getFullYear()))
     );
 
-    return { start, end };
+    return { start, stop };
   }
 
   async run(params) {
     // Setup
-    const { config, httpClient, input, mailer } = this.container.get([
-      'config',
-      'httpClient',
-      'input',
-      'mailer',
-    ]);
+    const { input, mailer, stats } = this.container.get(['input', 'mailer', 'stats']);
 
     const schema = {
       idp: { type: 'string', mandatory: true },
       email: { type: 'string', mandatory: true },
     };
     const { idp, email } = input.get(schema, params);
-    const { start, end } = WeeklyIdpRepport.getDateRange(new Date());
+    const { start, stop } = WeeklyIdpRepport.getDateRange(new Date());
 
-    const url = `${config.getAPIRoot()}/totalByFi?fi=${idp}&start=${start}&stop=${end}`;
-
-    // Action
-    const request = await httpClient.get(url, {
-      headers: {
-        token: config.getAPIKey(),
-      },
-    });
-
-    const emailContent = WeeklyIdpRepport.formatMessage(
+    const data = await stats.getTotalForActionsAndFiAndRangeByWeek(
       idp,
-      request.data.weeks
+      start,
+      stop
     );
+    const emailContent = WeeklyIdpRepport.formatMessage(idp, data);
     const subject = WeeklyIdpRepport.getSubject(idp);
 
     // Render

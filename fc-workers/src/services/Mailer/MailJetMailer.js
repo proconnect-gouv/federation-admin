@@ -4,8 +4,9 @@ import Mailer from './Mailer';
 class MailJetMailer extends Mailer {
   constructor(config, logger) {
     super(config, logger);
-    const { key, secret } = this.config;
-    this.mailer = mailjet.connect(key, secret);
+    const { key, secret, options } = this.config.getMailjet();
+
+    this.mailer = mailjet.connect(key, secret, options);
   }
 
   static mapParams(params) {
