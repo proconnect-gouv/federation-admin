@@ -5,4 +5,7 @@ export default {
   smtpSenderName: process.env.SMTP_SENDER_NAME || 'FranceConnect',
   smtpSenderEmail:
     process.env.SMTP_SENDER_EMAIL || 'ne-pas-repondre@franceconnect.gouv.fr',
+  options: {
+    proxyUrl: process.env.HTTPS_PROXY || '',
+  },
 };

@@ -31,9 +31,71 @@ export const getIdsToDelete = params => {
   return query;
 };
 
+export const getTotalForActionsAndFiAndRangeByWeek = params => {
+  const { fi, start, stop } = params;
+  const index = 'events';
+
+  const startTime = moment(start).format('YYYY-MM-DD');
+  const stopTime = moment(stop).format('YYYY-MM-DD');
+
+  const query = {
+    index,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          must: [
+            { term: { fi } },
+            {
+              range: {
+                date: {
+                  gte: startTime,
+                  lte: stopTime,
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        week: {
+          date_histogram: {
+            field: 'date',
+            interval: 'week',
+            min_doc_count: 0,
+            extended_bounds: {
+              min: startTime,
+              max: stopTime,
+            },
+          },
+          aggs: {
+            action: {
+              terms: {
+                field: 'typeAction',
+              },
+              aggs: {
+                count: {
+                  sum: {
+                    field: 'count',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  return query;
+};
+
 export const getByIntervalByFIFS = params => {
   const { start, stop, interval, size, after } = params;
   const index = 'franceconnect';
+
+  const startTime = moment(start).format('YYYY-MM-DD');
+  const stopTime = moment(stop).format('YYYY-MM-DD');
 
   const query = {
     index,
@@ -45,8 +107,8 @@ export const getByIntervalByFIFS = params => {
             {
               range: {
                 time: {
-                  gte: moment(start).format('YYYY-MM-DD'),
-                  lte: moment(stop).format('YYYY-MM-DD'),
+                  gte: startTime,
+                  lte: stopTime,
                 },
               },
             },
@@ -89,6 +151,9 @@ export const getActiveAccount = params => {
   const { start, stop } = params;
   const index = 'franceconnect';
 
+  const startTime = moment(start).format('YYYY-MM-DD');
+  const stopTime = moment(stop).format('YYYY-MM-DD');
+
   const query = {
     index,
     size: 0,
@@ -101,8 +166,8 @@ export const getActiveAccount = params => {
             {
               range: {
                 time: {
-                  gte: moment(start).format('YYYY-MM-DD'),
-                  lte: moment(stop).format('YYYY-MM-DD'),
+                  gte: startTime,
+                  lte: stopTime,
                 },
               },
             },

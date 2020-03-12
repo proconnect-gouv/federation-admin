@@ -1,5 +1,5 @@
 import { IsString, IsIn } from 'class-validator';
-import { BaseNestedDTO } from './stats-api-nested-base.dto';
+import { BaseNestedDTO } from './base-nested.dto';
 
 export class FilterParamDTO extends BaseNestedDTO {
   static parse(input) {

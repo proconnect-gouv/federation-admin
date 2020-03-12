@@ -34,6 +34,24 @@ class Stats {
     return api.search(query);
   }
 
+  async getTotalForActionsAndFiAndRangeByWeek(fi, start, stop) {
+    const api = this.container.get('logApi');
+    const query = queries.getTotalForActionsAndFiAndRangeByWeek({
+      fi,
+      start,
+      stop,
+    });
+    const data = await api.search(query);
+
+    return data.aggregations.week.buckets.map(week => ({
+      startDate: week.key,
+      events: week.action.buckets.map(event => ({
+        label: event.key,
+        count: event.count.value,
+      })),
+    }));
+  }
+
   async getActiveAccountsByRange(params) {
     const api = this.container.get('logApi');
     const stop = this.getStopDateForRange(params);

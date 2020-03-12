@@ -15,12 +15,20 @@ describe('config', () => {
   describe('getMailjet', () => {
     it('Should return an object', () => {
       // Given
-      const input = { MAILJET_KEY: 'foo', MAILJET_SECRET: 'bar' };
+      const input = {
+        MAILJET_KEY: 'fake-mailjet-key',
+        MAILJET_SECRET: 'fake-mailjet-secret',
+        HTTPS_PROXY: 'fake-proxy-url',
+      };
       const config = new Config(input);
       // When
       const result = config.getMailjet();
       // Then
-      expect(result).toEqual({ key: 'foo', secret: 'bar' });
+      expect(result).toEqual({
+        key: 'fake-mailjet-key',
+        secret: 'fake-mailjet-secret',
+        options: { proxyUrl: 'fake-proxy-url' },
+      });
     });
   });
 });
