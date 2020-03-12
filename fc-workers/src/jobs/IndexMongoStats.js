@@ -11,18 +11,14 @@ class IndexMongoStats extends Job {
   }
 
   async getMetric(metric, start, range) {
-    const { account, clientProduction } = this.db.models;
+    const { account, client } = this.db.models;
 
     switch (metric) {
       case 'account':
         return account.estimatedDocumentCount();
 
       case 'activeFsCount':
-        return IndexMongoStats.getActiveFsMetric(
-          clientProduction,
-          start,
-          range
-        );
+        return IndexMongoStats.getActiveFsMetric(client, start, range);
 
       case 'desactivated':
         return account.countDocuments({ active: false });
@@ -35,7 +31,7 @@ class IndexMongoStats extends Job {
     }
   }
 
-  static getActiveFsMetric(clientProduction, start, range) {
+  static getActiveFsMetric(client, start, range) {
     const stop = IndexMongoStats.getStopDateForRange(start, range);
     const query = {
       active: true,
@@ -45,7 +41,7 @@ class IndexMongoStats extends Job {
       ],
     };
 
-    return clientProduction.countDocuments(query);
+    return client.countDocuments(query);
   }
 
   static getRegistrationMetric(account, start, range) {
