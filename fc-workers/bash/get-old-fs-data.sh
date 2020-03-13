@@ -11,7 +11,7 @@ runFcWorkerJob(){
       start=$(date -I -d "$start + 1 $1")
       echo ""
       echo "********************* $1 : $start *********************"
-      ./run IndexMongoStats --count="activeFsCount" --range="$1" --start=$(date --rfc-3339=date -d "$start")
+      cd /opt/fc/workers && ./run IndexMongoStats --count="activeFsCount" --range="$1" --start=$(date --rfc-3339=date -d "$start")
       echo ""
   done     
 }
