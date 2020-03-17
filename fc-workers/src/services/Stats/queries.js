@@ -54,6 +54,21 @@ export const getTotalForActionsAndFiAndRangeByWeek = params => {
                 },
               },
             },
+            {
+              bool: {
+                should: [
+                  {
+                    match: { typeAction: 'initial' },
+                  },
+                  {
+                    match: { typeAction: 'identityProviderChoice' },
+                  },
+                  {
+                    match: { typeAction: 'identityProviderAuthentication' },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -89,7 +104,6 @@ export const getTotalForActionsAndFiAndRangeByWeek = params => {
 
   return query;
 };
-
 export const getByIntervalByFIFS = params => {
   const { start, stop, interval, size, after } = params;
   const index = 'franceconnect';

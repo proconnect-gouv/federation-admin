@@ -1,11 +1,5 @@
 import Job from './Job';
 
-const eventsMap = {
-  identityProviderChoice: 'Clics sur le bouton',
-  identityProviderAuthentication: 'Authentifications réussies chez le FI',
-  initial: 'Authentifications réussies chez le FS',
-};
-
 class WeeklyIdpRepport extends Job {
   static usage() {
     return `
@@ -40,21 +34,49 @@ class WeeklyIdpRepport extends Job {
   }
 
   static formatRows(weeks) {
-    const allowedEventNames = Object.keys(eventsMap);
-
     return weeks
       .map(week => {
         let html = `<td>Semaine du ${WeeklyIdpRepport.formatDate(
           new Date(week.startDate)
-        )}</td>\n`;
-        html += week.events
-          .filter(event => allowedEventNames.indexOf(event.label) > -1)
-          .map(event => `<td>${event.count}</td>`)
-          .join('\n');
+        )}</td>`;
+
+        // identityProviderChoice : Clics sur le bouton,
+        const identityProviderChoice = WeeklyIdpRepport.getPropertyCount(
+          week.events,
+          'identityProviderChoice'
+        );
+
+        // identityProviderAuthentication : Authentifications réussies chez le FI
+        const identityProviderAuthentication = WeeklyIdpRepport.getPropertyCount(
+          week.events,
+          'identityProviderAuthentication'
+        );
+
+        // initial : Authentifications réussies chez le FS
+        const initial = WeeklyIdpRepport.getPropertyCount(
+          week.events,
+          'initial'
+        );
+
+        html += [
+          `<td>${identityProviderChoice}</td>`,
+          `<td>${identityProviderAuthentication}</td>`,
+          `<td>${initial}</td>`,
+        ].join('');
 
         return `<tr>${html}</tr>`;
       })
-      .join('\n');
+      .join('');
+  }
+
+  static getPropertyCount(events, property) {
+    const filteredEvent = events
+      .filter(event => event.label === property)
+      .shift();
+    if (!filteredEvent) {
+      return 0;
+    }
+    return filteredEvent.count;
   }
 
   static formatMessage(idp, weeks) {
@@ -105,7 +127,11 @@ class WeeklyIdpRepport extends Job {
 
   async run(params) {
     // Setup
-    const { input, mailer, stats } = this.container.get(['input', 'mailer', 'stats']);
+    const { input, mailer, stats } = this.container.get([
+      'input',
+      'mailer',
+      'stats',
+    ]);
 
     const schema = {
       idp: { type: 'string', mandatory: true },
@@ -119,6 +145,7 @@ class WeeklyIdpRepport extends Job {
       start,
       stop
     );
+
     const emailContent = WeeklyIdpRepport.formatMessage(idp, data);
     const subject = WeeklyIdpRepport.getSubject(idp);
 
