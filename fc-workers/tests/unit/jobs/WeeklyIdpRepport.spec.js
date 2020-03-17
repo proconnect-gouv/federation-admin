@@ -108,11 +108,42 @@ describe('WeeklyIdpRepport', () => {
       expect(result).toEqual(
         [
           '<tr><td>Semaine du 2018-01-22</td>',
-          '<td>660</td>',
+          '<td>726</td>',
           '<td>396</td>',
-          '<td>726</td></tr>',
-        ].join('\n')
+          '<td>660</td></tr>',
+        ].join('')
       );
+    });
+  });
+
+  describe('getPropertyCount', () => {
+    it('should return 0 if filteredEvent is not found', () => {
+      // Given
+      const events = [
+        { label: 'identityProviderChoice', count: 2 },
+        { label: 'identityProviderAuthentication', count: 2 },
+      ]
+
+      // When
+      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial')
+
+      // then
+      expect(result).toEqual(0);
+    });
+
+    it('should return the count number of the provided property when it exists', () => {
+      // Given
+      const events = [
+        { label: 'identityProviderChoice', count: 2 },
+        { label: 'identityProviderAuthentication', count: 2 },
+        { label: 'initial', count: 3 },
+      ]
+
+      // When
+      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial')
+
+      // then
+      expect(result).toEqual(3);
     });
   });
 
@@ -146,12 +177,12 @@ describe('WeeklyIdpRepport', () => {
         },
       ];
 
-      const resultBody =   [
-             '<tr><td>Semaine du 2018-01-22</td>',
-             '<td>660</td>',
-             '<td>396</td>',
-             '<td>726</td></tr>',
-           ].join('\n');
+      const resultBody = [
+        '<tr><td>Semaine du 2018-01-22</td>',
+        '<td>726</td>',
+        '<td>396</td>',
+        '<td>660</td></tr>',
+      ].join('');
 
       container.add('input', () => ({ get: (schema, values) => values }));
       container.add('mailer', () => ({ send }));
