@@ -137,7 +137,7 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
     const blob = Buffer.from(image, 'base64');
 
     // on vérifie le "vrai" type de l'élément
-    const { ext } = fileType(blob) || { ext: null };
+    const { ext, mime: mimeBlob } = fileType(blob) || { ext: null, mime: '' };
     if (!ext || typeof ext !== 'string') {
       return false;
     }
@@ -145,7 +145,8 @@ export class IValidateDataURI implements ValidatorConstraintInterface {
     // on vérifie l'extension de l'image
     const [, mime = ''] = format.match(DATA_URI_FORMAT_REGEX);
     const hasGoodExtension =
-      ext.length >= MIN_EXTENSION_LENGTH && mime.includes(ext);
+      ext.length >= MIN_EXTENSION_LENGTH &&
+      (mime.includes(ext) || (mime === mimeBlob && mime.length));
     if (!hasGoodExtension) {
       return false;
     }
