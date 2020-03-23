@@ -33,6 +33,9 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.APP_VERSION = appConfig.appVersion;
 
     res.locals.APP_ENVIRONMENT = appConfig.environment;
+
+    res.locals.IS_PRODUCTION = appConfig.isProduction;
+
     res.locals.COMMIT_URL_PREFIX = appConfig.commitUrlPrefix;
 
     res.locals.GIT_CURRENT_BRANCH = appConfig.currentBranch;
