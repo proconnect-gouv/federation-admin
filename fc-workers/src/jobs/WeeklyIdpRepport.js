@@ -34,7 +34,8 @@ class WeeklyIdpRepport extends Job {
   }
 
   static formatRows(weeks) {
-    return weeks
+    const orderedWeeks = weeks.reverse();
+    return orderedWeeks
       .map(week => {
         let html = `<td>Semaine du ${WeeklyIdpRepport.formatDate(
           new Date(week.startDate)
