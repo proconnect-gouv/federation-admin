@@ -4,13 +4,13 @@
   "viewportHeight": 1800,
   "viewportWidth": 1400,
   "pageLoadTimeout": 30000,
-  "baseUrl": "https://stats.docker.dev-franceconnect.fr",
+  "baseUrl": "https://fc-stats.docker.dev-franceconnect.fr",
   "env": {
     "APP_NAME": "stats",
-    "APP_HOME_ROLE_ADMIN": "https://stats.docker.dev-franceconnect.fr/account",
-    "APP_HOME_ROLE_OPERATOR": "https://stats.docker.dev-franceconnect.fr/events",
-    "APP_HOME_ROLE_SECURITY": "https://stats.docker.dev-franceconnect.fr/account",
-    "APP_FORBIDDEN_PAGE": "https://stats.docker.dev-franceconnect.fr/events",
+    "APP_HOME_ROLE_ADMIN": "https://fc-stats.docker.dev-franceconnect.fr/account",
+    "APP_HOME_ROLE_OPERATOR": "https://fc-stats.docker.dev-franceconnect.fr/events",
+    "APP_HOME_ROLE_SECURITY": "https://fc-stats.docker.dev-franceconnect.fr/account",
+    "APP_FORBIDDEN_PAGE": "https://fc-stats.docker.dev-franceconnect.fr/events",
     "TOTP_WINDOW": "loose"
   }
 }

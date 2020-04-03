@@ -18,9 +18,9 @@
 
 ## Etc/hosts
 
-- stats.docker.dev-franceconnect.fr
-- exploitation.docker.dev-franceconnect.fr
-- support.docker.dev-franceconnect.fr
+- fc-stats.docker.dev-franceconnect.fr
+- fc-exploitation.docker.dev-franceconnect.fr
+- fc-support.docker.dev-franceconnect.fr
 
 
 ## Variables d'env 

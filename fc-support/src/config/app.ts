@@ -1,6 +1,6 @@
 export default {
   appName: process.env.APP_NAME || 'FC_SUPPORT',
-  appFqdn: process.env.APP_FQDN || 'support.docker.dev-franceconnect.fr',
+  appFqdn: process.env.APP_FQDN || 'fc-support.docker.dev-franceconnect.fr',
   environment: process.env.ENV_NAME || 'development',
   app_root: process.env.APP_ROOT || '',
   commitUrlPrefix:

@@ -25,7 +25,7 @@ curl -XDELETE "$ES_LOG/franceconnect"
 echo ""
 
 echo "Create log index"
-curl -XPUT "$ES_LOG/franceconnect" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping_wip.json'
+curl -XPUT "$ES_LOG/franceconnect" -H 'Content-Type: application/json' -d '@infra/ansible/roles/elasticsearch/files/create_index_business.json'
 echo ""
 
 echo "Delete events index"
@@ -33,7 +33,7 @@ curl -XDELETE "$ES_STATS/events"
 echo ""
 
 echo "Create events index"
-curl -XPUT "$ES_STATS/events" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping-stats.json'
+curl -XPUT "$ES_STATS/events" -H 'Content-Type: application/json' -d '@infra/ansible/roles/elasticsearch/files/create_index_stats.json'
 echo ""
 
 echo "Delete metrics index"
@@ -41,17 +41,17 @@ curl -XDELETE "$ES_STATS/metrics"
 echo ""
 
 echo "Create metrics index"
-curl -XPUT "$ES_STATS/metrics" -H 'Content-Type: application/json' -d '@Infra/ansible/roles/elasticsearch/files/mapping-stats.json'
+curl -XPUT "$ES_STATS/metrics" -H 'Content-Type: application/json' -d '@infra/ansible/roles/elasticsearch/files/create_index_stats.json'
 echo ""
 
 echo "Generate logs"
-docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-logs.js $START $STOP $LOGS_PER_DAY $VARIATION"
+docker exec fc_fc-workers_1 bash -c "cd /opt/fc/workers/tests/fixtures && node generate-logs.js $START $STOP $LOGS_PER_DAY $VARIATION"
 
 echo "Sleep 2 seconds to give elastic some rest"
 sleep 2
 
 echo "Generate stats"
-docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers && ./run IndexElasticLogs --start=$START --stop=$STOP"
+docker exec fc_fc-workers_1 bash -c "cd /opt/fc/workers && ./run IndexElasticLogs --start=$START --stop=$STOP"
 
 echo "Generate metrics stats"
-docker exec fc_workers_1 bash -c "cd /var/www/app/fc-workers/tests/fixtures && node generate-metrics.js $START $STOP $METRIC_GROWTH"
+docker exec fc_fc-workers_1 bash -c "cd /opt/fc/workers/tests/fixtures && node generate-metrics.js $START $STOP $METRIC_GROWTH"
