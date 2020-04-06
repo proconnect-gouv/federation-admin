@@ -1,5 +1,5 @@
 export function resetMongoFC() {
-  const command = 'cd $FC_ROOT/Infra/docker && CI=1 ./docker-stack reset_db';
+  const command = 'cd $FC_ROOT/infra/docker && CI=1 ./docker-stack reset-db';
 
   console.log(`
     Executing command:
