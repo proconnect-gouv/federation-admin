@@ -4,8 +4,8 @@ describe('IndexMongoStats', () => {
   describe('getMetricId', () => {
     it('Should return same output with same input', () => {
       // Given
-      const inputA = { key: 'foo', date: 'bar' };
-      const inputB = { key: 'foo', date: 'bar' };
+      const inputA = { key: 'foo', date: 'bar', range: 'day' };
+      const inputB = { key: 'foo', date: 'bar', range: 'day' };
       // When
       const hashA = IndexMongoStats.getMetricId(inputA);
       const hashB = IndexMongoStats.getMetricId(inputB);
@@ -14,8 +14,18 @@ describe('IndexMongoStats', () => {
     });
     it('Should return different output with different input', () => {
       // Given
-      const inputA = { key: 'foo', date: 'bar' };
-      const inputB = { key: 'foo', date: 'baz' };
+      const inputA = { key: 'foo', date: 'bar', range: 'day' };
+      const inputB = { key: 'foo', date: 'baz', range: 'day' };
+      // When
+      const hashA = IndexMongoStats.getMetricId(inputA);
+      const hashB = IndexMongoStats.getMetricId(inputB);
+      // Then
+      expect(hashA).not.toEqual(hashB);
+    });
+    it('Should return different output with different range', () => {
+      // Given
+      const inputA = { key: 'foo', date: 'bar', range: 'day' };
+      const inputB = { key: 'foo', date: 'bar', range: 'week' };
       // When
       const hashA = IndexMongoStats.getMetricId(inputA);
       const hashB = IndexMongoStats.getMetricId(inputB);

@@ -67,11 +67,11 @@ class IndexMongoStats extends Job {
   }
 
   static getMetricId(metric) {
-    const { key, date } = metric;
+    const { key, date, range } = metric;
 
     return crypto
       .createHash('sha256')
-      .update([key, date].join('.'))
+      .update([key, date, range].join('.'))
       .digest('hex');
   }
 
