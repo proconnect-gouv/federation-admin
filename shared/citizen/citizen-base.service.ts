@@ -10,7 +10,7 @@ export class CitizenServiceBase {
     const data = [
       pivotIdentity.givenName,
       pivotIdentity.familyName,
-      pivotIdentity.birthdate,
+      this.rectifyIfPartialBirthdate(pivotIdentity.birthdate),
       pivotIdentity.gender,
       pivotIdentity.birthPlace,
       pivotIdentity.birthCountry,
@@ -27,5 +27,21 @@ export class CitizenServiceBase {
       .createHash('sha256')
       .update(uuid())
       .digest('hex');
+  }
+
+  /**
+   * If the birthdate argument does not contain any day and/or any month,
+   * set the day and/or the month to "01"
+   * @param birthdate a birthdate to format "YYYY" / "YYYY-MM" / "YYYY-MM-DD"
+   * @returns a birthdate to format "YYYY-MM-DD"
+   */
+  private rectifyIfPartialBirthdate(birthdate: string): string {
+    if (birthdate.match(/^[0-9]{4}$/)) {
+      return `${birthdate}-01-01`;
+    } else if (birthdate.match(/^[0-9]{4}-[0-9]{2}$/)) {
+      return `${birthdate}-01`;
+    }
+
+    return birthdate;
   }
 }

@@ -124,10 +124,10 @@ describe('Rnipp rectification', () => {
       expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
       expect($divs.eq(1)).to.contain('Masculin');
-      expect($divs.eq(2)).to.contain('FLEURET');
+      expect($divs.eq(2)).to.contain('TARGE');
       expect($divs.eq(3)).to.contain('');
       expect($divs.eq(4)).to.contain('Jean');
-      expect($divs.eq(5)).to.contain('2019-00-00');
+      expect($divs.eq(5)).to.contain('1992');
       expect($divs.eq(6)).to.contain('');
       expect($divs.eq(7)).to.contain('99217');
     });
@@ -156,7 +156,7 @@ describe('Rnipp rectification', () => {
       expect($divs.eq(2)).to.contain('FLEURET');
       expect($divs.eq(3)).to.contain('');
       expect($divs.eq(4)).to.contain('Jean');
-      expect($divs.eq(5)).to.contain('2019-11-00');
+      expect($divs.eq(5)).to.contain('1992-11');
       expect($divs.eq(6)).to.contain('');
       expect($divs.eq(7)).to.contain('99217');
     });
