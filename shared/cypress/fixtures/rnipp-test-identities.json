@@ -49,9 +49,9 @@
   },
   "utilisateur_dont_on_ne_connaît_pas_le_mois_et_le_jour_de_naissance": {
     "gender": "male",
-    "familyName": "FLEURET",
+    "familyName": "TARGE",
     "givenName": "Jean",
-    "birthdate": "2019-00-00",
+    "birthdate": "1992-00-00",
     "isFrench": "false",
     "cog": "99217"
   },
@@ -59,7 +59,7 @@
     "gender": "male",
     "familyName": "FLEURET",
     "givenName": "Jean",
-    "birthdate": "2019-11-00",
+    "birthdate": "1992-11-00",
     "isFrench": "false",
     "cog": "99217"
   },
