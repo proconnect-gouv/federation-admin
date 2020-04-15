@@ -8,7 +8,7 @@ export = {
     process.env.DB_DATABASE || resolve(__dirname, '../../fc-support.sqlite'),
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  synchronize: (process.env.DB_SYNCHRONIZE || 'false') === 'true',
+  synchronize: false, // do not set to true, we do not want schema automatic creation
   entities: [
     resolve(
       __dirname,
@@ -17,7 +17,7 @@ export = {
   ],
   migrations: [
     join(__dirname, '../../migrations/*{.ts,.js}'),
-    join(__dirname, '../../../shared/migrations/*{.ts,.js}'),
+    join(__dirname, '../../../shared/migrations/**/*{.ts,.js}'),
   ],
   cli: {
     migrationsDir: 'migrations',

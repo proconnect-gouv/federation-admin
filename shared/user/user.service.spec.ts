@@ -12,6 +12,7 @@ import { ConfigService } from 'nestjs-config';
 import { MailerService } from '../mailer/mailer.service';
 import { MailerModule } from '../mailer/mailer.module';
 import * as uuid from 'uuid';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 const mockValidate = jest.fn();
 IsPasswordCompliant.prototype.validate = mockValidate;
@@ -31,6 +32,12 @@ describe('UserService', () => {
 
   const configServiceMock = {
     get: jest.fn(),
+  };
+
+  const businessEventMock = jest.fn();
+  const loggerMock = {
+    businessEvent: businessEventMock,
+    error: jest.fn(),
   };
 
   const transporterMock = {
@@ -82,6 +89,7 @@ describe('UserService', () => {
         Repository,
         ConfigService,
         MailerService,
+        LoggerService,
       ],
     })
       .overrideProvider(getRepositoryToken(User))
@@ -90,6 +98,8 @@ describe('UserService', () => {
       .useValue(configServiceMock)
       .overrideProvider(MailerService)
       .useValue(transporterMock)
+      .overrideProvider(LoggerService)
+      .useValue(loggerMock)
       .compile();
 
     userService = await module.get<UserService>(UserService);
@@ -255,6 +265,28 @@ describe('UserService', () => {
         userService.findByUsername('michael jackson'),
       ).rejects.toBeDefined();
     });
+
+    it('should fall back in catch statement if the database could not be reached', async () => {
+      // setup
+      const username = 'toto';
+      userRepositoryMock.findOne.mockRejectedValueOnce('user not found');
+
+      // action
+      try {
+        const result = await userService.findByUsername(username);
+      } catch (e) {
+        const { message } = e;
+        expect(e).toBeInstanceOf(Error);
+        expect(message).toEqual(
+          'The user could not be found due to a database error',
+        );
+        // expect(loggerMock.error).toHaveBeenCalledWith(e);
+        expect(loggerMock.error).toHaveBeenCalled();
+      }
+
+      // assertion
+      expect.hasAssertions();
+    });
   });
 
   describe('createUser', () => {
@@ -389,6 +421,42 @@ describe('UserService', () => {
       expect(
         result.tokenExpiresAt.getTime() - result.tokenCreatedAt.getTime(),
       ).toBe(userTokenExpiresIn * 60 * 1000);
+    });
+  });
+
+  describe('blockUser', () => {
+    it('should block a user', async () => {
+      // setup
+      const username = 'user';
+
+      // action
+      const result = await userService.blockUser(username);
+      // assertion
+      expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
+      expect(userRepositoryMock.update).toHaveBeenCalledWith(
+        { username },
+        { roles: [UserRole.BLOCKED_USER] },
+      );
+    });
+
+    it('should fall back in catch statement if update failed', async () => {
+      // setup
+      const username = 'user';
+      userRepositoryMock.update.mockRejectedValueOnce('failed');
+      // action
+      try {
+        await userService.blockUser(username);
+      } catch (e) {
+        const { message } = e;
+        expect(e).toBeInstanceOf(Error);
+        expect(message).toEqual(
+          'The user could not be blocked due to a database error',
+        );
+        expect(loggerMock.error).toHaveBeenCalled();
+      }
+
+      // assertion
+      expect.hasAssertions();
     });
   });
 

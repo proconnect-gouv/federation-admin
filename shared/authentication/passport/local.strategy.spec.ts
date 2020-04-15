@@ -5,23 +5,29 @@ import {
   AuthenticationStates,
 } from '../authentication-actions.enum';
 import { UserRole } from '../../user/roles.enum';
+import { UserService } from '../../user/user.service';
 
 describe('LocalStrategy', () => {
-  beforeEach(async () => {
-    jest.resetAllMocks();
-  });
   const authenticationServiceMock = {
     validateCredentials: jest.fn(),
+    getAuthenticationFailureReason: jest.fn(),
+    getAuthenticationAttemptCount: jest.fn(),
+    saveUserAuthenticationFailure: jest.fn(),
   };
   const businessEventMock = jest.fn();
-  const loggerMock = ({
+  const loggerMock = {
     businessEvent: businessEventMock,
-  } as unknown) as LoggerService;
-  const localStrategy = new LocalStrategy(
-    authenticationServiceMock,
-    loggerMock,
-  );
+  };
+
+  const userServiceMock = {
+    blockUser: jest.fn(),
+    findByUsername: jest.fn(),
+  };
+
+  let localStrategyMock;
+
   const req = {
+    params: {},
     flash: jest.fn(),
     csrfToken: function csrfToken() {
       return 'mygreatcsrftoken';
@@ -30,125 +36,303 @@ describe('LocalStrategy', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    localStrategyMock = new LocalStrategy(
+      authenticationServiceMock,
+      (loggerMock as unknown) as LoggerService,
+      (userServiceMock as unknown) as UserService,
+    );
   });
 
   describe('validate', () => {
-    it('should validate the user authentication', async () => {
+    it('should validate the regular user authentication', async () => {
       // setup
-      const date = new Date('2030-01-01');
-      authenticationServiceMock.validateCredentials.mockReturnValueOnce({
-        username: 'toto',
-        roles: ['new_account', 'inactive_operator'],
-        tokenExpiresAt: date,
+      authenticationServiceMock.validateCredentials.mockResolvedValue({
+        username: 'user',
+        roles: ['admin', 'operator'],
       });
       // action
-      const result = await localStrategy.validate(req, 'user', 'toto');
+      const result = await localStrategyMock.validate(req, 'user', 'toto');
       // assertion
       expect(result).toEqual({
-        roles: ['new_account', 'inactive_operator'],
-        tokenExpiresAt: new Date('2030-01-01T00:00:00.000Z'),
-        username: 'toto',
+        roles: ['admin', 'operator'],
+        username: 'user',
       });
       expect(req.flash).toHaveBeenCalledTimes(0);
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(0);
     });
 
-    it('flashes Informations de connexion erronées.', async () => {
+    it('should validate the new user authentication', async () => {
       // setup
-      authenticationServiceMock.validateCredentials.mockReturnValueOnce(
-        undefined,
-      );
+      const mockDate = new Date();
+      mockDate.setFullYear(mockDate.getFullYear() + 10);
+      const reqStub = {
+        params: {
+          token: '123456',
+        },
+        flash: jest.fn(),
+        csrfToken: function csrfToken() {
+          return 'mygreatcsrftoken';
+        },
+      };
+      authenticationServiceMock.validateCredentials.mockResolvedValue({
+        username: 'user',
+        roles: ['new_account', 'inactive_operator'],
+        tokenExpiresAt: mockDate,
+      });
       // action
-      await localStrategy.validate(req, 'user', 'toto');
+      const result = await localStrategyMock.validate(reqStub, 'user', 'toto');
       // assertion
-      expect(req.flash).toHaveBeenCalledTimes(1);
-      expect(req.flash).toHaveBeenCalledWith(
-        'error',
-        'Informations de connexion erronées.',
-      );
-    });
-
-    it('logs the username failing his authentication', async () => {
-      // setup
-      authenticationServiceMock.validateCredentials.mockReturnValueOnce(
-        undefined,
-      );
-      // action
-      await localStrategy.validate(req, 'user', 'toto');
-      // assertion
-      expect(loggerMock.businessEvent).toBeCalledTimes(1);
-      expect(loggerMock.businessEvent).toBeCalledWith({
-        action: AuthenticationActions.TOKEN_SIGNUP,
-        state: AuthenticationStates.DENIED,
-        user: 'user',
-      });
-    });
-
-    it('falls back in the catch statement because of a database error', async () => {
-      // setup
-      authenticationServiceMock.validateCredentials.mockRejectedValueOnce(
-        new Error('The user could be found due to a database error'),
-      );
-      // action
-      try {
-        await localStrategy.validate(req, 'user', 'toto');
-      } catch (err) {
-        const { message } = err;
-        expect(message).toEqual(
-          'The user could not be found due to a database error',
-        );
-      }
-      expect.hasAssertions();
-    });
-
-    it('sends "Informations de connexion erronées." if no user was found indatabase', async () => {
-      // action
-      await localStrategy.validate(req, 'user', 'toto');
-
-      // assert
-      expect(req.flash).toHaveBeenCalledTimes(1);
-      expect(req.flash).toHaveBeenCalledWith(
-        'error',
-        'Informations de connexion erronées.',
-      );
-    });
-
-    it('sends "Informations de connexion erronées." if authentication token has expired', async () => {
-      // setup
-      const tokenExpiresAt = new Date('2020-01-04T14:36:50.644Z');
-      authenticationServiceMock.validateCredentials.mockReturnValueOnce({
-        roles: [UserRole.NEWUSER],
-        tokenExpiresAt,
-      });
-      // action
-      await localStrategy.validate(req, 'user', 'toto');
-
-      // assert
-      expect(req.flash).toHaveBeenCalledTimes(1);
-      expect(req.flash).toHaveBeenLastCalledWith(
-        'error',
-        'Informations de connexion erronées.',
-      );
-      expect(loggerMock.businessEvent).toBeCalledTimes(1);
-      expect(loggerMock.businessEvent).toBeCalledWith({
-        action: AuthenticationActions.TOKEN_SIGNUP,
-        state: AuthenticationStates.DENIED,
-        user: 'user',
-      });
-    });
-
-    it('sends back a user if token has not expired ', async () => {
-      // setup
-      const tokenExpiresAt = new Date('2030-01-04T14:36:50.644Z');
-      authenticationServiceMock.validateCredentials.mockReturnValueOnce({
-        roles: [UserRole.NEWUSER],
-        tokenExpiresAt,
-      });
-      // action
-      const result = await localStrategy.validate(req, 'user', 'toto');
-      // assert
       expect(result).toEqual({
-        roles: ['new_account'],
-        tokenExpiresAt,
+        roles: ['new_account', 'inactive_operator'],
+        tokenExpiresAt: mockDate,
+        username: 'user',
+      });
+      expect(req.flash).toHaveBeenCalledTimes(0);
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(0);
+    });
+
+    it('should send back failure reason', async () => {
+      // setup
+      const reqStub = {
+        params: {
+          token: '123456',
+        },
+        flash: jest.fn(),
+        csrfToken: function csrfToken() {
+          return 'mygreatcsrftoken';
+        },
+      };
+      authenticationServiceMock.validateCredentials.mockResolvedValueOnce(
+        undefined,
+      );
+      authenticationServiceMock.getAuthenticationFailureReason.mockResolvedValueOnce(
+        AuthenticationStates.DENIED_USER_NOT_FOUND,
+      );
+      const mockDate = new Date();
+      mockDate.setFullYear(mockDate.getFullYear());
+
+      // action
+      const result = await localStrategyMock.validate(reqStub, 'user', 'toto');
+
+      // asertion
+      expect(result).toEqual(null);
+      expect(
+        authenticationServiceMock.saveUserAuthenticationFailure,
+      ).toHaveBeenCalledWith('user', '123456');
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
+      expect(loggerMock.businessEvent).toHaveBeenCalledWith({
+        action: 'token_signup',
+        state: 'denied because the user could not be found in database',
+        user: 'user',
+      });
+      expect(reqStub.flash).toHaveBeenCalledTimes(1);
+      expect(reqStub.flash).toHaveBeenCalledWith(
+        'error',
+        'Connexion impossible',
+      );
+    });
+
+    it('should send back failure reason with a specific message if the user exceeded his authentication attempts limit', async () => {
+      // setup
+      const reqStub = {
+        params: {
+          token: '123456',
+        },
+        flash: jest.fn(),
+        csrfToken: function csrfToken() {
+          return 'mygreatcsrftoken';
+        },
+      };
+      authenticationServiceMock.validateCredentials.mockResolvedValueOnce(
+        undefined,
+      );
+      authenticationServiceMock.getAuthenticationFailureReason.mockResolvedValueOnce(
+        AuthenticationStates.DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED,
+      );
+      const mockDate = new Date();
+      mockDate.setFullYear(mockDate.getFullYear());
+      // We need this syntax to test or mock privates methods
+      // tslint:disable-next-line no-string-literal
+      const originalBlockUser = localStrategyMock['blockUser'];
+      // We need this syntax to test or mock privates methods
+      // tslint:disable-next-line no-string-literal
+      localStrategyMock['blockUser'] = jest.fn();
+      // We need this syntax to test or mock privates methods
+      // tslint:disable-next-line no-string-literal
+      localStrategyMock['blockUser'].mockResolvedValueOnce({
+        id: '123456',
+        username: 'user',
+        token: 'MyToken',
+        authenticationAttemptedAt: mockDate,
+      });
+
+      // action
+      const result = await localStrategyMock.validate(reqStub, 'user', 'toto');
+
+      // asertion
+      expect(result).toEqual(null);
+      // We need this syntax to test or mock privates methods
+      // tslint:disable-next-line no-string-literal
+      expect(localStrategyMock['blockUser']).toHaveBeenCalledWith('user');
+      expect(
+        authenticationServiceMock.saveUserAuthenticationFailure,
+      ).toHaveBeenCalledWith('user', '123456');
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
+      expect(loggerMock.businessEvent).toHaveBeenCalledWith({
+        action: 'token_signup',
+        state:
+          'denied because the user exceedeed his allowed authentication attempts',
+        user: 'user',
+      });
+      expect(reqStub.flash).toHaveBeenCalledTimes(1);
+      expect(reqStub.flash).toHaveBeenCalledWith(
+        'error',
+        "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
+      );
+
+      // restore
+      // We need this syntax to test or mock privates methods
+      // tslint:disable-next-line no-string-literal
+      localStrategyMock['blockUser'] = originalBlockUser;
+    });
+
+    it('should send back failure reason with a specific message in case user is blocked', async () => {
+      // setup
+      authenticationServiceMock.validateCredentials.mockResolvedValueOnce(
+        undefined,
+      );
+      authenticationServiceMock.getAuthenticationFailureReason.mockResolvedValueOnce(
+        AuthenticationStates.DENIED_BLOCKED_USER,
+      );
+      const mockDate = new Date();
+      mockDate.setFullYear(mockDate.getFullYear());
+
+      // action
+      const result = await localStrategyMock.validate(req, 'user', 'toto');
+
+      // asertion
+      expect(result).toEqual(null);
+      expect(
+        authenticationServiceMock.saveUserAuthenticationFailure,
+      ).toHaveBeenCalledWith('user', undefined);
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
+      expect(loggerMock.businessEvent).toHaveBeenCalledWith({
+        action: 'token_signup',
+        state: 'denied beacause the user is blocked',
+        user: 'user',
+      });
+      expect(req.flash).toHaveBeenCalledTimes(1);
+      expect(req.flash).toHaveBeenCalledWith(
+        'error',
+        "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
+      );
+    });
+  });
+
+  describe('sendBackFailureReason', () => {
+    it('should log the failure reason', () => {
+      // setup
+      const reqStub = {
+        params: {
+          token: '123456',
+        },
+        flash: jest.fn(),
+        csrfToken: function csrfToken() {
+          return 'mygreatcsrftoken';
+        },
+      };
+
+      // action
+      localStrategyMock[
+        // We need this syntax to test or mock privates methods
+        // tslint:disable-next-line no-string-literal
+        'sendBackFailureReason'
+      ](
+        AuthenticationStates.DENIED_USER_NOT_FOUND,
+        'user',
+        reqStub,
+        'Votre token a expiré',
+      );
+
+      // assertion
+      expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
+      expect(loggerMock.businessEvent).toHaveBeenCalledWith({
+        action: AuthenticationActions.TOKEN_SIGNUP,
+        state: 'denied because the user could not be found in database',
+        user: 'user',
+      });
+    });
+
+    it('should flash the error to the user', () => {
+      // setup
+      const reqStub = {
+        params: {
+          token: '123456',
+        },
+        flash: jest.fn(),
+        csrfToken: function csrfToken() {
+          return 'mygreatcsrftoken';
+        },
+      };
+
+      // action
+      localStrategyMock[
+        // We need this syntax to test or mock privates methods
+        // tslint:disable-next-line no-string-literal
+        'sendBackFailureReason'
+      ](
+        AuthenticationStates.DENIED_USER_NOT_FOUND,
+        'user',
+        reqStub,
+        'Votre token a expiré',
+      );
+
+      // assertion
+      expect(reqStub.flash).toHaveBeenCalledTimes(1);
+      expect(reqStub.flash).toHaveBeenCalledWith(
+        'error',
+        'Votre token a expiré',
+      );
+    });
+  });
+
+  describe('blockUser', () => {
+    it('should call block user of userService', async () => {
+      // setup
+      const username = 'user';
+      const mockDateCreate = new Date();
+      const mockDateExpire = new Date();
+      mockDateCreate.setFullYear(mockDateCreate.getFullYear() - 2);
+      mockDateExpire.setFullYear(mockDateExpire.getFullYear() - 1);
+      userServiceMock.blockUser.mockResolvedValue({
+        id: '12346',
+        email: 'user@user.com',
+        passwordHash: 'kjlkjlksdjflkjsdflkjsdlkfj',
+        secret: 'shut',
+        username: 'user',
+        roles: [UserRole.BLOCKED_USER],
+        token: '12346',
+        tokenCreatedAt: mockDateCreate,
+        tokenExpiresAt: mockDateExpire,
+      });
+      // action
+      const result = await localStrategyMock[
+        // We need this syntax to test or mock privates methods
+        // tslint:disable-next-line no-string-literal
+        'blockUser'
+      ](username);
+      // assertion
+      expect(result).toEqual({
+        id: '12346',
+        email: 'user@user.com',
+        passwordHash: 'kjlkjlksdjflkjsdflkjsdlkfj',
+        secret: 'shut',
+        username: 'user',
+        roles: [UserRole.BLOCKED_USER],
+        token: '12346',
+        tokenCreatedAt: mockDateCreate,
+        tokenExpiresAt: mockDateExpire,
       });
     });
   });

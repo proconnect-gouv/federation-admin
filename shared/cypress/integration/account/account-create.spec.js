@@ -285,6 +285,11 @@ describe('Account', () => {
         cy.get('button[type="submit"]').click();
 
         cy.get('.login-form').contains('Informations de connexion erronées');
+        // TODO
+        // it's a test we need to come back on but whish is not doable for now.
+        // tokenExpiresAt is set 48 hours after its creation, so we can't set it on the fly, we need to use user fixtures.
+        // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.
+        // And so the test is not doable for now. 
       })
 
       it('Should not be possible for the new user to update his password if he is not respecting password format', () => {

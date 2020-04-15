@@ -3,13 +3,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { IAuthenticationService } from '../authentication.service';
 import { User } from '../../user/user.sql.entity';
+import { UserService } from '../../user/user.service';
 import { IAuthenticationTrack } from '../authentication-track.interface';
 import {
   AuthenticationActions,
   AuthenticationStates,
 } from '../authentication-actions.enum';
 import { LoggerService } from '@fc/shared/logger/logger.service';
-import { UserRole } from '../../user/roles.enum';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -17,6 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     @Inject('IAuthenticationService')
     private readonly authenticationService: IAuthenticationService,
     private readonly logger: LoggerService,
+    private readonly userService: UserService,
   ) {
     super({
       passReqToCallback: true,
@@ -27,44 +28,75 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     this.logger.businessEvent(log);
   }
 
-  async validate(req, username: string, password: string): Promise<User> {
-    let user;
+  async validate(
+    req,
+    usernameInput: string,
+    passwordInput: string,
+  ): Promise<User> {
     const { params = {} } = req;
     const { token } = params;
 
-    try {
-      user = await this.authenticationService.validateCredentials(
-        username,
-        password,
+    const validUser = await this.authenticationService.validateCredentials(
+      usernameInput,
+      passwordInput,
+      token,
+    );
+
+    if (!validUser) {
+      const authenticationFailureReason: AuthenticationStates = await this.authenticationService.getAuthenticationFailureReason(
+        usernameInput,
+        passwordInput,
         token,
       );
-    } catch (err) {
-      throw new Error('The user could not be found due to a database error');
-    }
-    if (!user) {
-      this.track({
-        action: AuthenticationActions.TOKEN_SIGNUP,
-        state: AuthenticationStates.DENIED,
-        user: username,
-      });
-      req.flash('error', 'Informations de connexion erronées.');
+
+      let messageToDisplay = 'Connexion impossible';
+
+      switch (authenticationFailureReason) {
+        case AuthenticationStates.DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED:
+          await this.blockUser(usernameInput);
+          messageToDisplay =
+            "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
+          break;
+        case AuthenticationStates.DENIED_BLOCKED_USER:
+          messageToDisplay =
+            "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
+          break;
+      }
+
+      await this.authenticationService.saveUserAuthenticationFailure(
+        usernameInput,
+        token,
+      );
+
+      this.sendBackFailureReason(
+        authenticationFailureReason,
+        usernameInput,
+        req,
+        messageToDisplay,
+      );
+
       return null;
     }
 
-    const date = new Date();
-    if (
-      user.roles.includes(UserRole.NEWUSER) &&
-      user.tokenExpiresAt.getTime() - date.getTime() < 0
-    ) {
-      this.track({
-        action: AuthenticationActions.TOKEN_SIGNUP,
-        state: AuthenticationStates.DENIED,
-        user: username,
-      });
-      req.flash('error', 'Informations de connexion erronées.');
-      return null;
-    }
+    return validUser;
+  }
 
-    return user;
+  private sendBackFailureReason(
+    authenticationFailureReason: AuthenticationStates,
+    usernameInput: string,
+    req,
+    message,
+  ) {
+    this.track({
+      action: AuthenticationActions.TOKEN_SIGNUP,
+      state: authenticationFailureReason,
+      user: usernameInput,
+    });
+    req.flash('error', message);
+  }
+
+  private async blockUser(usernameInput: string): Promise<User> {
+    const blockedUser = await this.userService.blockUser(usernameInput);
+    return blockedUser;
   }
 }
