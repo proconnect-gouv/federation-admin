@@ -12,4 +12,5 @@ export default {
   isProduction: process.env.IS_PRODUCTION || false,
   appVersion: process.env.APP_VERSION || 'no-version',
   userTokenExpiresIn: 2880,
+  userAuthenticationMaxAttempt: 4,
 };

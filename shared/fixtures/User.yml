@@ -95,6 +95,17 @@ items:
     token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
     tokenCreatedAt: '{{date.past(3)}}'
     tokenExpiresAt: '{{date.past(1)}}'
+  blocked:
+    id: 'a1613124-d3f4-4dfc-a593-ae2fad90a19f'
+    username: 'blocked'
+    email: '{{internet.email}}'
+    roles:
+      - 'blocked_user'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '{{date.recent(1)}}'
+    tokenExpiresAt: '{{date.future(2)}}'
   user{1..10}:
     username: '{{name.firstName}}($current)'
     email: '{{internet.email}}'

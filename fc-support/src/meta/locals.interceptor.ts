@@ -50,6 +50,7 @@ export class LocalsInterceptor implements NestInterceptor {
       { label: 'Administrateur inactif', value: UserRole.INACTIVE_ADMIN },
       { label: 'Exploitant inactif', value: UserRole.INACTIVE_OPERATOR },
       { label: 'Sécurité inactif', value: UserRole.INACTIVE_SECURITY },
+      { label: 'Utilisateur bloqué', value: UserRole.BLOCKED_USER },
     ];
 
     res.locals.CURRENT_USER = req.user;

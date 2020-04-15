@@ -14,6 +14,8 @@ import { IsPasswordCompliant } from '../account/validator/is-compliant.validator
 import { MailerService } from '../mailer/mailer.service';
 import { IMailerParams } from '../mailer/interfaces';
 import { Email } from '../mailer/mailjet';
+import { UserRole } from '@fc/shared/user/roles.enum';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -24,6 +26,7 @@ export class UserService implements IUserService {
     @Inject('generatePassword') private readonly generatePassword,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly logger: LoggerService,
     @InjectConfig() private readonly config: ConfigService,
     private readonly transporterService: MailerService,
   ) {
@@ -99,7 +102,14 @@ export class UserService implements IUserService {
   }
 
   async findByUsername(username: string): Promise<User> {
-    return this.userRepository.findOne({ username });
+    let user;
+    try {
+      user = await this.userRepository.findOne({ username });
+      return user;
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The user could not be found due to a database error');
+    }
   }
 
   async compareHash(password: string, hash: string): Promise<boolean> {
@@ -152,6 +162,22 @@ export class UserService implements IUserService {
     } catch (err) {
       throw new Error('The user could not be saved');
     }
+  }
+
+  async blockUser(username): Promise<User> {
+    let blockedUser;
+
+    try {
+      blockedUser = await this.userRepository.update(
+        { username },
+        { roles: [UserRole.BLOCKED_USER] },
+      );
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The user could not be blocked due to a database error');
+    }
+
+    return blockedUser;
   }
 
   async deleteUserById(id: string): Promise<DeleteResult> {

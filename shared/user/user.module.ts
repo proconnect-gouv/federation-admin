@@ -8,6 +8,7 @@ import { EjsAdapter } from '../mailer/ejs.adapter';
 import { User } from './user.sql.entity';
 import { UserService } from './user.service';
 import * as generatePassword from 'generate-password';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 const generatePasswordProvider = {
   provide: 'generatePassword',
@@ -33,7 +34,12 @@ const generatePasswordProvider = {
       inject: [ConfigService],
     }),
   ],
-  providers: [UserService, generatePasswordProvider, MailerService],
+  providers: [
+    UserService,
+    generatePasswordProvider,
+    MailerService,
+    LoggerService,
+  ],
   exports: [
     UserService,
     TypeOrmModule.forFeature([User]),
