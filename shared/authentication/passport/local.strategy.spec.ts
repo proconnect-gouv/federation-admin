@@ -163,7 +163,7 @@ describe('LocalStrategy', () => {
       localStrategyMock['blockUser'].mockResolvedValueOnce({
         id: '123456',
         username: 'user',
-        token: 'MyToken',
+        token: '123456',
         authenticationAttemptedAt: mockDate,
       });
 
@@ -218,7 +218,7 @@ describe('LocalStrategy', () => {
       ).toHaveBeenCalledWith('user', undefined);
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
-        action: 'token_signup',
+        action: 'signin',
         state: 'denied beacause the user is blocked',
         user: 'user',
       });
@@ -242,6 +242,7 @@ describe('LocalStrategy', () => {
           return 'mygreatcsrftoken';
         },
       };
+      const token = '123456';
 
       // action
       localStrategyMock[
@@ -252,7 +253,8 @@ describe('LocalStrategy', () => {
         AuthenticationStates.DENIED_USER_NOT_FOUND,
         'user',
         reqStub,
-        'Votre token a expiré',
+        'Connexion impossible',
+        token,
       );
 
       // assertion
@@ -275,6 +277,7 @@ describe('LocalStrategy', () => {
           return 'mygreatcsrftoken';
         },
       };
+      const token = '123456';
 
       // action
       localStrategyMock[
@@ -285,14 +288,15 @@ describe('LocalStrategy', () => {
         AuthenticationStates.DENIED_USER_NOT_FOUND,
         'user',
         reqStub,
-        'Votre token a expiré',
+        'Connexion impossible',
+        token,
       );
 
       // assertion
       expect(reqStub.flash).toHaveBeenCalledTimes(1);
       expect(reqStub.flash).toHaveBeenCalledWith(
         'error',
-        'Votre token a expiré',
+        'Connexion impossible',
       );
     });
   });

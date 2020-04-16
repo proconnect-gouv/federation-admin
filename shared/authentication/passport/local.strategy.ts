@@ -73,6 +73,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         usernameInput,
         req,
         messageToDisplay,
+        !!token,
       );
 
       return null;
@@ -85,10 +86,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     authenticationFailureReason: AuthenticationStates,
     usernameInput: string,
     req,
-    message,
+    message: string,
+    isNewUser: boolean,
   ) {
     this.track({
-      action: AuthenticationActions.TOKEN_SIGNUP,
+      action: isNewUser
+        ? AuthenticationActions.TOKEN_SIGNUP
+        : AuthenticationActions.SIGNIN,
       state: authenticationFailureReason,
       user: usernameInput,
     });
