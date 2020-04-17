@@ -4,8 +4,7 @@
     <% include partials/head.ejs %>
 </head>
 <body class="d-flex align-items-center justify-content-center">
-<% include partials/border.ejs %>
-<div class="container-fluid">
+<div>
   <form class="login-form" method="POST">
     <h2 class="login-form-heading"><img src="<%= APP_ROOT %>/images/FClogo.png" alt=""></h2>
     <% if (messages.error) {%>
