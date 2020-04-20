@@ -43,7 +43,13 @@ const passportProvider = {
     passportProvider,
     TotpService,
     LoggerService,
+    AuthenticationService,
   ],
-  exports: [LocalSerializer, passportProvider, TotpService],
+  exports: [
+    LocalSerializer,
+    passportProvider,
+    TotpService,
+    AuthenticationService,
+  ],
 })
 export class AuthenticationModule {}

@@ -15,22 +15,44 @@ describe('Authentication failures', () => {
       cy.url().should('match', /(?!login)/)
     });
 
-  it('should flash an error to the user trying to log in with a bad username', () => {
-    cy.login('badUsername', USER_PASS);
-    cy.url().should(
-    'eq',
-    `${BASE_URL}/login`,
-    );
-    cy.get('.login-form').contains('Connexion impossible');
-  });
+    it('should flash an error to the user trying to log in with a bad username', () => {
+      cy.login('badUsername', USER_PASS);
+      cy.url().should(
+      'eq',
+      `${BASE_URL}/login`,
+      );
+      cy.get('.login-form').contains('Connexion impossible');
+    });
 
-  it('should flash an error to the user trying to log in with a good username but a bad password', () => {
+    it('should flash an error to the user trying to log in with a good username but a bad password', () => {
     cy.login(USER_ADMIN, 'badPassword');
     cy.url().should(
     'eq',
     `${BASE_URL}/login`,
     );
     cy.get('.login-form').contains('Connexion impossible');
+    });
+
+    it('should flash an error to the user trying to log in with a bad TOTP', () => {
+      cy.visit('/login');
+      cy.formFill({ username: USER_ADMIN, password: USER_PASS }, {totp : false, fast: true });
+      cy.get('button[type="submit"]').click();
+      cy.url().should(
+        'eq',
+        `${BASE_URL}/login`,
+        );
+        cy.get('.login-form').contains('Connexion impossible');
+    });
+
+    it('should flash an error to the user trying to log in with a bad TOTP and invalid credentials', () => {
+      cy.visit('/login');
+      cy.formFill({ username: 'tata', password :'titi' }, {totp : false, fast: true });
+      cy.get('button[type="submit"]').click();
+      cy.url().should(
+        'eq',
+        `${BASE_URL}/login`,
+        );
+        cy.get('.login-form').contains('Connexion impossible');
     });
   });
     

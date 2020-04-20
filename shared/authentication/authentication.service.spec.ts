@@ -757,4 +757,39 @@ describe('AuthenticationService', () => {
       expect(result).toEqual(true);
     });
   });
+
+  describe('getUserSecret', () => {
+    let user;
+    let username;
+    let password;
+    beforeEach(() => {
+      user = {
+        passwordHash: Symbol('password hash'),
+        token: Symbol('2ddeb850-ee40-43ed-903e-44a5dad759d8'),
+        roles: [],
+      };
+      username = Symbol('username');
+      password = Symbol('password');
+      jest
+        .spyOn(mockedUserService, 'findByUsername')
+        .mockImplementation(candidate => {
+          if (candidate === username) {
+            return Promise.resolve(user);
+          }
+          return Promise.reject('User not found');
+        });
+    });
+
+    it('calls the UserService findByUsername', async () => {
+      await authenticationService.getUserSecret(username);
+      expect(mockedUserService.findByUsername).toHaveBeenCalledTimes(1);
+      expect(mockedUserService.findByUsername).toHaveBeenCalledWith(username);
+    });
+
+    it('calls the UserService findByUsername and failed', async () => {
+      return expect(
+        authenticationService.validateCredentials('jeanmoust', password),
+      ).rejects.toBeDefined();
+    });
+  });
 });

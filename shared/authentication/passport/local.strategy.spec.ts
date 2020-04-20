@@ -13,6 +13,7 @@ describe('LocalStrategy', () => {
     getAuthenticationFailureReason: jest.fn(),
     getAuthenticationAttemptCount: jest.fn(),
     saveUserAuthenticationFailure: jest.fn(),
+    getUserSecret: jest.fn(),
   };
   const businessEventMock = jest.fn();
   const loggerMock = {

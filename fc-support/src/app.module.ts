@@ -105,6 +105,7 @@ export class AppModule implements NestModule {
         path: '/citizen',
         method: RequestMethod.PATCH,
       },
+      { path: '/login', method: RequestMethod.POST },
     ];
 
     consumer.apply(TotpMiddleware).forRoutes(...totpRoutes);
