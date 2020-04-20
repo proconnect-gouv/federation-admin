@@ -71,10 +71,10 @@ export class AppModule implements NestModule {
         path: '/account/update-account/:username',
         method: RequestMethod.PATCH,
       },
+      { path: '/login', method: RequestMethod.POST },
     ];
 
     const totpRoutes: RouteInfo[] = [...totpAccount];
-
     consumer.apply(TotpMiddleware).forRoutes(...totpRoutes);
   }
 }

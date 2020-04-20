@@ -27,7 +27,7 @@ export class AuthenticationController {
   @Render('login')
   public firstLoginView(@Req() req) {
     const csrfToken = req.csrfToken();
-    return { csrfToken };
+    return { csrfToken, showTotpField: false };
   }
 
   @Post('first-login/:token')
@@ -46,7 +46,7 @@ export class AuthenticationController {
   @Render('login')
   public loginView(@Req() req) {
     const csrfToken = req.csrfToken();
-    return { csrfToken };
+    return { csrfToken, showTotpField: true };
   }
 
   @Post('login')

@@ -10,7 +10,7 @@ export function firstLogin(username, password) {
 
 export function login(username, password) {
   cy.visit('/login');
-  cy.formFill({ username, password }, { fast: true });
+  cy.formFill({ username, password }, {totp : true, fast: true });
   cy.get('button[type="submit"]').click();
 }
 

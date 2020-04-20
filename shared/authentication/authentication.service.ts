@@ -29,6 +29,7 @@ export interface IAuthenticationService {
     usernameInput: string,
     token: string,
   ): Promise<AuthenticationFailures>;
+  getUserSecret(username: string): Promise<string>;
 }
 
 @Injectable()
@@ -190,6 +191,16 @@ export class AuthenticationService implements IAuthenticationService {
       throw new Error(
         'The authentication attempts count could not be retrieved due to a database error',
       );
+    }
+  }
+
+  async getUserSecret(username: string): Promise<string> {
+    try {
+      const { secret } = await this.userService.findByUsername(username);
+      return secret;
+    } catch (error) {
+      this.logger.error(error);
+      return null;
     }
   }
 }
