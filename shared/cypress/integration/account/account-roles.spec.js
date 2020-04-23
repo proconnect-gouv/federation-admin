@@ -78,7 +78,7 @@ describe('Account', () => {
       cy.contains('Évènements').should('not.exist');
       cy.contains('Métriques').should('not.exist');
 
-      cy.get('body > nav > div > div > ul > li').each(elem => {
+      cy.get('body nav ul li').each(elem => {
         const tab = elem[0].innerText;
         cy.contains(tab).click();
         cy.get('.btn-action-update').should('not.be.visible');
