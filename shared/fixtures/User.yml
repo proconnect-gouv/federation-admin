@@ -106,6 +106,42 @@ items:
     token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
     tokenCreatedAt: '{{date.recent(1)}}'
     tokenExpiresAt: '{{date.future(2)}}'
+  pwd_fail:
+    id: '1cb0fe7b-730e-4bbb-ae33-96e3f572acc4'
+    username: 'pwd_fail'
+    email: '{{internet.email}}'
+    roles:
+      - 'admin'
+      - 'operator'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '{{date.recent(1)}}'
+    tokenExpiresAt: '{{date.future(2)}}'
+  totp_fail:
+    id: '0dc13546-2a5f-40aa-83bd-aa499fa702ef'
+    username: 'totp_fail'
+    email: '{{internet.email}}'
+    roles:
+      - 'admin'
+      - 'operator'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '{{date.recent(1)}}'
+    tokenExpiresAt: '{{date.future(2)}}'
+  pwd_totp_fail:
+    id: '51c325fd-c990-4e2f-bdb0-bf6820149de1'
+    username: 'pwd_totp_fail'
+    email: '{{internet.email}}'
+    roles:
+      - 'admin'
+      - 'operator'
+    passwordHash: '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e' # georgesmoustaki
+    secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
+    token: '84bc8f7e-33ad-441c-826b-0c8e9c3b4044'
+    tokenCreatedAt: '{{date.recent(1)}}'
+    tokenExpiresAt: '{{date.future(2)}}'
   user{1..10}:
     username: '{{name.firstName}}($current)'
     email: '{{internet.email}}'

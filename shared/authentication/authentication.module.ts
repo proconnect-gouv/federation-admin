@@ -50,6 +50,7 @@ const passportProvider = {
     passportProvider,
     TotpService,
     AuthenticationService,
+    UserModule,
   ],
 })
 export class AuthenticationModule {}

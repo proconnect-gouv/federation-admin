@@ -6,6 +6,7 @@ import {
 } from '../authentication-actions.enum';
 import { UserRole } from '../../user/roles.enum';
 import { UserService } from '../../user/user.service';
+import { AuthenticationService } from '../authentication.service';
 
 describe('LocalStrategy', () => {
   const authenticationServiceMock = {
@@ -14,6 +15,8 @@ describe('LocalStrategy', () => {
     getAuthenticationAttemptCount: jest.fn(),
     saveUserAuthenticationFailure: jest.fn(),
     getUserSecret: jest.fn(),
+    deleteUserAuthenticationFailures: jest.fn(),
+    isMaxAuthenticationAttemptLimitReached: jest.fn(),
   };
   const businessEventMock = jest.fn();
   const loggerMock = {
@@ -39,7 +42,7 @@ describe('LocalStrategy', () => {
     jest.resetAllMocks();
 
     localStrategyMock = new LocalStrategy(
-      authenticationServiceMock,
+      (authenticationServiceMock as unknown) as AuthenticationService,
       (loggerMock as unknown) as LoggerService,
       (userServiceMock as unknown) as UserService,
     );
@@ -81,9 +84,17 @@ describe('LocalStrategy', () => {
         roles: ['new_account', 'inactive_operator'],
         tokenExpiresAt: mockDate,
       });
+
       // action
       const result = await localStrategyMock.validate(reqStub, 'user', 'toto');
+
       // assertion
+      expect(
+        authenticationServiceMock.deleteUserAuthenticationFailures,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        authenticationServiceMock.deleteUserAuthenticationFailures,
+      ).toHaveBeenCalledWith('user');
       expect(result).toEqual({
         roles: ['new_account', 'inactive_operator'],
         tokenExpiresAt: mockDate,

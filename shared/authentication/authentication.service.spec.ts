@@ -19,6 +19,8 @@ describe('AuthenticationService', () => {
   const authenticationRepositoryMock = {
     save: jest.fn(),
     findAndCount: jest.fn(),
+    find: jest.fn(),
+    delete: jest.fn(),
   };
   const configServiceMock = {
     get: jest.fn(),
@@ -529,6 +531,62 @@ describe('AuthenticationService', () => {
         expect(e).toBeInstanceOf(Error);
         expect(message).toEqual(
           'The authentication attempt could not be saved due to a database error',
+        );
+        expect(loggerMock.error).toHaveBeenCalled();
+      }
+
+      // assertion
+      expect.hasAssertions();
+    });
+  });
+
+  describe('deleteUserAuthenticationFailures', () => {
+    it('should delete user entries of the given user', async () => {
+      // setup
+      const username = 'user';
+      const userToDelete = [
+        {
+          id: 1,
+          username: 'user',
+          token: '123456',
+          authenticationAttemptedAt: '2020-04-16T15:25:24.985Z',
+        },
+        {
+          id: 1,
+          username: 'user',
+          token: '123456',
+          authenticationAttemptedAt: '2020-04-16T15:25:26.985Z',
+        },
+      ];
+      authenticationRepositoryMock.delete.mockResolvedValueOnce(userToDelete);
+      const expectedResult = userToDelete;
+
+      // action
+      const result = await authenticationService.deleteUserAuthenticationFailures(
+        username,
+      );
+
+      // assertion
+      expect(authenticationRepositoryMock.delete).toHaveBeenCalledTimes(1);
+      expect(authenticationRepositoryMock.delete).toHaveBeenCalledWith({
+        username,
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should fall back in catch statement if the user entries could not be deleted due to a database error', async () => {
+      // setup
+      const username = 'user';
+      authenticationRepositoryMock.delete.mockRejectedValueOnce(undefined);
+
+      // action
+      try {
+        await authenticationService.deleteUserAuthenticationFailures(username);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+        const { message } = e;
+        expect(message).toEqual(
+          'The authentication attempts could not be deleted',
         );
         expect(loggerMock.error).toHaveBeenCalled();
       }
