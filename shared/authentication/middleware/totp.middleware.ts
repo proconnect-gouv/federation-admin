@@ -1,6 +1,7 @@
 import { NestMiddleware, Inject } from '@nestjs/common';
 import { AuthenticationDto } from '@fc/shared/authentication/dto/authentication.dto';
 import { AuthenticationService } from '@fc/shared/authentication/authentication.service';
+import { UserService } from '@fc/shared/user/user.service';
 import { LoggerService } from '@fc/shared/logger/logger.service';
 import {
   AuthenticationActions,
@@ -11,14 +12,15 @@ export class TotpMiddleware implements NestMiddleware {
   public constructor(
     @Inject('otplib') private readonly otplibService,
     private readonly authenticationService: AuthenticationService,
+    private readonly userService: UserService,
     private readonly logger: LoggerService,
   ) {}
 
-  use(req, res, next: () => void): any {
+  async use(req, res, next: () => void): Promise<void> {
     if (req.user) {
       this.totpInForm(req, next);
     } else {
-      this.totpInLogging(req, res, next);
+      await this.totpInLogging(req, res, next);
     }
   }
 
@@ -36,32 +38,50 @@ export class TotpMiddleware implements NestMiddleware {
 
   private async totpInLogging(req, res, next) {
     const { username, _totp }: AuthenticationDto = req.body;
+
     req.userSecret = await this.authenticationService.getUserSecret(username);
-    if (req.userSecret === null) {
-      this.authenticationService.saveUserAuthenticationFailure(username, null);
+
+    if (!req.userSecret) {
       this.logger.businessEvent({
         action: AuthenticationActions.TOTP,
         state: AuthenticationStates.DENIED_USER_NOT_FOUND,
         user: username,
       });
+
       req.flash('globalError', 'Connexion impossible.');
-      res.redirect('login');
-    } else {
-      if (this.otplibService.authenticator.check(_totp, req.userSecret)) {
-        return next();
-      } else {
-        this.authenticationService.saveUserAuthenticationFailure(
-          username,
-          null,
-        );
-        this.logger.businessEvent({
-          action: AuthenticationActions.TOTP,
-          state: AuthenticationStates.DENIED_TOTP,
-          user: username,
-        });
-        req.flash('globalError', 'Connexion impossible.');
-        res.redirect('login');
-      }
+      return res.redirect('/login');
     }
+
+    if (!this.otplibService.authenticator.check(_totp, req.userSecret)) {
+      const message = await this.handleUserTotpFailure(username);
+
+      this.logger.businessEvent({
+        action: AuthenticationActions.TOTP,
+        state: AuthenticationStates.DENIED_TOTP,
+        user: username,
+      });
+
+      req.flash('globalError', message);
+      return res.redirect('/login');
+    }
+
+    return next();
+  }
+
+  private async handleUserTotpFailure(username: string): Promise<string> {
+    this.authenticationService.saveUserAuthenticationFailure(username, null);
+
+    let message = 'Connexion impossible.';
+    const maxAuthenticationAttemptLimitReached = await this.authenticationService.isMaxAuthenticationAttemptLimitReached(
+      username,
+    );
+
+    if (maxAuthenticationAttemptLimitReached) {
+      await this.userService.blockUser(username);
+      message =
+        "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
+    }
+
+    return message;
   }
 }

@@ -42,44 +42,48 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       token,
     );
 
-    if (!validUser) {
-      const authenticationFailureReason: AuthenticationStates = await this.authenticationService.getAuthenticationFailureReason(
-        usernameInput,
-        passwordInput,
-        token,
+    if (validUser) {
+      await this.authenticationService.deleteUserAuthenticationFailures(
+        validUser.username,
       );
 
-      let messageToDisplay = 'Connexion impossible';
-
-      switch (authenticationFailureReason) {
-        case AuthenticationStates.DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED:
-          await this.blockUser(usernameInput);
-          messageToDisplay =
-            "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
-          break;
-        case AuthenticationStates.DENIED_BLOCKED_USER:
-          messageToDisplay =
-            "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
-          break;
-      }
-
-      await this.authenticationService.saveUserAuthenticationFailure(
-        usernameInput,
-        token,
-      );
-
-      this.sendBackFailureReason(
-        authenticationFailureReason,
-        usernameInput,
-        req,
-        messageToDisplay,
-        !!token,
-      );
-
-      return null;
+      return validUser;
     }
 
-    return validUser;
+    const authenticationFailureReason: AuthenticationStates = await this.authenticationService.getAuthenticationFailureReason(
+      usernameInput,
+      passwordInput,
+      token,
+    );
+
+    let messageToDisplay = 'Connexion impossible';
+
+    switch (authenticationFailureReason) {
+      case AuthenticationStates.DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED:
+        await this.blockUser(usernameInput);
+        messageToDisplay =
+          "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
+        break;
+      case AuthenticationStates.DENIED_BLOCKED_USER:
+        messageToDisplay =
+          "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur";
+        break;
+    }
+
+    await this.authenticationService.saveUserAuthenticationFailure(
+      usernameInput,
+      token,
+    );
+
+    this.sendBackFailureReason(
+      authenticationFailureReason,
+      usernameInput,
+      req,
+      messageToDisplay,
+      !!token,
+    );
+
+    return null;
   }
 
   private sendBackFailureReason(

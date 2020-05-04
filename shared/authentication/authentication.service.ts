@@ -1,7 +1,7 @@
 import { InjectConfig, ConfigService } from 'nestjs-config';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeleteResult } from 'typeorm';
 
 import { User } from '../user/user.sql.entity';
 import { UserService } from '../user/user.service';
@@ -30,6 +30,10 @@ export interface IAuthenticationService {
     token: string,
   ): Promise<AuthenticationFailures>;
   getUserSecret(username: string): Promise<string>;
+  deleteUserAuthenticationFailures(username: string): Promise<DeleteResult>;
+  isMaxAuthenticationAttemptLimitReached(
+    usernameInput: string,
+  ): Promise<boolean>;
 }
 
 @Injectable()
@@ -149,6 +153,21 @@ export class AuthenticationService implements IAuthenticationService {
     }
   }
 
+  async deleteUserAuthenticationFailures(
+    username: string,
+  ): Promise<DeleteResult> {
+    try {
+      const removeUserEntries = await this.authenticationFailuresRepository.delete(
+        { username },
+      );
+
+      return removeUserEntries;
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The authentication attempts could not be deleted');
+    }
+  }
+
   private isTokenExpired(tokenExpiresAt: Date): boolean {
     // it handles token expiration
     const date = new Date();
@@ -160,7 +179,7 @@ export class AuthenticationService implements IAuthenticationService {
     return false;
   }
 
-  private async isMaxAuthenticationAttemptLimitReached(
+  async isMaxAuthenticationAttemptLimitReached(
     usernameInput: string,
   ): Promise<boolean> {
     const authenticationAttemptLimitReached = await this.getAuthenticationAttemptCount(
@@ -194,13 +213,13 @@ export class AuthenticationService implements IAuthenticationService {
     }
   }
 
-  async getUserSecret(username: string): Promise<string> {
-    try {
-      const { secret } = await this.userService.findByUsername(username);
-      return secret;
-    } catch (error) {
-      this.logger.error(error);
-      return null;
+  async getUserSecret(username: string): Promise<string | null> {
+    const user = await this.userService.findByUsername(username);
+
+    if (user) {
+      return user.secret;
     }
+
+    return null;
   }
 }
