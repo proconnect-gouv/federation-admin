@@ -40,7 +40,7 @@ export function getData(baseQuery): ISummary[] {
           label: 'Nombre de nouveaux utilisateurs chaque mois',
           href: `/metrics?${queryString.stringify({
             ...baseQuery,
-            'filters[]': 'key:registration',
+            'filters[]': ['key:registration', 'range:month'],
           })}`,
         },
       ],
