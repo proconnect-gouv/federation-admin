@@ -3,7 +3,7 @@ import { Schema } from 'mongoose';
 export const clientSchema = new Schema({
   key: { type: String, index: true },
   name: String,
-  secret_hash: String,
+  client_secret: String,
   redirect_uris: [String],
   post_logout_redirect_uris: [String],
   credentialsFlow: { type: Boolean, default: false },
