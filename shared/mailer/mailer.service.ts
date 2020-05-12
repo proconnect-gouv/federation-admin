@@ -30,7 +30,7 @@ export class MailerService {
     mailerParams: IMailerParams,
   ) {
     try {
-      await this.transporter.constructMessage(
+      return this.transporter.constructMessage(
         sendParamsMessage,
         mailerParams,
         this.transporterOptions,
