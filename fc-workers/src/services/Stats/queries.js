@@ -200,3 +200,55 @@ export const getActiveAccount = params => {
 
   return query;
 };
+
+export const getUsageCountsByRange = params => {
+  const { start, stop, after, buckets } = params;
+
+  const index = 'franceconnect';
+
+  const startTime = moment(start).format('YYYY-MM-DD');
+  const stopTime = moment(stop).format('YYYY-MM-DD');
+
+  const query = {
+    index,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          must: [
+            { term: { type_action: 'initial' } },
+            {
+              range: {
+                time: {
+                  gte: startTime,
+                  lte: stopTime,
+                },
+              },
+            },
+          ],
+        },
+      },
+
+      aggs: {
+        accounts: {
+          composite: {
+            size: buckets,
+            sources: {
+              sub: {
+                terms: {
+                  field: 'accountId',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  if (after) {
+    query.body.aggs.accounts.composite.after = after;
+  }
+
+  return query;
+};
