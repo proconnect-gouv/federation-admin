@@ -1,6 +1,7 @@
 import parseArgs from 'minimist';
 import axios from 'axios';
-import elasticsearch from 'elasticsearch';
+// import elasticsearch from 'elasticsearch';
+import elasticsearch from '@elastic/elasticsearch';
 import * as jobs from './jobs';
 import Container, {
   Config,

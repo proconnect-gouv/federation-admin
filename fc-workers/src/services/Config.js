@@ -35,12 +35,18 @@ class Config {
 
   getElastic() {
     const hosts = this.config.ES_STATS_HOSTS || 'localhost:9200';
-    return { hosts: hosts.split(',') };
+    return {
+      node: hosts.split(',').map(host => `http://${host}`),
+      requestTimeout: process.env.REQUEST_TIMEOUT,
+    };
   }
 
   getLogElastic() {
     const hosts = this.config.ES_LOGS_HOSTS || 'localhost:9200';
-    return { hosts: hosts.split(',') };
+    return {
+      node: hosts.split(',').map(host => `http://${host}`),
+      requestTimeout: process.env.REQUEST_TIMEOUT,
+    };
   }
 
   getMongo() {

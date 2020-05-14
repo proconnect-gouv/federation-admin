@@ -61,6 +61,15 @@ class Stats {
     return data.aggregations.activeUsers.value;
   }
 
+  async getUsageCountsByRange(params) {
+    const api = this.container.get('logApi');
+    const stop = this.getStopDateForRange(params);
+    const query = queries.getUsageCountsByRange({ ...params, stop });
+    return api.search(query, { asStream: true });
+    // const data = await api.search(query);
+    // return data.body.aggregations.accounts;
+  }
+
   getStopDateForRange(params) {
     const { start, range } = params;
 
