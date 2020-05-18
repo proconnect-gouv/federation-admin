@@ -43,7 +43,7 @@ class Stats {
     });
     const data = await api.search(query);
 
-    return data.aggregations.week.buckets.map(week => ({
+    return data.body.aggregations.week.buckets.map(week => ({
       startDate: week.key,
       events: week.action.buckets.map(event => ({
         label: event.key,
@@ -58,7 +58,16 @@ class Stats {
     const query = queries.getActiveAccount({ ...params, stop });
     const data = await api.search(query);
 
-    return data.aggregations.activeUsers.value;
+    return data.body.aggregations.activeUsers.value;
+  }
+
+  async getUsageCountsByRange(params) {
+    const api = this.container.get('logApi');
+    const stop = this.getStopDateForRange(params);
+    const query = queries.getUsageCountsByRange({ ...params, stop });
+    return api.search(query, { asStream: true });
+    // const data = await api.search(query);
+    // return data.body.aggregations.accounts;
   }
 
   async getUsageCountsByRange(params) {
