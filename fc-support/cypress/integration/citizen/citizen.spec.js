@@ -50,6 +50,7 @@ describe('Citizen Management', () => {
     // Wait for the status to be fetched from database
     cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should('have.class', 'badge-success');
     cy.contains('Dernière connexion : le 08/01/2020 à 15:33:26');
+    cy.get('#citizen-status', { timeout: 2000 }).should('not.contain', 'Identity Hash :');
   });
 
 
@@ -86,5 +87,6 @@ describe('Citizen Management', () => {
     // Wait for the status to be fetched from database
     cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should('have.class', 'badge-danger');
     cy.contains('Dernière connexion : Jamais');
+    cy.get('#citizen-status', { timeout: 2000 }).should('not.contain', 'Identity Hash :');
   });
 });

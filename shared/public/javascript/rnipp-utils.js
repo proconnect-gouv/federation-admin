@@ -21,7 +21,7 @@ function toggleCitizenActive(element) {
 
   element.addEventListener(
     'submit',
-    function (event) {
+    function(event) {
       event.preventDefault();
       event.stopPropagation();
 
@@ -36,7 +36,7 @@ function toggleCitizenActive(element) {
   );
 }
 
-function checkUser(httpOptions, callback = () => { }) {
+function checkUser(httpOptions, callback = () => {}) {
   $.ajax(API.checkUser, httpOptions)
     .done(updateUISuccess)
     .fail(updateUIError)
@@ -58,10 +58,20 @@ function updateUISuccess(data) {
     ? `le ${moment(data.lastConnection).format('DD/MM/YYYY à HH:mm:ss')}`
     : 'Jamais';
 
+  let accountIdHTML = '';
+  if (data.accountId) {
+    accountIdHTML = `<li><b>AccountId : </b>${data.accountId}</li>`;
+  }
+
   $('#citizen-status').html(`
     <ul>
-      <li><b>Actif :</b> ${data.active ? '<span class="badge badge-success">Oui</span>' : '<span class="badge badge-danger">Non</span>' }</li>
+      <li><b>Actif :</b> ${
+        data.active
+          ? '<span class="badge badge-success">Oui</span>'
+          : '<span class="badge badge-danger">Non</span>'
+      }</li>
       <li><b>Dernière connexion :</b> ${lastConnection}</li>
+      ${accountIdHTML}
     </ul>
   `);
 }
@@ -107,7 +117,7 @@ export function checkUserStatus(callback) {
     headers: { 'CSRF-Token': csrfToken },
   };
 
-  checkUser(httpOptions, callback)
+  checkUser(httpOptions, callback);
 }
 
 export function initUIActiveButton(data) {
@@ -144,7 +154,8 @@ export function initUIActiveButton(data) {
     data-element-action="Voulez vous ${action.toLowerCase()} ${givenName} ${familyName} ?"
     novalidate
   >
-    <input type="hidden" name="preferredUsername" value="${preferredUsername || ''}" />
+    <input type="hidden" name="preferredUsername" value="${preferredUsername ||
+      ''}" />
     <input type="hidden" name="familyName" value="${familyName}" />
     <input type="hidden" name="givenName" value="${givenName}" />
     <input type="hidden" name="birthdate" value="${birthdate}" />
@@ -153,7 +164,7 @@ export function initUIActiveButton(data) {
     <input type="hidden" name="gender" value="${gender}" />
     <input type="hidden" name="supportId" value="${__SUPPORT_ID__}" />
     <input type="hidden" name="active" value="${
-    data.active ? 'false' : 'true'
+      data.active ? 'false' : 'true'
     }" />
     <input type="hidden" name="_csrf" value="${getCSRFToken()}">
     <input type="hidden" name="_totp">
@@ -161,12 +172,12 @@ export function initUIActiveButton(data) {
 
     <div class="form-group" id="citizen-management">
     <button type="submit" class="btn btn-warning" ${action === 'Activer' &&
-    'disabled'}>
+      'disabled'}>
       Désactiver
     </button>
     &nbsp;
     <button type="submit" class="btn btn-warning" ${action === 'Désactiver' &&
-    'disabled'}>
+      'disabled'}>
       Activer
     </button>
     </div>

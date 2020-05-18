@@ -39,6 +39,14 @@
     "isFrench": "male",
     "cog": "99217"
   },
+   "utilisateur_jamais_connecté": {
+    "gender": "male",
+    "familyName": "DUPONT",
+    "givenName": "Jean",
+    "birthdate": "2019-10-15",
+    "isFrench": "true",
+    "cog": "75007"
+  }, 
   "utilisateur_étranger_désactivé_jamais_connecté": {
     "gender": "male",
     "familyName": "FLEURET",
