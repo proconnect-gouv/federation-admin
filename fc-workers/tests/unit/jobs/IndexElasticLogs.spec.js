@@ -50,9 +50,9 @@ describe('IndexElasticLogs', () => {
     it('Should return the sum of sub arrays', () => {
       // Given
       const input = [
-        { items: new Array(2) },
-        { items: new Array(2) },
-        { items: new Array(2) },
+        { body: { items: new Array(2) } },
+        { body: { items: new Array(2) } },
+        { body: { items: new Array(2) } },
       ];
       // When
       const result = IndexElasticLogs.getIndexationStats(input);
