@@ -109,6 +109,21 @@ describe('AuthenticationService', () => {
           authenticationService.validateCredentials(username, password),
         ).resolves.toBe(null);
       });
+
+      it('fails to validate if a regular user try to connect on first login route', async () => {
+        jest.spyOn(mockedUserService, 'findByUsername').mockReturnValue(
+          Promise.resolve({
+            id: '123456',
+            username,
+            roles: ['operator'],
+          }),
+        );
+        const token = 'MyGreatToken';
+        return expect(
+          authenticationService.validateCredentials(username, password, token),
+        ).resolves.toBe(null);
+      });
+
       it('calls the UserService compareHash', async () => {
         await authenticationService.validateCredentials(username, password);
         expect(mockedUserService.compareHash).toHaveBeenCalledTimes(1);
@@ -241,6 +256,27 @@ describe('AuthenticationService', () => {
 
       // assertion
       expect(result).toEqual(AuthenticationStates.DENIED_BLOCKED_USER);
+    });
+
+    it('should return DENIED_NOT_A_NEW_USER if a regular user tries to login through first login route', async () => {
+      // setup
+      mockedUserService.findByUsername.mockResolvedValueOnce({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'user',
+        roles: ['operator'],
+        passwordHash:
+          '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
+      });
+
+      // action
+      const result = await authenticationService.getAuthenticationFailureReason(
+        'user',
+        'password',
+        'token',
+      );
+
+      // assertion
+      expect(result).toEqual(AuthenticationStates.DENIED_NOT_A_NEW_USER);
     });
 
     it('should return DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED if isMaxAuthenticationAttemptLimitReached returns true', async () => {
@@ -382,7 +418,9 @@ describe('AuthenticationService', () => {
         'MyTokenDoesNotMatchUserToken',
       );
 
-      expect(result).toEqual(AuthenticationStates.DENIED_PASSWORD_AND_TOKEN);
+      expect(result).toEqual(
+        AuthenticationStates.DENIED_PASSWORD_AND_TOKEN_INVALIDS,
+      );
     });
 
     it('should return DENIED_TOKEN if only token is invalid', async () => {
@@ -420,7 +458,7 @@ describe('AuthenticationService', () => {
         'MyTokenDoesNotMatchUserToken',
       );
 
-      expect(result).toEqual(AuthenticationStates.DENIED_TOKEN);
+      expect(result).toEqual(AuthenticationStates.DENIED_TOKEN_INVALID);
     });
 
     it('should return DENIED_PASSWORD if only password is invalid', async () => {
@@ -458,7 +496,7 @@ describe('AuthenticationService', () => {
         'MyToken',
       );
 
-      expect(result).toEqual(AuthenticationStates.DENIED_PASSWORD);
+      expect(result).toEqual(AuthenticationStates.DENIED_PASSWORD_INVALID);
     });
   });
 

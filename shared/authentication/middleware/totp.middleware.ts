@@ -57,7 +57,7 @@ export class TotpMiddleware implements NestMiddleware {
 
       this.logger.businessEvent({
         action: AuthenticationActions.TOTP,
-        state: AuthenticationStates.DENIED_TOTP,
+        state: AuthenticationStates.DENIED_TOTP_INVALID,
         user: username,
       });
 

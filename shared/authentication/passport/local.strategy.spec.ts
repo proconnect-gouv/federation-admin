@@ -135,7 +135,7 @@ describe('LocalStrategy', () => {
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
         action: 'token_signup',
-        state: 'denied because the user could not be found in database',
+        state: 'DENIED_USER_NOT_FOUND',
         user: 'user',
       });
       expect(reqStub.flash).toHaveBeenCalledTimes(1);
@@ -193,8 +193,7 @@ describe('LocalStrategy', () => {
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
         action: 'token_signup',
-        state:
-          'denied because the user exceedeed his allowed authentication attempts',
+        state: 'DENIED_MAX_AUTHENTICATION_ATTEMPTS_REACHED',
         user: 'user',
       });
       expect(reqStub.flash).toHaveBeenCalledTimes(1);
@@ -231,7 +230,7 @@ describe('LocalStrategy', () => {
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
         action: 'signin',
-        state: 'denied beacause the user is blocked',
+        state: 'DENIED_BLOCKED_USER',
         user: 'user',
       });
       expect(req.flash).toHaveBeenCalledTimes(1);
@@ -273,7 +272,7 @@ describe('LocalStrategy', () => {
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
         action: AuthenticationActions.TOKEN_SIGNUP,
-        state: 'denied because the user could not be found in database',
+        state: 'DENIED_USER_NOT_FOUND',
         user: 'user',
       });
     });

@@ -63,6 +63,10 @@ export class AuthenticationService implements IAuthenticationService {
       return null;
     }
 
+    if (token && !user.roles.includes(UserRole.NEWUSER)) {
+      return null;
+    }
+
     if (user.roles.includes(UserRole.NEWUSER) && token !== user.token) {
       return null;
     }
@@ -95,6 +99,10 @@ export class AuthenticationService implements IAuthenticationService {
       return AuthenticationStates.DENIED_BLOCKED_USER;
     }
 
+    if (token && !user.roles.includes(UserRole.NEWUSER)) {
+      return AuthenticationStates.DENIED_NOT_A_NEW_USER;
+    }
+
     const maxAuthenticationAttemptLimitReached = await this.isMaxAuthenticationAttemptLimitReached(
       usernameInput,
     );
@@ -123,14 +131,14 @@ export class AuthenticationService implements IAuthenticationService {
     const tokenMatchUser = token === user.token;
 
     if (firstConnexion && !tokenMatchUser && !passwordMatchUser) {
-      return AuthenticationStates.DENIED_PASSWORD_AND_TOKEN;
+      return AuthenticationStates.DENIED_PASSWORD_AND_TOKEN_INVALIDS;
     }
 
     if (firstConnexion && !tokenMatchUser) {
-      return AuthenticationStates.DENIED_TOKEN;
+      return AuthenticationStates.DENIED_TOKEN_INVALID;
     }
 
-    return AuthenticationStates.DENIED_PASSWORD;
+    return AuthenticationStates.DENIED_PASSWORD_INVALID;
   }
 
   async saveUserAuthenticationFailure(
