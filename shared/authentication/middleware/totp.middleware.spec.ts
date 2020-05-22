@@ -274,7 +274,7 @@ describe('TotpMiddleware', () => {
       expect(loggerMock.businessEvent).toHaveBeenCalledTimes(1);
       expect(loggerMock.businessEvent).toHaveBeenCalledWith({
         action: AuthenticationActions.TOTP,
-        state: AuthenticationStates.DENIED_TOTP,
+        state: AuthenticationStates.DENIED_TOTP_INVALID,
         user: req.body.username,
       });
     });

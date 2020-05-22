@@ -1197,5 +1197,38 @@ describe('Authentication failures', () => {
       // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.
       // And so the test is not doable for now.
     });
+
+    it('should be impossible for a regular user to login through first login route without second authentication factor', () => {
+      cy.contains('Comptes utilisateurs').click();
+      cy.contains('Créer un utilisateur').click();
+      cy.formType('#username', 'tempUser', basicConfiguration);
+      cy.formType('#email', 'temp@temp.com', basicConfiguration);
+      cy.get('form')
+        .find('[id="role-admin"]')
+        .check();
+
+      cy.totp(basicConfiguration);
+
+      cy.get('#tmpPassword').then(tmpPassword => {
+        cy.contains("Créer l'utilisateur").click();
+        cy.logout(USER_ADMIN);
+
+        cy.getUserActivationToken('tempUser').then(
+          ({ stdout: activationToken }) => {
+            cy.visit(`/first-login/${activationToken}`);
+            cy.formFill(
+              { username: USER_ADMIN, password: USER_PASS },
+              { fast: true },
+            );
+            cy.get('button[type="submit"]').click();
+            cy.get('.login-form').contains('Connexion impossible');
+
+            cy.login(USER_ADMIN, USER_PASS);
+            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+            deleteUser('tempUser', basicConfiguration);
+          },
+        );
+      });
+    });
   });
 });
