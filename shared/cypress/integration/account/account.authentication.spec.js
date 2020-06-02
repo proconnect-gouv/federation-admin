@@ -1197,7 +1197,7 @@ describe('Authentication failures', () => {
       // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.
       // And so the test is not doable for now.
     });
-
+    
     it('should be impossible for a regular user to login through first login route without second authentication factor', () => {
       cy.contains('Comptes utilisateurs').click();
       cy.contains('Créer un utilisateur').click();

@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { IAuthenticationService } from '../authentication.service';
 import { User } from '../../user/user.sql.entity';
+import { Password } from '@fc/shared/user/password.sql.entity';
 import { UserService } from '../../user/user.service';
 import { IAuthenticationTrack } from '../authentication-track.interface';
 import {

@@ -431,6 +431,63 @@ describe('Account', () => {
           },
           adminAccount);
       });
+
+      it('Should not be possible for the new user to update his password if using temporary password', () => {
+        const userInfo = {
+          username: 'bibi',
+          password: 'MyPassword10!!',
+          email: 'christophe@email.com',
+        };
+
+        cy.login(USER_ADMIN, USER_PASS);
+
+        cy.contains('Comptes utilisateurs').click();
+        cy.contains('Créer un utilisateur').click();
+        cy.formType('#username', userInfo.username, basicConfiguration);
+        cy.formType('#email', userInfo.email, basicConfiguration);
+        cy.get('form')
+        .find('[id="role-admin"]')
+        .check();
+        
+        cy.totp(basicConfiguration);
+        
+        cy.get('#tmpPassword').then(tmpPassword => {
+          cy.contains("Créer l'utilisateur").click();
+          cy.logout(USER_ADMIN);
+          const password = tmpPassword[0].textContent
+
+          cy.getUserActivationToken(userInfo.username).then(({stdout: activationToken}) => {
+            cy.visit(`/first-login/${activationToken}`);
+            cy.formFill({ username: 'bibi', password}, { fast: true });
+            cy.get('button[type="submit"]').click();
+            
+            cy.url().should('contain', `/account/enrollment`);
+            
+            cy.get('#secret > td').then(async secret => {
+              cy.formType('#password', password, basicConfiguration);
+              cy.formType(
+                '#confirm-password',
+                password,
+                basicConfiguration,
+              );
+          
+              cy.totp({ totp: basicConfiguration.totpFirstLogin }, secret[0].textContent);
+          
+              if (basicConfiguration.submit) {
+                cy.get('button[type="submit"]').click();
+              }
+            });
+
+            cy.visit(`/logout`);
+            cy.login(USER_ADMIN, USER_PASS);
+            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+
+            deleteUser(userInfo.username, basicConfiguration);
+            cy.logout(USER_ADMIN);
+          });
+        });
+
+      });
     });
   });
 });

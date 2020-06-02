@@ -6,6 +6,7 @@ import { MailerService } from '../mailer/mailer.service';
 import { MailerModule } from '../mailer/mailer.module';
 import { EjsAdapter } from '../mailer/ejs.adapter';
 import { User } from './user.sql.entity';
+import { Password } from './password.sql.entity';
 import { UserService } from './user.service';
 import * as generatePassword from 'generate-password';
 import { LoggerService } from '@fc/shared/logger/logger.service';
@@ -17,7 +18,7 @@ const generatePasswordProvider = {
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Password]),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({

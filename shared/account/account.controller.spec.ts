@@ -29,6 +29,8 @@ describe('AccountController', () => {
     enrollUser: jest.fn(),
     updateUserAccount: jest.fn(),
     passwordDoesNotContainUsername: jest.fn(),
+    isEqualToTemporaryPassword: jest.fn(),
+    isEqualToOneOfTheLastFivePasswords: jest.fn(),
   };
   const res = {
     redirect: jest.fn(),
@@ -358,6 +360,7 @@ describe('AccountController', () => {
       // setup
       req.user.roles = ['new_account', 'inactive_admin'];
       userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+      userService.isEqualToTemporaryPassword.mockReturnValueOnce(false);
       userService.enrollUser.mockImplementation(() => Promise.resolve(true));
       // action
       await accountController.enrollUser(enrollUserDto, req, res);
@@ -374,6 +377,7 @@ describe('AccountController', () => {
     it("should fall back in the catch statement if user's updated password and password confirmation do not respect the dto", async () => {
       // setup
       userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+      userService.isEqualToTemporaryPassword.mockReturnValueOnce(false);
       userService.enrollUser.mockImplementation(() =>
         Promise.reject(new Error('wrong, buddy')),
       );
@@ -436,6 +440,86 @@ describe('AccountController', () => {
       );
       expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
+    });
+
+    describe('temporary password check', () => {
+      test('should call req flash if temporary password is reused', async () => {
+        // setup
+        const password = 'georgesmoustaki';
+        const hash =
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+        const enrollUserDtoMock: EnrollUserDto = {
+          password,
+          passwordConfirmation: password,
+        };
+        req.body.password = password;
+        req.body.passwordConfirmation = password;
+        req.user.username = 'jean_moust';
+        req.user.passwordHash = hash;
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+        userService.isEqualToTemporaryPassword.mockReturnValueOnce(true);
+        // action
+        await accountController.enrollUser(enrollUserDtoMock, req, res);
+        // assertion
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'globalError',
+          'Votre nouveau mot de passe ne peut pas être le mot de passe temporaire.',
+        );
+      });
+
+      test('should call res redirect to the enrollment page  if temporary password is reused', async () => {
+        // setup
+        const password = 'georgesmoustaki';
+        const hash =
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+        const enrollUserDtoMock: EnrollUserDto = {
+          password,
+          passwordConfirmation: password,
+        };
+        req.body.password = password;
+        req.body.passwordConfirmation = password;
+        req.user.username = 'jean_moust';
+        req.user.passwordHash = hash;
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+        userService.isEqualToTemporaryPassword.mockReturnValueOnce(true);
+        // action
+        await accountController.enrollUser(enrollUserDtoMock, req, res);
+        // assertion
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith(
+          '/foo/bar/account/enrollment',
+        );
+      });
+    });
+
+    describe('Passwords check', () => {
+      test('should call res redirect to the enrollment page  if temporary password is reused', async () => {
+        // setup
+        const password = 'georgesmoustaki';
+        const hash =
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+        const enrollUserDtoMock: EnrollUserDto = {
+          password,
+          passwordConfirmation: password,
+        };
+        req.body.password = password;
+        req.body.passwordConfirmation = password;
+        req.user.username = 'jean_moust';
+        req.user.passwordHash = hash;
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+        userService.isEqualToTemporaryPassword.mockReturnValueOnce(true);
+        userService.isEqualToOneOfTheLastFivePasswords.mockReturnValueOnce(
+          false,
+        );
+        // action
+        await accountController.enrollUser(enrollUserDtoMock, req, res);
+        // assertion
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith(
+          '/foo/bar/account/enrollment',
+        );
+      });
     });
   });
 
@@ -574,6 +658,59 @@ describe('AccountController', () => {
         );
         expect(res.redirect).toHaveBeenCalledTimes(1);
         expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/me');
+      });
+
+      test('should call req flash if one of the last five password is reused', async () => {
+        // setup
+        const password = 'georgesmoustaki';
+        const hash =
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+
+        req.body.password = password;
+        req.body.passwordConfirmation = password;
+        req.user.username = 'jean_moust';
+        req.user.passwordHash = hash;
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+        userService.isEqualToTemporaryPassword.mockReturnValueOnce(false);
+        userService.isEqualToOneOfTheLastFivePasswords.mockReturnValueOnce(
+          true,
+        );
+        // action
+        await accountController.updateUserPassword(updateAccountDto, req, res);
+        // assertion
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'globalError',
+          "Votre nouveau mot de passe ne peut être l'un des cinq derniers mots de passe utilisés",
+        );
+        expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account/me');
+      });
+
+      test('should not call req flash if none of the last five password is reused', async () => {
+        // setup
+        const password = 'georgesmoustaki';
+        const hash =
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+
+        req.body.password = password;
+        req.body.passwordConfirmation = password;
+        req.user.username = 'jean_moust';
+        req.user.passwordHash = hash;
+        userService.passwordDoesNotContainUsername.mockReturnValueOnce(true);
+        userService.isEqualToTemporaryPassword.mockReturnValueOnce(false);
+        userService.isEqualToOneOfTheLastFivePasswords.mockReturnValueOnce(
+          false,
+        );
+        // action
+        await accountController.updateUserPassword(updateAccountDto, req, res);
+        // assertion
+        expect(req.flash).toHaveBeenCalledTimes(1);
+        expect(req.flash).toHaveBeenCalledWith(
+          'success',
+          `Le mot de passe a bien été mis à jour !`,
+        );
+        expect(res.redirect).toHaveBeenCalledTimes(1);
+        expect(res.redirect).toHaveBeenCalledWith('/foo/bar/');
       });
     });
   });
