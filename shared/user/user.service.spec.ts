@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.sql.entity';
+import { Password } from './password.sql.entity';
 import { UserService } from './user.service';
 import { UserRole } from './roles.enum';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
@@ -65,6 +66,15 @@ describe('UserService', () => {
 
   const mockToken = '3a95ebfa-cd28-40f1-ab6e-5eb4cef352e3';
   const userTokenExpiresIn = 2880;
+
+  const passwordRepositoryMock = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    save: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  };
+
   beforeEach(async () => {
     configServiceMock.get.mockReturnValue({
       userTokenExpiresIn,
@@ -72,7 +82,7 @@ describe('UserService', () => {
 
     const module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User, Password]),
         MailerModule.forRoot({
           transport: 'log',
           emailOptions: {
@@ -100,6 +110,8 @@ describe('UserService', () => {
       .useValue(transporterMock)
       .overrideProvider(LoggerService)
       .useValue(loggerMock)
+      .overrideProvider(getRepositoryToken(Password))
+      .useValue(passwordRepositoryMock)
       .compile();
 
     userService = await module.get<UserService>(UserService);
@@ -640,6 +652,474 @@ describe('UserService', () => {
       );
       // then
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('password validation', () => {
+    const username = 'jean_moust';
+    const password = 'georgesmoustaki';
+    const passwordHash =
+      '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
+
+    describe('isEqualToTemporaryPassword', () => {
+      test('should exist', () => {
+        expect(userService.isEqualToTemporaryPassword).toBeDefined();
+      });
+
+      test('should return true if temporay password is the same as new password', async () => {
+        // Action
+        const result = await userService.isEqualToTemporaryPassword(
+          'georgesmoustaki',
+          passwordHash,
+        );
+
+        // Expected
+        expect(result).toStrictEqual(true);
+      });
+
+      test('should return false if temporay password is different from new password', async () => {
+        // Action
+        const result = await userService.isEqualToTemporaryPassword(
+          'georges',
+          passwordHash,
+        );
+
+        // Expected
+        expect(result).toStrictEqual(false);
+      });
+    });
+
+    describe('isEqualToOneOfTheLastFivePasswords', () => {
+      test('should exist', () => {
+        expect(userService.isEqualToOneOfTheLastFivePasswords).toBeDefined();
+      });
+
+      test('should return true if current password is find in database', async () => {
+        // Setup
+        userRepositoryMock.findOne.mockImplementation(() =>
+          Promise.resolve({
+            username: 'jean_moust',
+            email: 'toto@toto.com',
+            roles: ['admin'],
+            passwordHash:
+              '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            secret: 'MySecret',
+          }),
+        );
+
+        passwordRepositoryMock.find.mockImplementation(() =>
+          Promise.resolve([
+            {
+              username: 'jean_moust',
+              passwordHash:
+                '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            },
+            {
+              username: 'jean_moust',
+              passwordHash:
+                '$2b$10$ZDZB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            },
+            {
+              username: 'jean_moust',
+              passwordHash:
+                '$2b$10$ZUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            },
+          ]),
+        );
+
+        // Action
+        const result = await userService.isEqualToOneOfTheLastFivePasswords(
+          username,
+          password,
+        );
+
+        // Expected
+        expect(userRepositoryMock.findOne).toHaveBeenCalledTimes(1);
+        // expect(passwordRepositoryMock.find).toHaveBeenCalledTimes(1);
+        expect(result).toStrictEqual(true);
+      });
+
+      test('should return false if current password is not find in database', async () => {
+        // Setup
+        userRepositoryMock.findOne.mockImplementation(() =>
+          Promise.resolve({
+            username: 'jean_moust',
+            email: 'toto@toto.com',
+            roles: ['admin'],
+            passwordHash:
+              '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            secret: 'MySecret',
+          }),
+        );
+
+        passwordRepositoryMock.find.mockResolvedValue([
+          {
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDOY7VgMYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+          },
+          {
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDZB7VgGYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+          },
+          {
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZUOB7VgBYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+          },
+        ]);
+
+        // Action
+        const result = await userService.isEqualToOneOfTheLastFivePasswords(
+          username,
+          password,
+        );
+
+        // Expected
+        expect(userRepositoryMock.findOne).toHaveBeenCalledTimes(1);
+        expect(result).toStrictEqual(false);
+      });
+    });
+
+    describe('savePassword', () => {
+      test('should exist', () => {
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['savePassword']).toBeDefined();
+      });
+
+      test('should save passwordHash in password table', async () => {
+        // Setup
+        // tslint:disable-next-line: no-string-literal
+        userService['savePassword'] = jest.fn();
+
+        const updatedAt = new Date();
+        // Action
+        // tslint:disable-next-line: no-string-literal
+        await userService['savePassword'](username, passwordHash, updatedAt);
+
+        // Expected
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['savePassword']).toHaveBeenCalledTimes(1);
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['savePassword']).toHaveBeenCalledWith(
+          username,
+          passwordHash,
+          updatedAt,
+        );
+      });
+
+      test('should throw an error if passwordHash can be saved in database', async () => {
+        // Setup
+        passwordRepositoryMock.save.mockRejectedValueOnce('failed');
+
+        const updatedAt = new Date();
+        // action
+        try {
+          // tslint:disable-next-line: no-string-literal
+          await userService['savePassword'](username, passwordHash, updatedAt);
+        } catch (e) {
+          const { message } = e;
+          expect(e).toBeInstanceOf(Error);
+          expect(message).toEqual('Cannot Save data in database');
+          expect(loggerMock.error).toHaveBeenCalled();
+        }
+
+        // assertion
+        expect.hasAssertions();
+      });
+    });
+
+    describe('checkIfOnlyFivePasswordsEntries', () => {
+      const userMockData = {
+        username: 'jean_moust',
+        email: 'toto@toto.com',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+        secret: 'MySecret',
+      };
+
+      test('should exist', () => {
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['checkIfOnlyFivePasswordsEntries']).toBeDefined();
+      });
+
+      test('should return true if five entries exit for a user', async () => {
+        // Setup
+        const userLastFivePassword = [
+          {
+            id: '1',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-06T12:59:01.436Z'),
+          },
+          {
+            id: '2',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDZB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-02T12:59:01.436Z'),
+          },
+          {
+            id: '3',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-04-30T12:59:01.436Z'),
+          },
+          {
+            id: '4',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$VDZB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-02T12:59:01.436Z'),
+          },
+          {
+            id: '5',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$AUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-04-30T12:59:01.436Z'),
+          },
+        ];
+        userRepositoryMock.findOne.mockResolvedValueOnce(userMockData);
+        passwordRepositoryMock.find.mockResolvedValueOnce(userLastFivePassword);
+        // Action
+        // tslint:disable-next-line: no-string-literal
+        const result = await userService['checkIfOnlyFivePasswordsEntries'](
+          username,
+        );
+
+        // Expected
+        expect(result).toStrictEqual(true);
+      });
+
+      test('should return false if five entries exit for a user', async () => {
+        // Setup
+        const userLastFivePassword = [
+          {
+            id: '1',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-06T12:59:01.436Z'),
+          },
+          {
+            id: '2',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDZB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-02T12:59:01.436Z'),
+          },
+          {
+            id: '3',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-04-30T12:59:01.436Z'),
+          },
+        ];
+
+        userRepositoryMock.findOne.mockResolvedValueOnce(userMockData);
+
+        passwordRepositoryMock.find.mockResolvedValueOnce(userLastFivePassword);
+
+        // Action
+        // tslint:disable-next-line: no-string-literal
+        const result = await userService['checkIfOnlyFivePasswordsEntries'](
+          userMockData.username,
+        );
+
+        // Expected
+        expect(result).toStrictEqual(false);
+      });
+
+      test('should return false if five entries exit for a user', async () => {
+        // Setup
+        const userLastFivePassword = [
+          {
+            id: '1',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-06T12:59:01.436Z'),
+          },
+          {
+            id: '2',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZDZB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-05-02T12:59:01.436Z'),
+          },
+          {
+            id: '3',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$ZUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-04-30T12:59:01.436Z'),
+          },
+        ];
+
+        userRepositoryMock.findOne.mockResolvedValueOnce(userMockData);
+
+        passwordRepositoryMock.find.mockRejectedValueOnce(
+          new Error('The user could not be found due to a database error'),
+        );
+
+        // Action
+        try {
+          // tslint:disable-next-line: no-string-literal
+          const result = await userService['checkIfOnlyFivePasswordsEntries'](
+            userMockData.username,
+          );
+        } catch (e) {
+          const { message } = e;
+          expect(e).toBeInstanceOf(Error);
+          expect(message).toEqual(
+            'The user could not be found due to a database error',
+          );
+          expect(loggerMock.error).toHaveBeenCalled();
+        }
+
+        // Assertion
+        expect.hasAssertions();
+      });
+    });
+
+    describe('replaceOldPasswordsEntries', () => {
+      const userMockData = {
+        username: 'jean_moust',
+        email: 'toto@toto.com',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+        secret: 'MySecret',
+      };
+
+      test('should exist', () => {
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['replaceOldPasswordsEntries']).toBeDefined();
+      });
+
+      test('should replace the oldest password for a user if five entries are found', async () => {
+        // Setup
+        const updatedAt = new Date('2020-05-06T12:59:01.436Z');
+
+        const expectedLastFivePassword = {
+          id: '5',
+          username: 'jean_moust',
+          passwordHash:
+            '$2b$10$AUTB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+          updatedAt: new Date('2020-04-22T16:59:01.436Z'),
+        };
+
+        const userLastFivePassword = [
+          {
+            id: '5',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$AUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-02-30T12:59:01.436Z'),
+          },
+        ];
+
+        userRepositoryMock.findOne.mockResolvedValueOnce(userMockData);
+
+        passwordRepositoryMock.find.mockResolvedValueOnce(userLastFivePassword);
+
+        passwordRepositoryMock.update.mockResolvedValueOnce(
+          expectedLastFivePassword,
+        );
+
+        // tslint:disable-next-line: no-string-literal
+        const result = await userService['replaceOldPasswordsEntries'](
+          userLastFivePassword[0].username,
+          userLastFivePassword[0].passwordHash,
+          updatedAt,
+        );
+
+        expect(result).toStrictEqual(expectedLastFivePassword);
+      });
+
+      test('should throw an error if user data not found in password table', async () => {
+        // Setup
+        const updatedAt = new Date('2020-05-06T12:59:01.436Z');
+
+        const userLastFivePassword = [
+          {
+            id: '5',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$AUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-02-30T12:59:01.436Z'),
+          },
+        ];
+
+        userRepositoryMock.findOne.mockResolvedValueOnce(userMockData);
+
+        passwordRepositoryMock.find.mockRejectedValueOnce(
+          new Error('The user could not be found due to a database error'),
+        );
+
+        try {
+          // tslint:disable-next-line: no-string-literal
+          await userService['replaceOldPasswordsEntries'](
+            userLastFivePassword[0].username,
+            userLastFivePassword[0].passwordHash,
+            updatedAt,
+          );
+        } catch (e) {
+          const { message } = e;
+          expect(e).toBeInstanceOf(Error);
+          expect(message).toEqual(
+            'The user could not be found due to a database error',
+          );
+          expect(loggerMock.error).toHaveBeenCalled();
+        }
+
+        // Assertion
+        expect.hasAssertions();
+      });
+
+      test('throw an error if user is not found in user table', async () => {
+        // Setup
+        const updatedAt = new Date('2020-05-06T12:59:01.436Z');
+
+        const userLastFivePassword = [
+          {
+            id: '5',
+            username: 'jean_moust',
+            passwordHash:
+              '$2b$10$AUOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e',
+            updatedAt: new Date('2020-02-30T12:59:01.436Z'),
+          },
+        ];
+
+        userRepositoryMock.findOne.mockRejectedValueOnce(
+          new Error('The user could not be found due to a database error'),
+        );
+
+        try {
+          // tslint:disable-next-line: no-string-literal
+          await userService['replaceOldPasswordsEntries'](
+            userLastFivePassword[0].username,
+            userLastFivePassword[0].passwordHash,
+            updatedAt,
+          );
+        } catch (e) {
+          const { message } = e;
+          expect(e).toBeInstanceOf(Error);
+          expect(message).toEqual(
+            'The user could not be found due to a database error',
+          );
+          expect(loggerMock.error).toHaveBeenCalled();
+        }
+
+        // Assertion
+        expect.hasAssertions();
+      });
     });
   });
 });

@@ -12,4 +12,12 @@ export interface IUserService {
   compareHash(password: string, hash: string): Promise<boolean>;
   createUser(user: ICreateUserDTO): Promise<User>;
   deleteUserById(id: string): Promise<DeleteResult>;
+  isEqualToTemporaryPassword(
+    newPassword: string,
+    temporaryPasswordHash: string,
+  ): Promise<boolean>;
+  isEqualToOneOfTheLastFivePasswords(
+    currentUsername: string,
+    password: string,
+  ): Promise<boolean>;
 }

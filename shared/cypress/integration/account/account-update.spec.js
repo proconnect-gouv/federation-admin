@@ -5,6 +5,7 @@ import {
 } from '../../../../shared/cypress/support/constants';
 import { createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
+import { updatePassword } from './account-update.util';
 import { testIsCompliantPasswordUpdate } from '../../support/request';
 
 describe('Update account', () => {
@@ -12,8 +13,8 @@ describe('Update account', () => {
   const userInfo = {
     username: 'thomas',
     email: 'thomas@email.com',
-    password: 'MyNewPassword10!!',
-    confirmPassword: 'MyNewPassword10!!',
+    password: 'MyNewPassword1!!',
+    confirmPassword: 'MyNewPassword1!!',
   };
   const basicConfiguration = {
     adminRole: true,
@@ -45,7 +46,7 @@ describe('Update account', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#currentPassword', 'MyNewPassword1!!');
     cy.formType('#password', 'MyNewPassword20!!');
     cy.formType('#confirm-password', 'MyNewPassword20!!');
 
@@ -62,8 +63,8 @@ describe('Update account', () => {
     cy.contains('Mon compte').click();
 
     cy.formType('#currentPassword', 'badPassword!!');
-    cy.formType('#password', 'MyNewPassword20!!');
-    cy.formType('#confirm-password', 'MyNewPassword20!!');
+    cy.formType('#password', 'MyNewPassword22!!');
+    cy.formType('#confirm-password', 'MyNewPassword22!!');
 
     cy.get('#secret > td').then(secret =>
       cy.totp(basicConfiguration, secret[0].textContent),
@@ -80,7 +81,7 @@ describe('Update account', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#currentPassword', 'MyNewPassword1!!');
     cy.formType('#password', 'badone!!', { typeEvent: true });
     cy.get('#password').should('have.class', 'is-invalid');
     cy.formType('#confirm-password', 'badone!!');
@@ -97,7 +98,7 @@ describe('Update account', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#currentPassword', 'MyNewPassword1!!');
     cy.formType('#password', 'MyPass10!!');
     cy.formType('#confirm-password', 'badconfirmation', { typeEvent: true });
     cy.get('#confirm-password').should('have.class', 'is-invalid');
@@ -114,7 +115,7 @@ describe('Update account', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 
-    cy.formType('#currentPassword', 'MyNewPassword10!!');
+    cy.formType('#currentPassword', 'MyNewPassword1!!');
     cy.formType('#password', 'MyNewPassword20!!');
     cy.formType('#confirm-password', 'MyNewPassword20!!');
     cy.formType('#_totp', 123456);
@@ -144,6 +145,7 @@ describe('Patch update-account/:username', () => {
   afterEach(() => {
     cy.visit(`/logout`);
   });
+
   describe("is-compliant-validator", () => {
     it("should throw an error if his password is too short", () => {
       testIsCompliantPasswordUpdate(
@@ -207,4 +209,41 @@ describe('Patch update-account/:username', () => {
         });
     });
   });
-})
+});
+
+describe("isEqualToOneOfTheLastFivePasswords", () => {
+  before(() => cy.resetEnv('postgres'));
+  const userInfo = {
+    username: 'bill',
+    email: 'bill@email.com',
+    password: 'MyNewPassword10!!',
+    confirmPassword: 'MyNewPassword10!!',
+  };
+  const basicConfiguration = {
+    adminRole: true,
+    operatorRole: true,
+    securityRole: true,
+    _csrf: true,
+    submit: true,
+    confirmSuppression: true,
+    totpAccountCreate: true,
+    totpFirstLogin: true,
+    fast: true,
+  };
+  beforeEach(() => {
+    cy.login(USER_ADMIN, USER_PASS);
+    createUserAndLogWith(userInfo, basicConfiguration);
+  });
+  afterEach(() => {
+    cy.visit(`/account`);
+    cy.logout(userInfo.username);
+
+    cy.login(USER_ADMIN, USER_PASS);
+    cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+    deleteUser(userInfo.username, basicConfiguration);
+    cy.logout(USER_ADMIN);
+  });
+  it('should update password if not equal to one of the last five passwords', () => {
+    updatePassword(basicConfiguration);
+  });
+});

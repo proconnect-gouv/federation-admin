@@ -110,6 +110,20 @@ export class AccountController {
       req.body.password,
       req.user.username,
     );
+
+    const isEqualToTemporaryPassword = await this.userService.isEqualToTemporaryPassword(
+      req.body.password,
+      req.user.passwordHash,
+    );
+
+    if (isEqualToTemporaryPassword) {
+      req.flash(
+        'globalError',
+        'Votre nouveau mot de passe ne peut pas être le mot de passe temporaire.',
+      );
+      return res.redirect(`${res.locals.APP_ROOT}/account/enrollment`);
+    }
+
     if (!validPassword) {
       req.flash(
         'globalError',
@@ -201,6 +215,20 @@ export class AccountController {
       );
       return res.redirect(`${res.locals.APP_ROOT}/account/me`);
     }
+
+    const isEqualToOneOfTheLastFivePasswords = await this.userService.isEqualToOneOfTheLastFivePasswords(
+      req.user.username,
+      req.body.password,
+    );
+
+    if (isEqualToOneOfTheLastFivePasswords) {
+      req.flash(
+        'globalError',
+        "Votre nouveau mot de passe ne peut être l'un des cinq derniers mots de passe utilisés",
+      );
+      return res.redirect(`${res.locals.APP_ROOT}/account/me`);
+    }
+
     try {
       await this.userService.updateUserAccount(req.user, updateAccountDto);
     } catch (error) {

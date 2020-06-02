@@ -6,6 +6,7 @@ import { InjectConfig, ConfigService } from 'nestjs-config';
 import { v4 as uuid } from 'uuid';
 
 import { User } from './user.sql.entity';
+import { Password } from './password.sql.entity';
 import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.interface';
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
@@ -26,6 +27,8 @@ export class UserService implements IUserService {
     @Inject('generatePassword') private readonly generatePassword,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Password)
+    private readonly passwordRepository: Repository<Password>,
     private readonly logger: LoggerService,
     @InjectConfig() private readonly config: ConfigService,
     private readonly transporterService: MailerService,
@@ -71,6 +74,7 @@ export class UserService implements IUserService {
     const roles = user.roles
       .filter(role => role !== 'new_account')
       .map(role => role.replace('inactive_', ''));
+
     try {
       return await this.updatePassword(user, enrollmentPassword.password, {
         roles,
@@ -88,6 +92,7 @@ export class UserService implements IUserService {
       data.currentPassword,
       user.passwordHash,
     );
+
     if (isValidPassword) {
       try {
         return await this.updatePassword(user, data.password, {});
@@ -122,6 +127,7 @@ export class UserService implements IUserService {
     const token: string = uuid();
 
     let passwordHash;
+    const updatedAt = new Date();
     try {
       passwordHash = await bcrypt.hash(user.password, this.SALT_ROUNDS);
     } catch (err) {
@@ -149,7 +155,8 @@ export class UserService implements IUserService {
         tokenCreatedAt,
         tokenExpiresAt,
       } = this.setAuthenticationTokenExpirationDate();
-      return this.userRepository.save({
+
+      const enrolledUser = this.userRepository.save({
         passwordHash,
         username,
         email,
@@ -159,6 +166,10 @@ export class UserService implements IUserService {
         tokenCreatedAt,
         tokenExpiresAt,
       });
+
+      this.savePassword(username, passwordHash, updatedAt);
+
+      return enrolledUser;
     } catch (err) {
       throw new Error('The user could not be saved');
     }
@@ -191,14 +202,18 @@ export class UserService implements IUserService {
   ): Promise<UpdateResult> {
     const newPasswordHash = await bcrypt.hash(password, this.SALT_ROUNDS);
     let userEntity;
+
     try {
       userEntity = await this.findByUsername(username);
       userEntity.passwordHash = newPasswordHash;
       Object.assign(userEntity, userData);
       await this.userRepository.update(id, userEntity);
+      const updatedAt = new Date();
+      this.savePassword(username, newPasswordHash, updatedAt);
     } catch (err) {
       throw new Error('password could not be updated');
     }
+
     return userEntity;
   }
 
@@ -234,5 +249,132 @@ export class UserService implements IUserService {
     const tokenExpiresAt = new Date(now.getTime() + this.userTokenExpiresIn);
 
     return { tokenCreatedAt, tokenExpiresAt };
+  }
+
+  async isEqualToTemporaryPassword(
+    newPassword: string,
+    temporaryPasswordHash: string,
+  ): Promise<boolean> {
+    const compareHash = await this.compareHash(
+      newPassword,
+      temporaryPasswordHash,
+    );
+
+    return compareHash;
+  }
+
+  async isEqualToOneOfTheLastFivePasswords(
+    currentUsername: string,
+    password: string,
+  ): Promise<boolean> {
+    const updatedAt: Date = new Date();
+    let isSame: boolean = false;
+    let isInPasswordList: boolean = false;
+    let userLastFivePassword: Password[] = [];
+
+    const { username } = await this.findByUsername(currentUsername);
+    try {
+      userLastFivePassword = await this.passwordRepository.find({
+        username,
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The user could not be found due to a database error');
+    }
+
+    for (const entry of userLastFivePassword) {
+      if (await this.compareHash(password, entry.passwordHash)) {
+        isSame = true;
+      }
+    }
+
+    if ((await this.checkIfOnlyFivePasswordsEntries(username)) && !isSame) {
+      this.replaceOldPasswordsEntries(username, password, updatedAt);
+    }
+
+    if (isSame) {
+      return (isInPasswordList = true);
+    }
+
+    return isInPasswordList;
+  }
+
+  private async savePassword(
+    username: string,
+    passwordHash: string,
+    updatedAt: Date,
+  ): Promise<Password> {
+    try {
+      if (!(await this.checkIfOnlyFivePasswordsEntries(username))) {
+        return await this.passwordRepository.save({
+          username,
+          passwordHash,
+          updatedAt,
+        });
+      }
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error(`Cannot Save data in database`);
+    }
+  }
+
+  private async checkIfOnlyFivePasswordsEntries(
+    username: string,
+  ): Promise<boolean> {
+    const passwordRecordLimit: number = 5;
+    let userLastFivePassword: Password[];
+    let haveFiveEntires: boolean = false;
+    try {
+      userLastFivePassword = await this.passwordRepository.find({
+        username,
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The user could not be found due to a database error');
+    }
+    if (userLastFivePassword.length === passwordRecordLimit) {
+      haveFiveEntires = true;
+    }
+
+    return haveFiveEntires;
+  }
+
+  private async replaceOldPasswordsEntries(
+    username: string,
+    password: string,
+    updatedAt: Date,
+  ): Promise<UpdateResult> {
+    let oldestPasswordEntity: Password[];
+
+    try {
+      oldestPasswordEntity = await this.passwordRepository.find({
+        where: {
+          username,
+        },
+        order: {
+          updatedAt: 'ASC',
+        },
+        take: 1,
+      });
+
+      oldestPasswordEntity[0].passwordHash = await bcrypt.hash(
+        password,
+        this.SALT_ROUNDS,
+      );
+      oldestPasswordEntity[0].updatedAt = updatedAt;
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error('The user could not be found due to a database error');
+    }
+
+    try {
+      return await this.passwordRepository.update(
+        oldestPasswordEntity[0].id,
+        oldestPasswordEntity[0],
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error(`Cannot Save data in database`);
+    }
   }
 }
