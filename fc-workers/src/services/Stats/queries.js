@@ -146,6 +146,11 @@ export const getByIntervalByFIFS = params => {
               { typeAction: { terms: { field: 'type_action' } } },
               { action: { terms: { field: 'action' } } },
               { fs: { terms: { field: 'fs', missing_bucket: true } } },
+              {
+                'fs_label': {
+                  terms: { field: 'fs_label.raw', missing_bucket: true },
+                },
+              },
               { fi: { terms: { field: 'fi', missing_bucket: true } } },
             ],
           },
