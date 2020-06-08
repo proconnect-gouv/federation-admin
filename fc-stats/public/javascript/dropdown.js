@@ -87,7 +87,7 @@ function generateHTML(item, hidden = false) {
         data-form="search"
         ${item.checked ? 'checked' : ''}>
       <label class="custom-control-label justify-content-start" for="${name}${item.value}">
-        ${item.label || item.key}
+        ${item.key}
       </label>
     </div>
   `;

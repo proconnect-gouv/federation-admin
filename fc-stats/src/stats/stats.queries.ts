@@ -156,7 +156,6 @@ export class StatsQueries {
           this.generateSort('date', 'asc'),
           this.generateSort('fi', 'asc'),
           this.generateSort('fs', 'asc'),
-          this.generateSort('fs_label.keyword', 'asc'),
           this.generateSort('typeAction', 'asc'),
           this.generateSort('action', 'asc'),
         ],
@@ -173,7 +172,6 @@ export class StatsQueries {
           // Side aggregations to list availables values for filters in UI
           fi: this.generateAggregation('fi'),
           fs: this.generateAggregation('fs'),
-          fsLabel: this.generateAggregation('fs_label.keyword'),
           typeAction: this.generateAggregation('typeAction'),
           action: this.generateAggregation('action'),
         },

@@ -77,7 +77,6 @@ export class StatsService {
     /** Get filters menu data */
     const total = data.hits.total;
     const fsList = this.getAggregate(data, 'fs');
-    const fsLabelList = this.getAggregate(data, 'fsLabel');
     const fiList = this.getAggregate(data, 'fi');
     const actionList = this.getAggregate(data, 'action');
     const typeActionList = this.getAggregate(data, 'typeAction');
@@ -85,7 +84,6 @@ export class StatsService {
     const meta: EventMetaDTO = {
       total,
       fsList,
-      fsLabelList,
       fiList,
       actionList,
       typeActionList,

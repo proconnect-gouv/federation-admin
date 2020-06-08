@@ -67,7 +67,7 @@ function computeFilterValues(items, key) {
             key: 'fs',
             type: 'multiple',
             valueType: 'composed',
-            values: computeFilterValues(locals.meta.fsLabelList, 'fs')
+            values: computeFilterValues(locals.meta.fsList, 'fs')
           }) %>
           <%- include('../partials/dropdown', {
             name: 'filters[]',
