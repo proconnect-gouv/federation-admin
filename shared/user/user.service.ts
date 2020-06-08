@@ -135,7 +135,7 @@ export class UserService implements IUserService {
     }
 
     try {
-      this.sendNewAccountEmail(
+      await this.sendNewAccountEmail(
         { username, email },
         {
           templateName: 'enrollment',
