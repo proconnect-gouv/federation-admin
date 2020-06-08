@@ -2,7 +2,7 @@ module.exports = {
   // Size of chunks sent to elastic
   CHUNK_SIZE: 400,
   // values for the keys property
-  KEYS: ['account', 'activeAccount', 'desactivated'],
+  KEYS: ['account', 'activeAccount', 'disabled'],
   // Values for the range property
   RANGES: ['day', 'week', 'month', 'year'],
   // Min values per range

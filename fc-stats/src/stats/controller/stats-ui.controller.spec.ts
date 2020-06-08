@@ -101,11 +101,6 @@ describe('StatsUIController', () => {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          fsLabel: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
           action: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -142,7 +137,6 @@ describe('StatsUIController', () => {
           date: aggregations.date,
           fi: { buckets: [] },
           fs: { buckets: [] },
-          fsLabel: { buckets: [] },
           action: { buckets: [] },
           typeAction: { buckets: [] },
         },
@@ -195,9 +189,6 @@ describe('StatsUIController', () => {
           fs: {
             buckets: [],
           },
-          fsLabel: {
-            buckets: [],
-          },
           action: {
             buckets: [],
           },
@@ -247,9 +238,6 @@ describe('StatsUIController', () => {
             buckets: [],
           },
           fs: {
-            buckets: [],
-          },
-          fsLabel: {
             buckets: [],
           },
           action: {

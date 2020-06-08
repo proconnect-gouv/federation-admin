@@ -155,11 +155,6 @@ describe('StatsService', () => {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          fsLabel: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
           action: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -216,11 +211,6 @@ describe('StatsService', () => {
             buckets: [],
           },
           fs: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          fsLabel: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [],

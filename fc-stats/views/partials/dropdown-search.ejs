@@ -1,17 +1,9 @@
 <%
 const { filters = [] } = params;
+
 const result = filters
   .filter(({ key: k }) => k === key)
   .map(({ value }) => value);
-
-if (locals.mapping) {
-  locals.values = locals.values.map(item => {
-    return {
-      ...item,
-      label: locals.helpers.getMapped(mapping, item.key)
-    }
-  })
-} 
 %>
 <div id="<%= key %>-dropdown" class="dropdown m-1">
   <button class="btn btn-<%= locals.className || 'secondary' %> btn-sm dropdown-toggle search"
@@ -59,8 +51,7 @@ if (locals.mapping) {
       </div>
 
       <div class="dropdown-container">
-        <% 
-        values
+        <% values
              .filter(item => result.includes(item.key))
              .map(item => {
         %>
