@@ -10,7 +10,8 @@ global-install:
     - yarn install
     - yarn lint
     - yarn test --coverage
-  coverage: /All\sfiles.*?\s+(\d+.\d+)/
+    - ./node-scripts/coverage.sh
+  coverage: '/Global coverage is: \[([\d\.]+)%\]/'
   artifacts:
     paths:
       - node_modules
