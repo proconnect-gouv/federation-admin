@@ -1,5 +1,5 @@
 module.exports = {
-  CHUNK_SIZE: 400,
+  CHUNK_SIZE: 100,
   IDPS: [
     'dgfip',
     'ameli',
@@ -49,4 +49,16 @@ module.exports = {
     { type_action: 'rejectedSyntaxErrors', action: 'rnippCheck' },
   ],
   RNIPP_RESULT: [2, 3, 4, 5, 6, 7, 8],
+  CITY: [
+    'Boulogne Billancourt',
+    'Fréjus',
+    'Brest',
+    'Limoges',
+    'Marseille',
+    'Mayotte',
+    'Strasbourg',
+    'Calais',
+    'Fort-de-France',
+    'Bordeaux',
+  ],
 };
