@@ -33,16 +33,25 @@ function addDays(from, days) {
   return date;
 }
 
-function generate(start, stop) {
+function trace(...args) {
+  // eslint-disable-next-line no-console
+  console.log(' > ', ...args);
+}
+
+async function generate(start, stop) {
   let day = new Date(start);
   let docs = [];
 
+  trace('Start generating data');
   while (day.toISOString() <= stop.toISOString()) {
     docs = docs.concat(generateDay(day));
     day = addDays(day, 1);
   }
+  trace('Data generated');
 
-  indexDocs(docs);
+  trace('initiate sending data to Elasticsearch');
+  await indexDocs(docs);
+  trace('...Metrics done');
 }
 
 function generateDay(day) {
@@ -97,12 +106,14 @@ async function indexDocs(list) {
     bulk.push(JSON.stringify(doc));
 
     if (bulk.length >= CHUNK_SIZE * 2) {
+      trace(`${bulk.length} docs in progress...`);
       bulkList.push(sendToElastic(bulk));
       bulk = [];
     }
   });
 
   if (bulk.length > 0) {
+    trace(`${bulk.length} docs in progress...`);
     bulkList.push(sendToElastic(bulk));
   }
 
@@ -113,6 +124,7 @@ function sendToElastic(bulk) {
   const body = `${bulk.join('\n')}\n`;
   const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://elasticsearch:9200/_bulk' --data-binary '${body}'; echo`;
 
+  // eslint-disable-next-line no-console
   return exec(command).catch(console.error);
 }
 

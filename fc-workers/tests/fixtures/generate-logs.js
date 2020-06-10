@@ -1,29 +1,85 @@
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
 const crypto = require('crypto');
+const axios = require('axios');
+const elasticsearch = require('elasticsearch');
+
+const DEFAULT_PORT = 9200;
+const LIST_HOSTS = [
+  {
+    host: 'elasticsearch',
+    protocol: 'http',
+    port: DEFAULT_PORT,
+  },
+  {
+    host: 'fc_elasticsearch_1',
+    protocol: 'http',
+    port: DEFAULT_PORT,
+  },
+  {
+    host: 'localhost',
+    protocol: 'http',
+    port: DEFAULT_PORT,
+  },
+];
+
+let ESClient;
+/**
+ * function used to find the good elasticsearch host from different context
+ * ex: docker, local stack, or CI
+ */
+async function reachHost() {
+  // Test all hosts possible
+  const findOneHosts = LIST_HOSTS.map(async client => {
+    const url =
+      typeof client === 'string'
+        ? client
+        : `${client.protocol}://${client.host}:${client.port}`;
+    try {
+      await axios.options(url);
+      return client;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  // grab the first host available
+  const selectedHost = (await Promise.all(findOneHosts))
+    .filter(f => f)
+    .map(url => ({ host: url }))
+    .pop();
+
+  if (!selectedHost) {
+    const hosts = LIST_HOSTS.map(h => JSON.stringify(h)).join(', ');
+    throw new Error(
+      `no available host was find in [${hosts}], please check the config file`
+    );
+  }
+  return selectedHost;
+}
+
 const {
   CHUNK_SIZE,
   IDPS,
   SPS,
+  CITY,
   ACTIONS,
   RNIPP_RESULT,
 } = require('./generate-logs.conf');
 
 let COUNTER = 0;
 
-const ACCOUNTS = [];
+let ACCOUNTS = [];
 
 function generateAccounts(count) {
-  const numberToGenerate = Math.ceil(count / 10);
+  const nbToGen = Math.ceil(count / 10);
 
-  for (let i = 0; i < numberToGenerate; i++) {
-    ACCOUNTS.push(
-      crypto
-        .createHash('sha256')
-        .update(`${i}${new Date().toISOString()}`)
-        .digest('hex')
-    );
-  }
+  // generate range between 0 and nbToGen in an Array
+  const rangeOfAccounts = [...Array(nbToGen).keys()];
+  return rangeOfAccounts.map(i =>
+    crypto
+      .createHash('sha256')
+      .update(`${i}${new Date().toISOString()}`)
+      .digest('hex')
+  );
 }
 
 function pickOne(list) {
@@ -31,10 +87,16 @@ function pickOne(list) {
   return list[index];
 }
 
-function random(min, max) {
-  min = Math.ceil(min * 100);
-  max = Math.floor(max * 100);
-  return (Math.floor(Math.random() * (max - min + 1)) + min) / 100;
+/**
+ * Generic function to get random value in a range with any precision
+ * @param {*} minValue min value
+ * @param {*} maxValue max value
+ * @param {*} precision number of digit after the comma
+ */
+function random(minValue, maxValue, precision = 2) {
+  const min = Math.ceil(minValue * 10 ** precision);
+  const max = Math.floor(maxValue * 10 ** precision);
+  return (Math.floor(Math.random() * (max - min + 1)) + min) / 10 ** precision;
 }
 
 function randomTime(inputDate) {
@@ -51,39 +113,79 @@ function randomTime(inputDate) {
 }
 
 function appendRnippStatus(entry) {
-  if (entry.action === 'rnippCheck') {
-    return Object.assign(
-      {
-        rnippReturnValue: pickOne(RNIPP_RESULT),
-      },
-      entry
-    );
-  }
-
-  return entry;
+  return entry.action === 'rnippCheck'
+    ? { ...entry, rnippReturnValue: pickOne(RNIPP_RESULT) }
+    : entry;
 }
 
 function appendAccountId(entry) {
-  if (entry.type_action === 'initial') {
-    return Object.assign(
-      {
-        accountId: pickOne(ACCOUNTS),
-      },
-      entry
-    );
-  }
-
-  return entry;
+  return entry.type_action === 'initial'
+    ? { ...entry, accountId: pickOne(ACCOUNTS) }
+    : entry;
 }
 
+function randomID() {
+  return random(1000, 9999, 0);
+}
+
+function randomIPS(nb = 3) {
+  const num = () => random(0, 255, 0);
+  const ip = () => `${num()}.${num()}.${num()}.${num()}`;
+  return [...Array(Math.ceil(Math.random() * nb)).keys()]
+    .map(() => ip())
+    .join(', ');
+}
+
+/**
+ * Generate false date from mapping of ElasticSearch
+ * @see /Infra/ansible/roles/elasticsearch/files/create_index_business.json
+ * don't add unknow field to document or insertion of doc will failed
+ */
 function generateDocument(day) {
-  const { action, type_action } = pickOne(ACTIONS);
+  // Default template of data for a log in ES
+  const basic = {
+    v: 0,
+    type: 'log',
+    tags: ['beats_input_raw_event'],
+    hostname: 'fcexpndjs03',
+    offset: 1636102,
+    name: 'FranceConnect',
+    count: 1,
+    msg: '',
+    level: 30,
+    '@version': '1',
+    beat: {
+      name: 'fcopras01',
+      hostname: 'fcopras01',
+    },
+    geoloc_country_iso_code: 'FR',
+    host: { name: 'prod-sanctuaire-01' },
+  };
+
+  const { action, type_action: type } = pickOne(ACTIONS);
   const fi = pickOne(IDPS);
   const fs = pickOne(SPS);
   const time = randomTime(day);
+  const eidas = pickOne([1, 2, 3]);
+  const geoloc = pickOne(CITY);
+  const pid = randomID();
+  const userIp = randomIPS();
 
   return appendRnippStatus(
-    appendAccountId({ fi, fs, action, type_action, time })
+    appendAccountId({
+      ...basic,
+      pid,
+      fi,
+      fs,
+      fs_label: fs,
+      fi_label: fi,
+      action,
+      type_action: type,
+      time,
+      eidas,
+      geoloc_city_name: geoloc,
+      userIp,
+    })
   );
 }
 
@@ -101,15 +203,6 @@ function getDateRangeArray(start, stop) {
   return range;
 }
 
-async function generate(start, stop, countPerDay, variation) {
-  const range = getDateRangeArray(start, stop);
-  const total = range.length * countPerDay;
-
-  generateAccounts(30);
-
-  subGenerate(total, [], range, countPerDay, variation);
-}
-
 function getDocToGenerateCount(countPerDay, variation) {
   const loopVariation = 1 + random(0 - variation, variation);
 
@@ -118,18 +211,43 @@ function getDocToGenerateCount(countPerDay, variation) {
   return count;
 }
 
+async function indexDocs(list) {
+  const bulk = [];
+  const bulkList = [];
+
+  const header = {
+    index: { _index: 'franceconnect' },
+  };
+
+  list.forEach(doc => {
+    bulk.push(JSON.stringify(header));
+    bulk.push(JSON.stringify(doc));
+
+    if (bulk.length >= CHUNK_SIZE * 2) {
+      bulkList.push(ESClient.bulk({ refresh: true, body: bulk }));
+      bulk.length = 0;
+    }
+  });
+
+  if (bulk.length) {
+    bulkList.push(ESClient.bulk({ refresh: true, body: bulk }));
+  }
+
+  return Promise.all(bulkList);
+}
+
 async function subGenerate(total, documents, range, countPerDay, variation) {
-  if (range.length === 0) {
-    if (documents.length > 0) {
-      indexDocs(documents);
+  if (!range.length) {
+    if (documents.length) {
+      await indexDocs(documents);
     }
     return;
   }
   const day = range.pop();
   const count = getDocToGenerateCount(countPerDay, variation);
 
-  for (let i = 0; i < count; i++) {
-    COUNTER++;
+  COUNTER += count;
+  for (let i = 0; i < count; i += 1) {
     documents.push(generateDocument(day));
   }
 
@@ -140,7 +258,7 @@ async function subGenerate(total, documents, range, countPerDay, variation) {
   );
 
   if (documents.length >= CHUNK_SIZE) {
-    indexDocs(documents).then(() => {
+    await indexDocs(documents).then(() => {
       setTimeout(() => {
         subGenerate(total, [], range, countPerDay, variation);
       }, 0);
@@ -152,35 +270,17 @@ async function subGenerate(total, documents, range, countPerDay, variation) {
   }
 }
 
-async function indexDocs(list) {
-  let bulk = [];
-  const bulkList = [];
+async function generate(start, stop, countPerDay, variation) {
+  // localhost:9200 is the default URL of ElasticSearch server
+  const host = await reachHost();
+  ESClient = new elasticsearch.Client(host);
 
-  list.forEach(doc => {
-    const header = {
-      index: { _index: 'franceconnect', _id: doc._id },
-    };
-    bulk.push(JSON.stringify(header));
-    bulk.push(JSON.stringify(doc));
+  const range = getDateRangeArray(start, stop);
+  const total = range.length * countPerDay;
 
-    if (bulk.length >= CHUNK_SIZE * 2) {
-      bulkList.push(sendToElastic(bulk));
-      bulk = [];
-    }
-  });
+  ACCOUNTS = generateAccounts(30);
 
-  if (bulk.length > 0) {
-    bulkList.push(sendToElastic(bulk));
-  }
-
-  return Promise.all(bulkList);
-}
-
-function sendToElastic(bulk) {
-  const body = `${bulk.join('\n')}\n`;
-  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://elasticsearch:9200/_bulk' --data-binary '${body}'; echo`;
-
-  return exec(command).catch(console.error);
+  await subGenerate(total, [], range, countPerDay, variation);
 }
 
 const [, , start, stop, countPerDay, variation] = process.argv;
