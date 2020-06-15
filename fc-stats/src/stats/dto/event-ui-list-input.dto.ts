@@ -53,16 +53,18 @@ export class EventUIListInputDTO {
   readonly visualize?: string = 'list';
 
   @IsString()
-  @IsIn(['', 'date', 'fi', 'fs', 'action', 'typeAction'])
+  @IsIn(['', 'date', 'fi', 'fs', 'fs_label.keyword', 'action', 'typeAction'])
   readonly x?: string = 'date';
 
   @IsString()
-  @IsIn(['date', 'fi', 'fs', 'action', 'typeAction'])
+  @IsIn(['date', 'fi', 'fs', 'fs_label.keyword', 'action', 'typeAction'])
   readonly y?: string = 'fs';
 
   @IsOptional()
   @IsArray()
-  @IsIn(['fi', 'fs', 'action', 'typeAction'], { each: true })
+  @IsIn(['fi', 'fs', 'fs_label.keyword', 'action', 'typeAction'], {
+    each: true,
+  })
   readonly columns: string[] = ['fi', 'action'];
 
   @IsOptional()

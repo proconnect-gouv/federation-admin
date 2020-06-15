@@ -55,7 +55,7 @@ export const MAPPINGS = {
   columns: {
     events: {
       fi: 'FI',
-      fs: 'FS',
+      'fs_label.keyword': 'FS',
       action: 'Action',
       typeAction: "Type d'action",
     },
