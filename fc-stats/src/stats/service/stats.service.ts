@@ -45,9 +45,9 @@ export class StatsService {
 
   async getMetrics(params: StatsServiceParams): Promise<MetricUIListOutputDTO> {
     const query: SearchParams = this.statsQueries.getMetrics(params);
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
+    const data: SearchResponse<any> = await this.elasticsearchService
+      .getClient()
+      .search(query);
 
     const stats = data.hits.hits.map(doc =>
       plainToClass(MetricDTO, doc._source),
@@ -65,9 +65,9 @@ export class StatsService {
 
   async getEvents(params: StatsServiceParams): Promise<EventUIListOutputDTO> {
     const query: SearchParams = this.statsQueries.getEvents(params);
-    const data: SearchResponse<
-      any
-    > = await this.elasticsearchService.getClient().search(query);
+    const data: SearchResponse<any> = await this.elasticsearchService
+      .getClient()
+      .search(query);
 
     const stats: EventDTO[] = StatsService.aggregationsToDocuments(
       params,
