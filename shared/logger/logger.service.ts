@@ -16,7 +16,14 @@ export class LoggerService extends Logger {
     }
 
     logger = pino(
-      { useLevelLabels: true, level },
+      {
+        formatters: {
+          level(label: string) {
+            return { level: label };
+          },
+        },
+        level,
+      },
       pino.destination(this.config.get('logger.path')),
     );
   }

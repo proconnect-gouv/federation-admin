@@ -84,7 +84,7 @@ export class LocalsInterceptor implements NestInterceptor {
       return 'Toute la période';
     }
 
-    const date = moment(input);
+    const date = moment(new Date(input));
 
     if (!date.isValid()) {
       throw Error(`Invalid date: <${input}>`);

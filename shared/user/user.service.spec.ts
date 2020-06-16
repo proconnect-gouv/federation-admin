@@ -117,6 +117,8 @@ describe('UserService', () => {
     userService = await module.get<UserService>(UserService);
 
     jest.resetAllMocks();
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
 
     jest.spyOn(uuid, 'v4').mockReturnValueOnce(mockToken);
   });
@@ -302,7 +304,14 @@ describe('UserService', () => {
   });
 
   describe('createUser', () => {
+    beforeEach(() => {
+      // need to mock the private mthod
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn();
+    });
+
     it('creates the user', async () => {
+      // setup
       const userMock: ICreateUserDTO = {
         username: 'jean_moust',
         email: 'jean@moust.lol',
@@ -329,7 +338,10 @@ describe('UserService', () => {
 
       userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
 
+      // action
       await userService.createUser(userMock);
+
+      // expect
       expect(userRepositoryMock.save).toHaveBeenCalledTimes(1);
       const { passwordHash } = userRepositoryMock.save.mock.calls[0][0];
       expect(bcrypt.compare(userMock.password, passwordHash)).toBeTruthy();
@@ -495,6 +507,9 @@ describe('UserService', () => {
         password: 'MyPasswordIsValid10!!',
         passwordConfirmation: 'MyPasswordIsValid10!!',
       };
+      // need to mock private call
+      // tslint:disable-next-line: no-string-literal
+      userService['compareHash'] = jest.fn().mockResolvedValueOnce(true);
       userService.updatePassword = jest.fn().mockResolvedValue(true);
 
       // action
@@ -516,6 +531,9 @@ describe('UserService', () => {
         password: 'MyPasswordIsValid10!!',
         passwordConfirmation: 'MyPasswordIsValid10!!',
       };
+      // need to mock private call
+      // tslint:disable-next-line: no-string-literal
+      userService['compareHash'] = jest.fn().mockResolvedValueOnce(true);
       userService.updatePassword = jest.fn().mockRejectedValue(false);
 
       // action
@@ -541,6 +559,9 @@ describe('UserService', () => {
       const userMock = {
         passwordHash: 'y/cvxrzo6dRMIMD4dgdOGci',
       };
+      // need to mock private call
+      // tslint:disable-next-line: no-string-literal
+      userService['compareHash'] = jest.fn().mockResolvedValueOnce(false);
       userService.updatePassword = jest.fn().mockResolvedValue(true);
 
       // action
@@ -560,7 +581,13 @@ describe('UserService', () => {
   });
 
   describe('updatePassword', () => {
-    it('should update a user password', async () => {
+    beforeEach(() => {
+      // need to mock the private mthod
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn();
+    });
+
+    it('should call userRepositoryMock.update', async () => {
       // setup
       const dataMock: IUserPasswordUpdateDTO = {
         currentPassword: 'MyPass20!!',
@@ -574,6 +601,9 @@ describe('UserService', () => {
         passwordHash:
           '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
       });
+      // need to mock the private mthod
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn().mockResolvedValueOnce('ok');
 
       // action
       const result = await userService.updatePassword(
@@ -583,7 +613,48 @@ describe('UserService', () => {
       );
 
       // assert
+      // need to test the private
+      // tslint:disable-next-line: no-string-literal
       expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Object);
+    });
+
+    it('should update a user password in connections failed historic', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.findByUsername = jest.fn().mockResolvedValue({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
+      });
+      // need to mock the private mthod
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn().mockResolvedValueOnce('ok');
+
+      // action
+      const result = await userService.updatePassword(
+        user,
+        dataMock.password,
+        dataMock,
+      );
+
+      // assert
+      // need to test the private
+      // tslint:disable-next-line: no-string-literal
+      expect(userService['savePassword']).toHaveBeenCalledTimes(1);
+      // need to test the private
+      // tslint:disable-next-line: no-string-literal
+      expect(userService['savePassword']).toHaveBeenCalledWith(
+        'fred',
+        expect.any(String),
+        expect.any(Date),
+      );
       expect(result).toBeInstanceOf(Object);
     });
 
@@ -601,7 +672,9 @@ describe('UserService', () => {
         passwordHash:
           '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
       });
-      userRepositoryMock.update = jest.fn().mockRejectedValueOnce(false);
+      // need to mock the private method
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn().mockRejectedValueOnce(false);
 
       // action
       try {
@@ -610,7 +683,16 @@ describe('UserService', () => {
         const message = err.message;
 
         // assert
-        expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
+        // need to test the private mthod
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['savePassword']).toHaveBeenCalledTimes(1);
+        // need to test the private
+        // tslint:disable-next-line: no-string-literal
+        expect(userService['savePassword']).toHaveBeenCalledWith(
+          'fred',
+          expect.any(String),
+          expect.any(Date),
+        );
         expect(message).toEqual('password could not be updated');
       }
       expect.hasAssertions();
@@ -662,11 +744,11 @@ describe('UserService', () => {
       '$2b$10$ZDOB7VgNYb.L3mTyf2yQduc9X6AItJmYhEFD0ea30kVXEURcJi31e';
 
     describe('isEqualToTemporaryPassword', () => {
-      test('should exist', () => {
+      it('should exist', () => {
         expect(userService.isEqualToTemporaryPassword).toBeDefined();
       });
 
-      test('should return true if temporay password is the same as new password', async () => {
+      it('should return true if temporay password is the same as new password', async () => {
         // Action
         const result = await userService.isEqualToTemporaryPassword(
           'georgesmoustaki',
@@ -677,7 +759,7 @@ describe('UserService', () => {
         expect(result).toStrictEqual(true);
       });
 
-      test('should return false if temporay password is different from new password', async () => {
+      it('should return false if temporay password is different from new password', async () => {
         // Action
         const result = await userService.isEqualToTemporaryPassword(
           'georges',
@@ -690,11 +772,11 @@ describe('UserService', () => {
     });
 
     describe('isEqualToOneOfTheLastFivePasswords', () => {
-      test('should exist', () => {
+      it('should exist', () => {
         expect(userService.isEqualToOneOfTheLastFivePasswords).toBeDefined();
       });
 
-      test('should return true if current password is find in database', async () => {
+      it('should return true if current password is find in database', async () => {
         // Setup
         userRepositoryMock.findOne.mockImplementation(() =>
           Promise.resolve({
@@ -739,7 +821,7 @@ describe('UserService', () => {
         expect(result).toStrictEqual(true);
       });
 
-      test('should return false if current password is not find in database', async () => {
+      it('should return false if current password is not find in database', async () => {
         // Setup
         userRepositoryMock.findOne.mockImplementation(() =>
           Promise.resolve({
@@ -783,34 +865,113 @@ describe('UserService', () => {
     });
 
     describe('savePassword', () => {
-      test('should exist', () => {
-        // tslint:disable-next-line: no-string-literal
-        expect(userService['savePassword']).toBeDefined();
-      });
-
-      test('should save passwordHash in password table', async () => {
+      it('should call checkIfOnlyFivePasswordsEntries', async () => {
         // Setup
-        // tslint:disable-next-line: no-string-literal
-        userService['savePassword'] = jest.fn();
-
+        userService[
+          // need to mock the private method
+          // tslint:disable-next-line: no-string-literal
+          'checkIfOnlyFivePasswordsEntries'
+        ] = jest.fn().mockResolvedValueOnce(false);
+        passwordRepositoryMock.save.mockResolvedValueOnce(true);
         const updatedAt = new Date();
+
         // Action
         // tslint:disable-next-line: no-string-literal
         await userService['savePassword'](username, passwordHash, updatedAt);
 
         // Expected
+        expect(
+          // tslint:disable-next-line: no-string-literal
+          userService['checkIfOnlyFivePasswordsEntries'],
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          // tslint:disable-next-line: no-string-literal
+          userService['checkIfOnlyFivePasswordsEntries'],
+        ).toHaveBeenCalledWith(username);
+      });
+
+      it('should call passwordRepository.save', async () => {
+        // Setup
+        userService[
+          // need to mock the private method
+          // tslint:disable-next-line: no-string-literal
+          'checkIfOnlyFivePasswordsEntries'
+        ] = jest.fn().mockResolvedValueOnce(false);
+        passwordRepositoryMock.save.mockResolvedValueOnce(true);
+        const updatedAt = new Date();
+
+        // Action
         // tslint:disable-next-line: no-string-literal
-        expect(userService['savePassword']).toHaveBeenCalledTimes(1);
-        // tslint:disable-next-line: no-string-literal
-        expect(userService['savePassword']).toHaveBeenCalledWith(
+        await userService['savePassword'](username, passwordHash, updatedAt);
+
+        // Expected
+        expect(
+          // tslint:disable-next-line: no-string-literal
+          passwordRepositoryMock.save,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          // tslint:disable-next-line: no-string-literal
+          passwordRepositoryMock.save,
+        ).toHaveBeenCalledWith({
           username,
           passwordHash,
           updatedAt,
-        );
+        });
       });
 
-      test('should throw an error if passwordHash can be saved in database', async () => {
+      it('should not call passwordRepositoryMock.save if checkIfOnlyFivePasswordsEntries resolves to true', async () => {
         // Setup
+        userService[
+          // need to mock the private method
+          // tslint:disable-next-line: no-string-literal
+          'checkIfOnlyFivePasswordsEntries'
+        ] = jest.fn().mockResolvedValueOnce(true);
+        passwordRepositoryMock.save.mockRejectedValueOnce('failed');
+
+        const updatedAt = new Date();
+
+        // action
+        // tslint:disable-next-line: no-string-literal
+        await userService['savePassword'](username, passwordHash, updatedAt);
+
+        // expect
+        expect(
+          // tslint:disable-next-line: no-string-literal
+          passwordRepositoryMock.save,
+        ).toHaveBeenCalledTimes(0);
+      });
+
+      it('should throw an error if checkIfOnlyFivePasswordsEntries reject', async () => {
+        // Setup
+        userService[
+          // need to mock the private method
+          // tslint:disable-next-line: no-string-literal
+          'checkIfOnlyFivePasswordsEntries'
+        ] = jest.fn().mockRejectedValueOnce(false);
+
+        const updatedAt = new Date();
+        // action
+        try {
+          // tslint:disable-next-line: no-string-literal
+          await userService['savePassword'](username, passwordHash, updatedAt);
+        } catch (e) {
+          expect(e).toBeInstanceOf(Error);
+          const { message } = e;
+          expect(message).toEqual('Cannot Save data in database');
+          expect(loggerMock.error).toHaveBeenCalled();
+        }
+
+        // assertion
+        expect.hasAssertions();
+      });
+
+      it('should throw an error if passwordHash can be saved in database', async () => {
+        // Setup
+        userService[
+          // need to mock the private method
+          // tslint:disable-next-line: no-string-literal
+          'checkIfOnlyFivePasswordsEntries'
+        ] = jest.fn().mockResolvedValueOnce(false);
         passwordRepositoryMock.save.mockRejectedValueOnce('failed');
 
         const updatedAt = new Date();
@@ -840,12 +1001,12 @@ describe('UserService', () => {
         secret: 'MySecret',
       };
 
-      test('should exist', () => {
+      it('should exist', () => {
         // tslint:disable-next-line: no-string-literal
         expect(userService['checkIfOnlyFivePasswordsEntries']).toBeDefined();
       });
 
-      test('should return true if five entries exit for a user', async () => {
+      it('should return true if five entries exit for a user', async () => {
         // Setup
         const userLastFivePassword = [
           {
@@ -896,7 +1057,7 @@ describe('UserService', () => {
         expect(result).toStrictEqual(true);
       });
 
-      test('should return false if five entries exit for a user', async () => {
+      it('should return false if five entries exit for a user', async () => {
         // Setup
         const userLastFivePassword = [
           {
@@ -936,7 +1097,7 @@ describe('UserService', () => {
         expect(result).toStrictEqual(false);
       });
 
-      test('should return false if five entries exit for a user', async () => {
+      it('should return false if five entries exit for a user', async () => {
         // Setup
         const userLastFivePassword = [
           {
@@ -998,12 +1159,12 @@ describe('UserService', () => {
         secret: 'MySecret',
       };
 
-      test('should exist', () => {
+      it('should exist', () => {
         // tslint:disable-next-line: no-string-literal
         expect(userService['replaceOldPasswordsEntries']).toBeDefined();
       });
 
-      test('should replace the oldest password for a user if five entries are found', async () => {
+      it('should replace the oldest password for a user if five entries are found', async () => {
         // Setup
         const updatedAt = new Date('2020-05-06T12:59:01.436Z');
 
@@ -1043,7 +1204,7 @@ describe('UserService', () => {
         expect(result).toStrictEqual(expectedLastFivePassword);
       });
 
-      test('should throw an error if user data not found in password table', async () => {
+      it('should throw an error if user data not found in password table', async () => {
         // Setup
         const updatedAt = new Date('2020-05-06T12:59:01.436Z');
 
@@ -1083,7 +1244,7 @@ describe('UserService', () => {
         expect.hasAssertions();
       });
 
-      test('throw an error if user is not found in user table', async () => {
+      it('throw an error if user is not found in user table', async () => {
         // Setup
         const updatedAt = new Date('2020-05-06T12:59:01.436Z');
 

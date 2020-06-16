@@ -167,7 +167,7 @@ export class UserService implements IUserService {
         tokenExpiresAt,
       });
 
-      this.savePassword(username, passwordHash, updatedAt);
+      await this.savePassword(username, passwordHash, updatedAt);
 
       return enrolledUser;
     } catch (err) {
@@ -204,12 +204,12 @@ export class UserService implements IUserService {
     let userEntity;
 
     try {
+      const updatedAt = new Date();
+      await this.savePassword(username, newPasswordHash, updatedAt);
       userEntity = await this.findByUsername(username);
       userEntity.passwordHash = newPasswordHash;
       Object.assign(userEntity, userData);
       await this.userRepository.update(id, userEntity);
-      const updatedAt = new Date();
-      this.savePassword(username, newPasswordHash, updatedAt);
     } catch (err) {
       throw new Error('password could not be updated');
     }

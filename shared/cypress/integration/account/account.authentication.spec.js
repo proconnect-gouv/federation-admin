@@ -1005,8 +1005,8 @@ describe('Authentication failures', () => {
               { fast: true },
             );
             cy.get('button[type="submit"]').click();
-            cy.get('#password').type(tmpPassword[0].textContent);
-            cy.get('#confirm-password').type(tmpPassword[0].textContent);
+            cy.get('#password').type("new_Password01");
+            cy.get('#confirm-password').type("new_Password01");
             cy.get('#secret > td').then(secret => {
               const token = getTotp(secret[0].textContent)
               cy.get('#_totp').type(token);
@@ -1085,8 +1085,8 @@ describe('Authentication failures', () => {
               { fast: true },
             );
             cy.get('button[type="submit"]').click();
-            cy.get('#password').type(tmpPassword[0].textContent);
-            cy.get('#confirm-password').type(tmpPassword[0].textContent);
+            cy.get('#password').type("new_Password01");
+            cy.get('#confirm-password').type("new_Password01");
             cy.get('#secret > td').then(secret => {
               const token = getTotp(secret[0].textContent)
               cy.get('#_totp').type(token);
@@ -1165,8 +1165,8 @@ describe('Authentication failures', () => {
               { fast: true },
             );
             cy.get('button[type="submit"]').click();
-            cy.get('#password').type(tmpPassword[0].textContent);
-            cy.get('#confirm-password').type(tmpPassword[0].textContent);
+            cy.get('#password').type("new_Password01");
+            cy.get('#confirm-password').type("new_Password01");
             cy.get('#secret > td').then(secret => {
               const token = getTotp(secret[0].textContent)
               cy.get('#_totp').type(token);
