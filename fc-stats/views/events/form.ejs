@@ -71,7 +71,7 @@ function computeFilterValues(items, key) {
           }) %>
           <%- include('../partials/dropdown', {
             name: 'filters[]',
-            label: 'Action',
+            label: 'Catégorie',
             key: 'action',
             type: 'multiple',
             valueType: 'composed',
@@ -80,7 +80,7 @@ function computeFilterValues(items, key) {
           }) %>
           <%- include('../partials/dropdown-search', {
             name: 'filters[]',
-            label: 'Type Action',
+            label: 'Evènement',
             key: 'typeAction',
             type: 'multiple',
             valueType: 'composed',

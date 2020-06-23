@@ -56,8 +56,8 @@ export const MAPPINGS = {
     events: {
       fi: 'FI',
       'fs_label.keyword': 'FS',
-      action: 'Action',
-      typeAction: "Type d'action",
+      action: 'Catégorie',
+      typeAction: 'Evènement',
     },
     metrics: {
       key: 'Clé',
