@@ -42,7 +42,7 @@ describe('Update account', () => {
     cy.logout(USER_ADMIN);
   });
 
-  it('should be possible for a  user to update his password', () => {
+  it('should be possible for a user to update his password', () => {
     cy.contains('thomas').click();
     cy.contains('Mon compte').click();
 

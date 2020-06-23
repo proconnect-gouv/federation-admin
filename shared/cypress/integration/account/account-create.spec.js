@@ -275,6 +275,7 @@ describe('Account', () => {
         logoutAndDeleteUser(userInfo.username, configuration);
       });
 
+      // voluntary skip - read @todo
       it.skip('should not be possible for the user to authenticate himself if his token has expired', () => {
         const username ='activationTokenAlwaysExpired';
 
@@ -285,7 +286,7 @@ describe('Account', () => {
         cy.get('button[type="submit"]').click();
 
         cy.get('.login-form').contains('Informations de connexion erronées');
-        // TODO
+        // @todo
         // it's a test we need to come back on but whish is not doable for now.
         // tokenExpiresAt is set 48 hours after its creation, so we can't set it on the fly, we need to use user fixtures.
         // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.

@@ -1,5 +1,5 @@
 import { formType, formFill, formControl, totp } from './forms';
-import { resetMongoFC, resetPostgres, resetElasticStats } from './reset';
+import { resetMongoFC, resetPostgres, resetEventsStats, resetMetricsStats } from './reset';
 import { firstLogin, login, logout } from './login';
 import { getUserActivationToken } from './get-user-activation-token';
 
@@ -11,8 +11,11 @@ Cypress.Commands.add('resetEnv', type => {
     case 'mongoFC':
       resetMongoFC();
       break;
-    case 'elasticStats':
-      resetElasticStats();
+    case 'events':
+      resetEventsStats();
+      break;
+    case 'metrics':
+      resetMetricsStats();
       break;
     default:
       cy.error('resetEnv needs a task name as parameter');

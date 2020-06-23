@@ -396,9 +396,10 @@ describe('Authentication failures', () => {
   });
 
   describe('First login new user', () => {
+    const random = +Math.floor(Math.random()*1000).toFixed(4);
     const userInfo = {
       username: 'christophe',
-      password: 'MyPassword10!!',
+      password: `MyPassword${random}!!`,
       email: 'christophe@email.com',
     };
     const basicConfiguration = {
@@ -1007,9 +1008,10 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type("new_Password01");
             cy.get('#confirm-password').type("new_Password01");
-            cy.get('#secret > td').then(secret => {
-              const token = getTotp(secret[0].textContent)
-              cy.get('#_totp').type(token);
+            cy.get('#secret > td').then(([{textContent:secret}]) => {
+              cy.wrap(getTotp(secret)).as('totp:token');
+              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
+              
               cy.get('button[type="submit"]').click();
               cy.logout('Dominique');
 
@@ -1087,9 +1089,10 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type("new_Password01");
             cy.get('#confirm-password').type("new_Password01");
-            cy.get('#secret > td').then(secret => {
-              const token = getTotp(secret[0].textContent)
-              cy.get('#_totp').type(token);
+            cy.get('#secret > td').then(([{textContent:secret}]) => {
+              cy.wrap(getTotp(secret)).as('totp:token');
+              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
+
               cy.get('button[type="submit"]').click();
               cy.logout('Cyril');
 
@@ -1167,9 +1170,11 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type("new_Password01");
             cy.get('#confirm-password').type("new_Password01");
-            cy.get('#secret > td').then(secret => {
-              const token = getTotp(secret[0].textContent)
-              cy.get('#_totp').type(token);
+            cy.get('#secret > td').then(([{textContent: secret}]) => {
+
+              cy.wrap(getTotp(secret)).as('totp:token');
+              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
+
               cy.get('button[type="submit"]').click();
               cy.logout('Mathias');
 
@@ -1190,8 +1195,9 @@ describe('Authentication failures', () => {
       });
     });
 
+    // voluntary skip - read @todo
     it.skip('should flash an error to the new user trying to log in with an expired token', () => {
-      // TODO
+      // @todo
       // it's a test we need to come back on but whish is not doable for now.
       // tokenExpiresAt is set 48 hours after its creation, so we can't set it on the fly, we need to use user fixtures.
       // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.
