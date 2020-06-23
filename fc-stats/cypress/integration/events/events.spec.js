@@ -13,7 +13,7 @@ const STOP = moment()
 
 describe('Events visualisation UI', () => {
   before(() => {
-    cy.resetEnv('elasticStats');
+    cy.resetEnv('events');
   });
 
   beforeEach(() => {

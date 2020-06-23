@@ -140,13 +140,15 @@ export function totp(subject, arg1, arg2) {
   const hasSubject = typeof subject === 'object' && 'prevObject' in subject;
   // we inject the arguments based on the possible existence of the subject element
   const input = hasSubject ? subject : 'input[name="_totp"]';
-  const configuration = (hasSubject || subject === undefined ? arg1 : subject) || {};
-  const secret = (hasSubject || subject === undefined ? arg2 : arg1) || SECRET_TOTP;
+  const configuration =
+    (hasSubject || subject === undefined ? arg1 : subject) || {};
+  const secret =
+    (hasSubject || subject === undefined ? arg2 : arg1) || SECRET_TOTP;
 
   if (configuration.totp === false) {
     return formType(input, '000000', configuration);
   }
 
-  const token = getTotp(secret);
-  return formType(input, token, configuration);
+  cy.wrap(getTotp(secret)).as('totp:token');
+  cy.get('@totp:token').then(token => formType(input, token, configuration));
 }

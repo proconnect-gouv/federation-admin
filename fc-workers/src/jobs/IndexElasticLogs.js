@@ -55,7 +55,6 @@ class IndexElasticLogs extends Job {
 
   static getIndexationStats(indexationResults) {
     const reducer = (acc, result) => acc + result.body.items.length;
-
     return indexationResults.reduce(reducer, 0);
   }
 
@@ -64,14 +63,19 @@ class IndexElasticLogs extends Job {
     */
   static getEventCountFromAggregates(documents) {
     const reducer = (acc, doc) => acc + doc.count;
-
     return documents.reduce(reducer, 0);
   }
 
   async indexLogs(start, stop, after = null, initialDelay = 0) {
     this.log.info('Fetch the value we want from ES');
     const compositeSize = 10000;
-    const data = await this.fetchData(start, stop, compositeSize, after);
+    let data;
+    try {
+      data = await this.fetchData(start, stop, compositeSize, after);
+    } catch (e) {
+      this.log.error(e);
+      return process.exit(1);
+    }
     const { buckets, after_key: nextAfter } = data.body.aggregations.date;
 
     const docList = buckets.map(bucket => ({
