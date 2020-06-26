@@ -11,10 +11,14 @@ import * as queryString from 'query-string';
 import { MAPPINGS } from './mappings-data';
 import { errorCodeTranslations } from './error-code-translations';
 import { UserRole } from '@fc/shared/user/roles.enum';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async intercept(
     context: ExecutionContext,
@@ -65,17 +69,19 @@ export class LocalsInterceptor implements NestInterceptor {
       { label: 'Utilisateur bloqué', value: UserRole.BLOCKED_USER },
     ];
 
-    res.locals.helpers.getMapped = LocalsInterceptor.getMapped;
+    res.locals.helpers.getMapped = this.getMapped.bind(this);
 
     res.locals.formatDate = LocalsInterceptor.formatDate;
 
     return next.handle();
   }
 
-  static getMapped(mapping: object, key: string): string {
+  getMapped(mapping: object, key: string): string {
     if (typeof mapping[key] !== 'undefined') {
       return mapping[key];
     }
+
+    this.logger.warn(`wrong mapping for key: ${key}`);
     return key;
   }
 

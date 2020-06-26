@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { LocalsInterceptor } from './locals.interceptor';
+import { LoggerService } from '@fc/shared/logger/logger.service';
 import { ConfigService } from 'nestjs-config';
 
 describe('LocalsInterceptor', () => {
@@ -7,13 +8,18 @@ describe('LocalsInterceptor', () => {
   const configService = {
     get: jest.fn(),
   };
+  const loggerService = {
+    warn: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [LocalsInterceptor, ConfigService],
+      providers: [LocalsInterceptor, ConfigService, LoggerService],
     })
       .overrideProvider(ConfigService)
       .useValue(configService)
+      .overrideProvider(LoggerService)
+      .useValue(loggerService)
       .compile();
     localsInterceptor = await module.get<LocalsInterceptor>(LocalsInterceptor);
   });
@@ -67,17 +73,18 @@ describe('LocalsInterceptor', () => {
       // Given
       const mapping = { foo: 'fooValue' };
       // When
-      const result = LocalsInterceptor.getMapped(mapping, 'foo');
+      const result = localsInterceptor.getMapped(mapping, 'foo');
       // Then
       expect(result).toBe('fooValue');
     });
-    it('Should return given key of not mapped', () => {
+    it('Should return given key if not mapped', () => {
       // Given
       const mapping = { foo: 'fooValue' };
       // When
-      const result = LocalsInterceptor.getMapped(mapping, 'bar');
+      const result = localsInterceptor.getMapped(mapping, 'bar');
       // Then
       expect(result).toBe('bar');
+      expect(loggerService.warn).toHaveBeenCalledTimes(1);
     });
   });
 
