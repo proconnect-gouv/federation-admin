@@ -31,6 +31,49 @@ describe('Events visualisation UI', () => {
     });
   });
 
+  it('searches type actions by label and not technical terms', () => {
+    const searchString1 = 'demande';
+    const searchString2 = 'erreur';
+    const searchString3 = 'tentative';
+    const searchString4 = 'consentement';
+    const searchString5 = 'naissance';
+    const searchString6 = 'token';
+    const searchString7 = 'url';
+    const searchString8 = 'scope';
+
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('input[type=text]').type(searchString1);
+      cy.get('.dropdown-item').should('have.length', 10);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString2);
+      cy.get('.dropdown-item').should('have.length', 4);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString3);
+      cy.get('.dropdown-item').should('have.length', 3);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString4);
+      cy.get('.dropdown-item').should('have.length', 3);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString5);
+      cy.get('.dropdown-item').should('have.length', 1);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString6);
+      cy.get('.dropdown-item').should('have.length', 1);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString7);
+      cy.get('.dropdown-item').should('have.length', 2);
+      cy.get('input[type=text]').clear();
+      cy.get('input[type=text]').type(searchString8);
+      cy.get('.dropdown-item').should('have.length', 1);
+      cy.get('input[type=text]').clear();
+    });
+  })
+
   it('displays the events page with', () => {
     cy.visit('/events');
     cy.contains('Choisissez des dates');
@@ -96,28 +139,10 @@ describe('Events visualisation UI', () => {
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('input[type=text]').type(searchString1);
-      cy.get('.dropdown-item').should('have.length', 2);
+      cy.get('.dropdown-item').should('have.length', 6);
       cy.get('input[type=text]').clear();
       cy.get('input[type=text]').type(searchString2);
-      cy.get('.dropdown-item').should('have.length', 1);
-    });
-  });
-
-  it('display elements "Types actions" that match with search', () => {
-    const searchString1 = 'iden';
-    const searchString2 = 'div';
-
-    cy.visit(
-      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
-    );
-
-    cy.get('#typeAction-dropdown').within(() => {
-      cy.get('button').click();
-      cy.get('input[type=text]').type(searchString1);
       cy.get('.dropdown-item').should('have.length', 2);
-      cy.get('input[type=text]').clear();
-      cy.get('input[type=text]').type(searchString2);
-      cy.get('.dropdown-item').should('have.length', 1);
     });
   });
 
@@ -191,7 +216,7 @@ describe('Events visualisation UI', () => {
     cy.get('canvas[data-type="line"]');
   });
 
-  it('Checks the choosen values in dropdowns', () => {
+  it('Checks the chosen values in dropdowns', () => {
     cy.visit(
       `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&filters%5B%5D=fi%3Adgfip&filters%5B%5D=fi%3Aameli&visualize=bar&granularity=month&x=date&y=fs`,
     );

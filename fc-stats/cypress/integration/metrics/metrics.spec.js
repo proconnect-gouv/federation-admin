@@ -47,24 +47,24 @@ describe('Metrics visualisation UI', () => {
       .should('contain', 'Comptes');
   });
 
-  it('displays the metric page with result when another filter key is choosed', () => {
+  it('displays the metrics page with results when another filter key is chosen', () => {
     cy.visit(
-      `/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list`,
+      `/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adesactivated&visualize=list`,
     );
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
     });
     cy.get('tbody td')
       .first()
-      .should('contain', 'Comptes désactivés');
+      .should('contain', 'desactivated');
     cy.get('tbody tr:last td')
       .first()
-      .should('contain', 'Comptes désactivés');
+      .should('contain', 'desactivated');
   });
 
-  it('displays the metric page with result only with choosen granularity', () => {
+  it('displays the metrics page with only the results concerning the chosen granularity', () => {
     cy.visit(
-      `/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adisabled&visualize=list&filters[]=range:week`,
+      `/metrics?start=${START}&stop=${STOP}&filters%5B%5D=key%3Adesactivated&visualize=list&filters[]=range:week`,
     );
     cy.get('table th').then(table => {
       expect(table.length).to.be.greaterThan(0);
@@ -98,12 +98,12 @@ describe('Metrics visualisation UI', () => {
 
   it('Checks the choosen values in dropdowns', () => {
     cy.visit(
-      `/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=key:account&filters[]=key:disabled&filters[]=range:week&x=date&y=key`,
+      `/metrics?start=${START}&stop=${STOP}&visualize=pie&filters[]=key:account&filters[]=key:desactivated&filters[]=range:week&x=date&y=key`,
     );
     cy.get('#key-dropdown input[id="filters[]key:account"]').should(
       'be.checked',
     );
-    cy.get('#key-dropdown input[id="filters[]key:disabled"]').should(
+    cy.get('#key-dropdown input[id="filters[]key:desactivated"]').should(
       'be.checked',
     );
     cy.get('#key-dropdown input[id="filters[]key:activeAccount"]').should(

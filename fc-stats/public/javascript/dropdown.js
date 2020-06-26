@@ -15,6 +15,7 @@ export function dropdown(element) {
 
     const dropdownElem = $(element);
     if (dropdownElem.hasClass('search')) {
+      search = $(element).next('nav').find('input[type=text]').val();
 
       ({ name, items = [], filters = [] } = dropdownElem.data());
       container = dropdownElem.next('.dropdown-menu.search').find('.dropdown-container');
@@ -53,7 +54,8 @@ function generateItems() {
 
   container.empty();
   items.forEach(item => {
-    if (!search || item.key.toLowerCase().includes(search)) {
+    const { label, key } = item;
+    if (!search || (label || key).toLowerCase().includes(search)) {
       if(itemsDisplayed < limitItems || item.checked) {
         container.append(generateHTML(item));
         itemsDisplayed++;
@@ -87,7 +89,7 @@ function generateHTML(item, hidden = false) {
         data-form="search"
         ${item.checked ? 'checked' : ''}>
       <label class="custom-control-label justify-content-start" for="${name}${item.value}">
-        ${item.key}
+        ${item.label || item.key}
       </label>
     </div>
   `;
@@ -104,8 +106,8 @@ function sortItems(a, b) {
 }
 
 function sortByKey(a, b) {
-  const keyA = a.key.toUpperCase();
-  const keyB = b.key.toUpperCase();
+  const keyA = a[a.label ? `label` : `key`].toUpperCase();
+  const keyB = b[b.label ? `label` : `key`].toUpperCase();
 
   if(keyA > keyB) return 1;
   if (keyA < keyB) return -1;
