@@ -20,6 +20,17 @@ describe('Events visualisation UI', () => {
     cy.login(USER_OPERATOR, USER_PASS);
   });
 
+  it('should have connexion checked by default within action dropdown', () => {
+    cy.visit(
+      `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
+    );
+
+    cy.get('#action-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.checked');
+    });
+  });
+
   it('displays the events page with', () => {
     cy.visit('/events');
     cy.contains('Choisissez des dates');
