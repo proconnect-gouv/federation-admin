@@ -7,6 +7,6 @@ export const accountSchema = new Schema({
   servicesProvidersFederationKeys: Array,
   active: { type: Boolean, default: true },
   noDisplayConfirmation: Boolean,
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now, index: { expires: '3y' } },
 });

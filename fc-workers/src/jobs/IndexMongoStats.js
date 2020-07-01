@@ -15,7 +15,7 @@ class IndexMongoStats extends Job {
 
     switch (metric) {
       case 'account':
-        return account.estimatedDocumentCount();
+        return account.countDocuments({ createdAt: { $lte: start } });
 
       case 'activeFsCount':
         return IndexMongoStats.getActiveFsMetric(client, start, range);
