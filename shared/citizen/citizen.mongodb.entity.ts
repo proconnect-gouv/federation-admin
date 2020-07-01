@@ -3,6 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ObjectIdColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('account')
@@ -17,6 +18,7 @@ export class Citizen {
   id: string;
 
   @Column()
+  @Index({ unique: true })
   identityHash: string;
 
   @Column()
@@ -36,6 +38,7 @@ export class Citizen {
   noDisplayConfirmation: boolean;
 
   @Column({ name: 'createdAt' })
+  @Index({ unique: true })
   createdAt: Date;
 
   @Column({ name: 'updatedAt' })

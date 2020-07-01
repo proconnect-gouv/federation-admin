@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { CitizenService } from './citizen.service';
-import { Citizen } from './citizen.mongodb.entity';
+import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
 import { ConfigService } from 'nestjs-config';
 import * as crypto from 'crypto';
 import { LoggerService } from '@fc/shared/logger/logger.service';

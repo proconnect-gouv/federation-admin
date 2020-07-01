@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Citizen } from './citizen.mongodb.entity';
+import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 
 @Injectable()
