@@ -34,6 +34,10 @@ async function bootstrap() {
   ]);
   app.setViewEngine('ejs');
 
+  // Trust first proxy (needed for secure cookies)
+  // @see https://www.npmjs.com/package/express-session#cookiesecure
+  app.set('trust proxy', 1);
+
   // Static files
   app.use(express.static('dist/client'));
 

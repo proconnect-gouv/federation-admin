@@ -3,4 +3,12 @@ export default {
   name: process.env.SESSION_NAME || 'sessionId',
   resave: true,
   saveUninitialized: false,
+  cookie: {
+    domain: process.env.VIRTUAL_HOST,
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    maxAge: process.env.SESSION_TTL || 60 * 60 * 1000, // 1 hour
+    sameSite: 'Strict',
+  },
 };
