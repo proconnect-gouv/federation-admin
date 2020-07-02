@@ -139,10 +139,10 @@ describe('Events visualisation UI', () => {
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('input[type=text]').type(searchString1);
-      cy.get('.dropdown-item').should('have.length', 6);
+      cy.get('.dropdown-item').should('have.length', 8);
       cy.get('input[type=text]').clear();
       cy.get('input[type=text]').type(searchString2);
-      cy.get('.dropdown-item').should('have.length', 2);
+      cy.get('.dropdown-item').should('have.length', 3);
     });
   });
 
