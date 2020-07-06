@@ -36,6 +36,15 @@ describe('StatsUIController', () => {
   });
 
   describe('getEvents', () => {
+    const Mockmeta = {
+      error: ``,
+      total: 0,
+      fsList: [],
+      fsLabelList: [],
+      fiList: [],
+      actionList: [],
+      typeActionList: [],
+    };
     it('Return only parameters if empty parameters are provided', async () => {
       // Given
       const mockQuery = {
@@ -43,10 +52,11 @@ describe('StatsUIController', () => {
         stop: '',
         columns: ['fs', 'fi', 'action', 'typeAction'],
       };
+
       // When
       const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result).toEqual({ params: mockQuery });
+      expect(result).toEqual({ params: mockQuery, meta: Mockmeta });
     });
 
     it('Return only parameters if empty parameters and empty filter are provided', async () => {
@@ -60,7 +70,7 @@ describe('StatsUIController', () => {
       // When
       const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result).toEqual({ params: mockQuery });
+      expect(result).toEqual({ params: mockQuery, meta: Mockmeta });
     });
 
     it('Should return stats and meta data', async () => {
@@ -163,7 +173,7 @@ describe('StatsUIController', () => {
       // When
       const result = await statsController.getEvents(mockQuery);
       // Then
-      expect(result).toEqual({ params: {} });
+      expect(result).toEqual({ params: {}, meta: Mockmeta });
     });
 
     it('returns all the stats entries', async () => {

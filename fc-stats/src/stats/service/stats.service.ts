@@ -64,32 +64,53 @@ export class StatsService {
   }
 
   async getEvents(params: StatsServiceParams): Promise<EventUIListOutputDTO> {
+    let data: SearchResponse<any>;
+    let stats: EventDTO[];
+    let meta: EventMetaDTO;
+
     const query: SearchParams = this.statsQueries.getEvents(params);
-    const data: SearchResponse<any> = await this.elasticsearchService
-      .getClient()
-      .search(query);
 
-    const stats: EventDTO[] = StatsService.aggregationsToDocuments(
-      params,
-      data.aggregations,
-    );
+    try {
+      data = await this.elasticsearchService.getClient().search(query);
+      stats = StatsService.aggregationsToDocuments(params, data.aggregations);
 
-    /** Get filters menu data */
-    const total = data.hits.total;
-    const fsList = this.getAggregate(data, 'fs');
-    const fsLabelList = this.getAggregate(data, 'fsLabel');
-    const fiList = this.getAggregate(data, 'fi');
-    const actionList = this.getAggregate(data, 'action');
-    const typeActionList = this.getAggregate(data, 'typeAction');
+      /** Get filters menu data */
+      const total = data.hits.total;
+      const fsList = this.getAggregate(data, 'fs');
+      const fsLabelList = this.getAggregate(data, 'fsLabel');
+      const fiList = this.getAggregate(data, 'fi');
+      const actionList = this.getAggregate(data, 'action');
+      const typeActionList = this.getAggregate(data, 'typeAction');
 
-    const meta: EventMetaDTO = {
-      total,
-      fsList,
-      fsLabelList,
-      fiList,
-      actionList,
-      typeActionList,
-    };
+      meta = {
+        total,
+        fsList,
+        fsLabelList,
+        fiList,
+        actionList,
+        typeActionList,
+      };
+    } catch (error) {
+      /**
+       * @ TODO
+       * Add a better error handeling system
+       * to differenciate request error from empty ES index, etc...
+       */
+      return {
+        params,
+        stats: [],
+        meta: {
+          error: `Vu le nombre important de résultats liés à votre recherche, celle-ci ne peut aboutir. Merci d'effectuer une nouvelle recherche en modifiant la période de temps voulue ou la granularité.`,
+          total: 0,
+          fsList: [],
+          fsLabelList: [],
+          fiList: [],
+          actionList: [],
+          typeActionList: [],
+        },
+      };
+    }
+
     return {
       params,
       stats,
