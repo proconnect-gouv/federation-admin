@@ -1,4 +1,4 @@
-import { IsArray, IsNumber } from 'class-validator';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 
 export class EventMetaDTO {
   @IsNumber()
@@ -13,4 +13,6 @@ export class EventMetaDTO {
   readonly actionList: string[];
   @IsArray()
   readonly typeActionList: string[];
+  @IsString()
+  readonly error?: string;
 }

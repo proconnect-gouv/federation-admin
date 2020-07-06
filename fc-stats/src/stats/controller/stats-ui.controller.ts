@@ -41,12 +41,24 @@ export class StatsUIController {
     @Query() params: EventUIListInputDTO,
   ): Promise<EventUIListOutputDTO> {
     const { start, stop } = params;
-
+    /**
+     * @description: The meta variable is init with empty value to
+     * avoid a rendering error, if no error is
+     */
+    const meta = {
+      error: ``,
+      total: 0,
+      fsList: [],
+      fsLabelList: [],
+      fiList: [],
+      actionList: [],
+      typeActionList: [],
+    };
     if (start && stop) {
       return this.statsService.getEvents(params as StatsServiceParams);
     }
 
-    return { params };
+    return { params, meta };
   }
 
   @Get('metrics')

@@ -245,6 +245,29 @@ describe('StatsService', () => {
       expect(result instanceof Object).toBe(true);
       expect(search.mock.calls).toHaveLength(1);
     });
+
+    it('should throw an error when the query results are too large', async () => {
+      // Given
+      const params = {
+        start: new Date('2016-01-01'),
+        stop: new Date('2020-06-01'),
+        columns: ['fs', 'fi', 'action', 'typeAction'],
+      };
+
+      const errorMock = new Error('Elasticsearch Mocked error message');
+      search.mockRejectedValueOnce(errorMock);
+
+      // When
+      const result = await statsService.getEvents(params);
+
+      // Then
+      expect(result).toBeDefined();
+      expect(result instanceof Object).toBe(true);
+      expect(result.meta.error).toBeDefined();
+      expect(result.meta.error).toEqual(
+        `Vu le nombre important de résultats liés à votre recherche, celle-ci ne peut aboutir. Merci d'effectuer une nouvelle recherche en modifiant la période de temps voulue ou la granularité.`,
+      );
+    });
   });
 
   describe('aggregationsToDocuments', () => {
