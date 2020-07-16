@@ -83,7 +83,7 @@ export const MAPPINGS = {
   columns: {
     events: {
       fi: 'FI',
-      'fs_label.keyword': 'FS',
+      fs: 'FS',
       action: 'Catégorie',
       typeAction: 'Evènement',
     },
