@@ -63,7 +63,7 @@ export function getData(baseQuery): ISummary[] {
           label: 'Répartition des connexions par FS',
           href: `/events?${queryString.stringify({
             ...baseQuery,
-            'columns[]': ['typeAction', 'fs_label.keyword'],
+            'columns[]': ['typeAction', 'fs'],
             'filters[]': 'typeAction:initial',
             visualize: 'pie',
             granularity: 'all',

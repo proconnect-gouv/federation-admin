@@ -6,8 +6,6 @@ export class EventMetaDTO {
   @IsArray()
   readonly fsList: string[];
   @IsArray()
-  readonly fsLabelList: string[];
-  @IsArray()
   readonly fiList: string[];
   @IsArray()
   readonly actionList: string[];

@@ -27,7 +27,9 @@ describe('Events visualisation UI', () => {
 
     cy.get('#action-dropdown').within(() => {
       cy.get('button').click();
-      cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.checked');
+      cy.get('label[for="filters[]action:authentication"]')
+        .prev('input')
+        .should('be.checked');
     });
   });
 
@@ -72,7 +74,7 @@ describe('Events visualisation UI', () => {
       cy.get('.dropdown-item').should('have.length', 1);
       cy.get('input[type=text]').clear();
     });
-  })
+  });
 
   it('displays the events page with', () => {
     cy.visit('/events');
@@ -148,19 +150,29 @@ describe('Events visualisation UI', () => {
 
   it('display elements "Types actions" checked even after a search', () => {
     const searchString = 'iden';
-    
+
     cy.visit(
       `/events?start=${START}&stop=${STOP}&columns%5B%5D=fi&columns%5B%5D=action&visualize=list&granularity=month&x=date&y=fs`,
     );
 
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
-      cy.get('.dropdown-item').eq(1).click();
+      cy.get('.dropdown-item')
+        .eq(1)
+        .click();
       cy.get('input[type=text]').type(searchString);
-      cy.get('.dropdown-item').eq(1).click();
+      cy.get('.dropdown-item')
+        .eq(1)
+        .click();
       cy.get('input[type=text]').clear();
-      cy.get('.dropdown-item').eq(0).children('input').should('be.checked');
-      cy.get('.dropdown-item').eq(1).children('input').should('be.checked');
+      cy.get('.dropdown-item')
+        .eq(0)
+        .children('input')
+        .should('be.checked');
+      cy.get('.dropdown-item')
+        .eq(1)
+        .children('input')
+        .should('be.checked');
     });
   });
 
@@ -214,6 +226,42 @@ describe('Events visualisation UI', () => {
     cy.get('#bouton-filtrer').click();
 
     cy.get('canvas[data-type="line"]');
+  });
+
+  it('should display data when filtering on FS dropdown with one known FS', () => {
+    cy.visit(`/events`);
+
+    cy.get('#start').click();
+    cy.get('.lightpick__day:first').click();
+    cy.get('.lightpick__day:last').click();
+
+    // Choose FS Column
+    cy.get('#columns\\[\\]-dropdown button').click();
+    cy.get('#columns\\[\\]-dropdown label[for="columns[]fs"]').click();
+
+    // Submit
+    cy.get('#bouton-filtrer').click();
+
+    // Check we have results
+    cy.get('table th').then(table => {
+      expect(table.length).to.be.greaterThan(0);
+    });
+
+    // Get the first FS in the list and filter on it
+    cy.get('tbody td')
+      .eq(1)
+      .then($td => {
+        const fs = $td.text().trim();
+        cy.get('#fs-dropdown button').click();
+        cy.get(`#fs-dropdown label[for="filters[]fs:${fs}"]`).click();
+        // Submit
+        cy.get('#bouton-filtrer').click();
+
+        // Check we have results
+        cy.get('table th').then(table => {
+          expect(table.length).to.be.greaterThan(0);
+        });
+      });
   });
 
   it('Checks the chosen values in dropdowns', () => {
