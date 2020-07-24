@@ -6,6 +6,7 @@ import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as flash from 'express-flash';
+import * as helmet from 'helmet';
 import * as methodOverride from 'method-override';
 
 import 'dotenv';
@@ -46,6 +47,20 @@ async function bootstrap() {
 
   // Flash messages
   app.use(flash());
+
+  // Helmet
+  app.use(helmet());
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+      },
+    }),
+  );
+  app.use(helmet.permittedCrossDomainPolicies());
+  app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
 
   // Sessions initialization
   app.use(session(configService.get('session')));

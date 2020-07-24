@@ -52,6 +52,17 @@ async function bootstrap() {
 
   // Helmet
   app.use(helmet());
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+      },
+    }),
+  );
+  app.use(helmet.permittedCrossDomainPolicies());
+  app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
 
   // Sessions initialization
   app.use(session(configService.get('session')));
