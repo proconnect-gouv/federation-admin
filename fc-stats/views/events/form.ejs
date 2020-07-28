@@ -76,7 +76,8 @@ function computeFilterValues(items, key) {
             type: 'multiple',
             valueType: 'composed',
             values: computeFilterValues(locals.meta.actionList, 'action'),
-            mapping: locals.helpers.MAPPINGS.action
+            mapping: locals.helpers.MAPPINGS.action,
+            autosubmit: true
           }) %>
           <%- include('../partials/dropdown-search', {
             name: 'filters[]',

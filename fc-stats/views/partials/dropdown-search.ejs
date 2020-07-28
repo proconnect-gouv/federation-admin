@@ -23,7 +23,8 @@ const result = filters
     data-filters="<%= JSON.stringify(result); %>"
     data-name="<%= name %>"
     aria-haspopup="true"
-    aria-expanded="false">
+    aria-expanded="false"
+    <% if (locals.autosubmit) {%>data-autosubmit="true" <%}%>>
     <%= label %>
     <% if (result.length > 0) { %>
       <span class="badge badge-light"><%= result.length %></span>

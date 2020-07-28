@@ -172,7 +172,7 @@ export class StatsQueries {
           // Side aggregations to list availables values for filters in UI
           fi: this.generateAggregation('fi'),
           fs: this.generateAggregation('fs'),
-          typeAction: this.generateAggregation('typeAction'),
+          typeAction: this.generateAggregation('typeAction', 1),
           action: this.generateAggregation('action'),
         },
       },
