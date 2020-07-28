@@ -14,6 +14,8 @@ export function dropdown(element) {
     });
 
     const dropdownElem = $(element);
+    const AUTOSUBMIT = dropdownElem.attr('data-autosubmit') === 'true';
+    
     if (dropdownElem.hasClass('search')) {
       search = $(element).next('nav').find('input[type=text]').val();
 
@@ -28,11 +30,11 @@ export function dropdown(element) {
         });
       items.sort(sortItems);
 
-      generateItems();
+      generateItems(AUTOSUBMIT);
       $('.dropdown-menu.search').on('keyup', 'input[type=text]', event => {
         search = event.target.value.toLowerCase();
 
-        generateItems();
+        generateItems(AUTOSUBMIT);
       });
 
       container.on('click', '.dropdown-item input[type=checkbox]', event => {
@@ -41,15 +43,16 @@ export function dropdown(element) {
           .forEach(item => {
             item.checked = !item.checked;
           });
+
         items.sort(sortItems);
 
-        generateItems();
+        generateItems(AUTOSUBMIT);
       });
     }
   }, true);
 }
 
-function generateItems() {
+function generateItems(autoSubmit = false) {
   let itemsDisplayed = 0;
 
   container.empty();
@@ -57,11 +60,11 @@ function generateItems() {
     const { label, key } = item;
     if (!search || (label || key).toLowerCase().includes(search)) {
       if(itemsDisplayed < limitItems || item.checked) {
-        container.append(generateHTML(item));
+        container.append(generateHTML(item, false, autoSubmit));
         itemsDisplayed++;
       }
     } else if (item.checked) {
-      container.append(generateHTML(item, true))
+      container.append(generateHTML(item, true, autoSubmit))
     }
   });
 
@@ -76,10 +79,12 @@ function generateItems() {
   }
 }
 
-function generateHTML(item, hidden = false) {
+function generateHTML(item, hidden = false, autosubmit) {
+  const autoSubmitAttribute = autosubmit ? `onclick="this.form.submit()"` : '';
   return `
     <div class="dropdown-item custom-control custom-checkbox my-1 mr-sm-2 text-nowrap" ${hidden ? 'style="display: none"' : ''}">
       <input
+        ${autoSubmitAttribute}
         class="custom-control-input"
         type="checkbox"
         id="${name}${item.value}"
