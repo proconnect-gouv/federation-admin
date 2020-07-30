@@ -3,6 +3,7 @@ export default {
   name: process.env.SESSION_NAME || 'sessionId',
   resave: true,
   saveUninitialized: false,
+  rolling: true,
   cookie: {
     domain: process.env.VIRTUAL_HOST,
     path: '/',
