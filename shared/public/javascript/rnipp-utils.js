@@ -47,7 +47,7 @@ function updateUIError(data) {
   let content = 'Une erreur technique est survenue';
 
   if (data.status === 404) {
-    content = 'Inconnu(e) de France connect';
+    content = 'Inconnu(e) de FranceConnect';
   }
 
   $('#citizen-status').html(`<p>${content}</p>`);
