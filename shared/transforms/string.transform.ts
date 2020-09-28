@@ -1,3 +1,15 @@
+import * as moment from 'moment-timezone';
+
+export function toDate(format: string) {
+  const requiredDateFormat = 'YYYY-MM-DD';
+  return (value: string): Date => {
+    if (format !== requiredDateFormat) {
+      return undefined;
+    }
+    return moment(value, format).toDate();
+  };
+}
+
 export function toBoolean(value: string): boolean | undefined {
   switch (value) {
     case 'true':
