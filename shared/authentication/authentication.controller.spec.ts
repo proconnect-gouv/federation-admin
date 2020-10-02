@@ -115,12 +115,21 @@ describe('AuthenticationController', () => {
   });
 
   describe('logout method', () => {
-    it('logs out the user and redirects to the homepage', () => {
+    it('logs out the user and redirects to the homepage', async () => {
       // setup
+      /**
+       * Mock the call to callback function
+       * to make the promisified function resolve
+       */
+      const promisiableImplementation = (cb: () => void) => cb();
       const req = {
         logout: jest.fn(),
         user: {
           username: 'foo',
+        },
+        session: {
+          regenerate: jest.fn().mockImplementation(promisiableImplementation),
+          destroy: jest.fn().mockImplementation(promisiableImplementation),
         },
       };
       const res = {
@@ -131,7 +140,7 @@ describe('AuthenticationController', () => {
       };
 
       // action
-      authenticationController.logout(req, res);
+      await authenticationController.logout(req, res);
 
       // assert
       expect(loggerMock.businessEvent).toBeCalledWith({
