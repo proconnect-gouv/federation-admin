@@ -1,3 +1,4 @@
+import { promisify } from 'util';
 import {
   Controller,
   Get,
@@ -61,13 +62,21 @@ export class AuthenticationController {
   }
 
   @Get('logout')
-  public logout(@Req() req, @Res() res) {
+  public async logout(@Req() req, @Res() res) {
     if (req.user) {
       this.track({
         action: AuthenticationActions.SIGNOUT,
         user: req.user.username,
       });
     }
+
+    const sessionDestroy = promisify(req.session.destroy.bind(req.session));
+    const sessionRegenerate = promisify(
+      req.session.regenerate.bind(req.session),
+    );
+
+    await sessionDestroy();
+    await sessionRegenerate();
     req.logout();
     return res.redirect(`${res.locals.APP_ROOT}/login`);
   }
