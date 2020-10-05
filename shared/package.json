@@ -27,6 +27,7 @@
     "https-proxy-agent": "^4.0.0",
     "jsdom": "^16.1.0",
     "lodash": "^4.17.11",
+    "moment-timezone": "^0.5.31",
     "nestjs-config": "^1.4.1",
     "nestjs-console": "^1.2.0",
     "nestjs-typeorm-paginate": "^1.0.0",
