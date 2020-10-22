@@ -41,10 +41,11 @@ export const MAPPINGS = {
     initial: 'Connexion FI et redressement RNIPP ok',
     confirmAuthentication: 'Connexion au FS confirmée',
     conflict: 'Conflit de niveau eidas',
-    demande: 'Demande de consentement pour transfert de données',
-    refus: 'Refus de consentement (obsolète)',
-    information: 'Affichage des informations usager',
-    inconnu: 'Erreur technique lors du consentement',
+    demande: 'Demande de consentement pour transfert de données (obsolète)',
+    inconnu: 'Erreur technique lors du consentement (obsolète)',
+    information: "Affichage de la page d'information",
+    demandeData: "Consentement(FD) sur des données d'un fournisseur de données",
+    demandeIdentity: "Consentement(FS) sur des données d'identités",
     birthDateError:
       "La date de naissance de l'usager diffère de plus d'un jour entre le FI et le RNIPP",
     getUserInfoError:
