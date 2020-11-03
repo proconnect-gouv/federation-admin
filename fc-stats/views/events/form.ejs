@@ -9,8 +9,8 @@ function computeFilterValues(items, key) {
 
 %>
 
-<div>
-  <form id="search" action="<%= APP_ROOT %>/events" method="get">
+<div data-init="initFirstResult">
+  <form id="search" name="events" action="<%= APP_ROOT %>/events" method="get">
 
     <div class="form-inline">
 
@@ -25,7 +25,7 @@ function computeFilterValues(items, key) {
             data-secondField="stop"
             data-form="search"
             class="form-control form-control-sm mb-1"
-            value="<%= moment(params.start).format('YYYY-MM-DD') %>"
+            value="<%= moment().startOf('year').format('YYYY-MM-DD') %>"
             style="width: 90px;"
             >
 
@@ -34,7 +34,7 @@ function computeFilterValues(items, key) {
             id="stop"
             name="stop"
             type="text"
-            value="<%= moment(params.stop).format('YYYY-MM-DD') %>"
+            value="<%= moment().format('YYYY-MM-DD') %>"
             class="form-control  form-control-sm mb-1"
             style="width: 90px;"
           />

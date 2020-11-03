@@ -11,7 +11,7 @@ const START = moment()
 const STOP = moment()
   .add(3, 'month')
   .format('YYYY-MM-DD');
-
+  
 describe('Events visualisation UI', () => {
   before(() => {
     cy.resetEnv('events');
@@ -64,9 +64,9 @@ describe('Events visualisation UI', () => {
     });
   })
 
-  it('displays the events page with', () => {
+  it('displays events', () => {
     cy.visit('/events');
-    cy.contains('Choisissez des dates');
+    cy.get('#events').should('exist');
   });
 
   it('displays the events page with result when data range is choosed', () => {
@@ -357,6 +357,19 @@ describe('Events visualisation UI', () => {
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('.dropdown-item').should('have.length', 4);
+    });
+  });
+
+  it('should deselect "Connexion" category', () => {
+    cy.visit(`/events`);
+    
+    cy.get('#action-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.checked');
+      cy.get('label[for="filters[]action:authentication"]').prev('input').uncheck({
+        force: true
+      });
+      cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.not.checked');
     });
   });
 

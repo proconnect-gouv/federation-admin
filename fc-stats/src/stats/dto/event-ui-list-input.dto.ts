@@ -40,9 +40,13 @@ export class EventUIListInputDTO {
   )
   readonly page?: number = 0;
 
+  @IsOptional()
+  @IsString()
+  readonly action?: string;
+
   @IsString()
   @IsIn(['day', 'week', 'month', 'year', 'all'])
-  readonly granularity?: string = 'day';
+  readonly granularity?: string = 'month';
 
   @IsString()
   @IsIn(['list', 'line', 'bar', 'pie'])
@@ -75,7 +79,5 @@ export class EventUIListInputDTO {
     value => value.map(FilterParamDTO.parse),
     { toClassOnly: true },
   )
-  readonly filters?: FilterParamDTO[] = [
-    new FilterParamDTO({ key: 'action', value: 'authentication' }),
-  ];
+  readonly filters?: FilterParamDTO[];
 }
