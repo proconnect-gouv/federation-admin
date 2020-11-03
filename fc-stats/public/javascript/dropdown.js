@@ -14,7 +14,6 @@ export function dropdown(element) {
     });
 
     const dropdownElem = $(element);
-    const AUTOSUBMIT = dropdownElem.attr('data-autosubmit') === 'true';
     
     if (dropdownElem.hasClass('search')) {
       search = $(element).next('nav').find('input[type=text]').val();
@@ -30,11 +29,11 @@ export function dropdown(element) {
         });
       items.sort(sortItems);
 
-      generateItems(AUTOSUBMIT);
+      generateItems();
       $('.dropdown-menu.search').on('keyup', 'input[type=text]', event => {
         search = event.target.value.toLowerCase();
 
-        generateItems(AUTOSUBMIT);
+        generateItems();
       });
 
       container.on('click', '.dropdown-item input[type=checkbox]', event => {
@@ -46,13 +45,13 @@ export function dropdown(element) {
 
         items.sort(sortItems);
 
-        generateItems(AUTOSUBMIT);
+        generateItems();
       });
     }
   }, true);
 }
 
-function generateItems(autoSubmit = false) {
+function generateItems() {
   let itemsDisplayed = 0;
 
   container.empty();
@@ -60,11 +59,11 @@ function generateItems(autoSubmit = false) {
     const { label, key } = item;
     if (!search || (label || key).toLowerCase().includes(search)) {
       if(itemsDisplayed < limitItems || item.checked) {
-        container.append(generateHTML(item, false, autoSubmit));
+        container.append(generateHTML(item, false));
         itemsDisplayed++;
       }
     } else if (item.checked) {
-      container.append(generateHTML(item, true, autoSubmit))
+      container.append(generateHTML(item, true))
     }
   });
 
@@ -79,12 +78,10 @@ function generateItems(autoSubmit = false) {
   }
 }
 
-function generateHTML(item, hidden = false, autosubmit) {
-  const autoSubmitAttribute = autosubmit ? `onclick="this.form.submit()"` : '';
+function generateHTML(item, hidden = false) {
   return `
     <div class="dropdown-item custom-control custom-checkbox my-1 mr-sm-2 text-nowrap" ${hidden ? 'style="display: none"' : ''}">
       <input
-        ${autoSubmitAttribute}
         class="custom-control-input"
         type="checkbox"
         id="${name}${item.value}"
