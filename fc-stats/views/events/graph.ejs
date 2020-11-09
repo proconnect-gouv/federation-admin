@@ -16,7 +16,7 @@
         fi: item.fi,
         fs: item.fs,
         date: locals.formatDate(item.date, params.granularity),
-        action: locals.helpers.getMapped(locals.helpers.MAPPINGS.action, item.action),
+        action: item.action ? locals.helpers.getMapped(locals.helpers.MAPPINGS.action, item.action) : null,
         typeAction: locals.helpers.getMapped(locals.helpers.MAPPINGS.typeAction, item.typeAction),
         count: item.count,
       }))
