@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 export function initFirstResult(element) {
   // if there is no results displayed table #events is not generated in rendering template
-  if (!document.getElementById('events') && !document.getElementById('error-events')) {
+  if (document.getElementById('autoload-results')) {
     // checked "Connexion" action in filters only for the first visit
     const actionContainer = $('#action-dropdown').find('.dropdown-container');
     actionContainer.append(`
