@@ -1,10 +1,10 @@
 stages:
   - install
   - test
-  - run
+  - e2e
 
 global-install:
-  image: node:12.15.0
+  image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   stage: install
   script:
     - yarn install
@@ -20,6 +20,12 @@ global-install:
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
+      - yarn.lock
+      - fc-exploitation/yarn.lock
+      - fc-stats/yarn.lock
+      - fc-support/yarn.lock
+      - fc-workers/yarn.lock
+    expire_in: 1 hrs
 
 include:
   - '/shared/.gitlab-ci.yml'

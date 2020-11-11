@@ -17,6 +17,7 @@ describe('Authentication failures', () => {
        * Should not be necessary but csrf issues occurs *sometimes* without this
        */
       cy.clearCookies();
+      cy.resetEnv('postgres');
     });
 
     it('should renew session id when loging in', () => {
@@ -459,6 +460,7 @@ describe('Authentication failures', () => {
       fast: true,
     };
     beforeEach(() => {
+      cy.resetEnv('postgres');
       cy.login(USER_ADMIN, USER_PASS);
     });
 

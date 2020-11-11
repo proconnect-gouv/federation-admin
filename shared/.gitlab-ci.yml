@@ -1,6 +1,6 @@
 test/shared:
   stage: test
-  image: node:12.15.0
+  image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   dependencies:
     - global-install
   script:
