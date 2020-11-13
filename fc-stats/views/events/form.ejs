@@ -25,7 +25,7 @@ function computeFilterValues(items, key) {
             data-secondField="stop"
             data-form="search"
             class="form-control form-control-sm mb-1"
-            value="<%= moment().startOf('year').format('YYYY-MM-DD') %>"
+            value="<%= params.start ? moment(params.start).format('YYYY-MM-DD') : moment().startOf('year').format('YYYY-MM-DD') %>"
             style="width: 90px;"
             >
 
@@ -34,7 +34,7 @@ function computeFilterValues(items, key) {
             id="stop"
             name="stop"
             type="text"
-            value="<%= moment().format('YYYY-MM-DD') %>"
+            value="<%= params.stop ? moment(params.stop).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD') %>"
             class="form-control  form-control-sm mb-1"
             style="width: 90px;"
           />
