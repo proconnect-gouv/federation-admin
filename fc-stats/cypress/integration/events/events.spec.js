@@ -373,6 +373,30 @@ describe('Events visualisation UI', () => {
     });
   });
 
+  it('should change and keep dates after a search', () => {
+    // define date range
+    const start = moment().subtract(7, 'days').format('YYYY-MM-DD');
+    const stop = moment().subtract(3, 'days').format('YYYY-MM-DD');
+
+
+    cy.visit(`/events`);
+
+    // change dates
+    cy.get('#start')
+      .clear()
+      .type(start);
+    cy.get('#stop')
+      .clear()
+      .type(stop);
+
+    // trigger search
+    cy.get('#bouton-filtrer').click();
+
+    // date range should be equal to what is expected
+    cy.get('#start').invoke('val').should('eq', start);
+    cy.get('#stop').invoke('val').should('eq', stop);
+  });
+
   it('should display in "type actions" dropdown the two corresponding checked "actions"', () => {
     const query = {
       start: START,
