@@ -264,29 +264,16 @@ describe('Events visualisation UI', () => {
     cy.get('#start').click();
     cy.get('.lightpick__day:first').click();
     cy.get('.lightpick__day:last').click();
-
     cy.get('#bouton-filtrer').click();
 
-    cy.get('#fi-dropdown button').click();
-    cy.get('#fi-dropdown label[for="filters[]fi:AliceM"]').click();
-
-    cy.get('#bouton-filtrer').click();
-
-    cy.get('table th').then(table => {
-      expect(table.length).to.be.greaterThan(0);
+    cy.get('input[name="start"]').invoke('val').then(val => {
+      const start = val;
+      cy.url().should('include', `?start=${start}`);
     });
-    cy.get('tbody td')
-      .first()
-      .should('contain', 'AliceM');
-    cy.get('tbody tr:last td')
-      .first()
-      .should('contain', 'AliceM');
-
-    cy.get('#visualize-dropdown button').click();
-    cy.get('#visualize-dropdown label[for="visualizeline"]').click();
-    cy.get('#bouton-filtrer').click();
-
-    cy.get('canvas[data-type="line"]');
+    cy.get('input[name="stop"]').invoke('val').then(val => {
+      const stop = val;
+      cy.url().should('include', `&stop=${stop}`);
+    });
   });
 
   it('Checks the chosen values in dropdowns', () => {
@@ -383,10 +370,10 @@ describe('Events visualisation UI', () => {
 
     // change dates
     cy.get('#start')
-      .clear()
+      .clear({force: true})
       .type(start);
     cy.get('#stop')
-      .clear()
+      .clear({force: true})
       .type(stop);
 
     // trigger search

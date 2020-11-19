@@ -12,5 +12,7 @@
     "APP_HOME_ROLE_SECURITY": "https://fc-stats.docker.dev-franceconnect.fr/account",
     "APP_FORBIDDEN_PAGE": "https://fc-stats.docker.dev-franceconnect.fr/events",
     "TOTP_WINDOW": "loose"
-  }
+  },
+  "retries": 2,
+  "ignoreTestFiles": ["*.util.js", "*.utils.js"]
 }

@@ -50,6 +50,7 @@ describe('Account', () => {
     };
 
     beforeEach(() => {
+      cy.resetEnv('postgres');
       cy.login(USER_ADMIN, USER_PASS);
     });
 

@@ -12,5 +12,7 @@
     "APP_HOME_ROLE_SECURITY": "https://fc-support.docker.dev-franceconnect.fr/account",
     "APP_FORBIDDEN_PAGE": "https://fc-support.docker.dev-franceconnect.fr/rnipp",
     "TOTP_WINDOW": "loose"
-  }
+  },
+  "retries": 2,
+  "ignoreTestFiles": ["*.util.js", "*.utils.js"]
 }
