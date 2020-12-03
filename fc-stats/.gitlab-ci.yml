@@ -1,6 +1,8 @@
 test/stats:
   stage: test
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
+  tags:
+    - nodejs
   dependencies:
     - global-install
   script:
@@ -10,11 +12,10 @@ test/stats:
 cypress/stats:
   stage: e2e
   image: ${E2E_DOCKER_IMAGE}
-  services:
-    - docker:18.09.7-dind
+  tags:
+    - docker
   variables:
     FC_ROOT : "$CI_BUILDS_DIR/france-connect"
-    CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
     TZ: "Europe/Paris"
   dependencies:
     - global-install
@@ -23,29 +24,23 @@ cypress/stats:
     - git clone --single-branch -b $FC_DOCKER_VERSION https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc-docker.git $FC_ROOT/fc-docker
     - shopt -s expand_aliases
     - alias docker-stack=$FC_ROOT/fc-docker/docker-stack
-    - export DOCKER_HOST_IP="$(getent hosts docker | awk '{ print $1 }')"
-    - export DOCKER_HOST="tcp://$DOCKER_HOST_IP:2375"
-    - echo "$DOCKER_HOST_IP localhost" >> /etc/hosts
-    - echo "$DOCKER_HOST_IP fc-stats.docker.dev-franceconnect.fr" >> /etc/hosts
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - cp -R /var/www/mocks $FC_ROOT/
+    - if [[ ! -d $FC_ROOT/mocks ]]; then cp -R /var/www/mocks $FC_ROOT/; fi
     - cp -R /var/www/elasticsearch/data/ $FC_ROOT/fc-docker/volumes/elasticsearch/
     - chown -R 1000:0 $FC_ROOT/fc-docker/volumes/elasticsearch/data/
     - ln -s $CI_PROJECT_DIR $FC_ROOT/fc-docker/volumes/src/fc-apps
     - for mock in `find $FC_ROOT/mocks -maxdepth 1 -mindepth 1 -type d`; do ln -s $mock $FC_ROOT/fc-docker/volumes/src; done
   script:
     - docker-stack up fc-stats fc-workers
-    - docker-stack dep fc-stats fc-workers
     - docker-stack fixtures fc-stats
     - docker-stack start fc-stats
-    - timeout 60 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-stats.docker.dev-franceconnect.fr/login)" != "200" ]];
+    - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-stats.docker.dev-franceconnect.fr/login)" != "200" ]];
         do echo "Waiting for fc-stats..." && sleep 10; done' ||
         (echo 'Cannot connect to fc-stats' && exit 1)
     - npx cypress${CYPRESS_VERSION} run -c video=${CYPRESS_VIDEO} -P fc-stats/ || (
         (docker cp fc_fc-stats_1:/tmp/.pm2/logs fc-stats/cypress || true) &&
         (docker cp fc-rp-all:/var/log/nginx fc-stats/cypress/logs || true) &&
         exit 1)
-  allow_failure: false
   artifacts:
     expire_in: 1 hrs
     when: on_failure
@@ -53,3 +48,6 @@ cypress/stats:
     - fc-stats/cypress/screenshots
     - fc-stats/cypress/videos
     - fc-stats/cypress/logs
+  after_script:
+    - bash $CI_BUILDS_DIR/france-connect/fc-docker/docker-stack halt
+    - docker container prune --force && docker volume prune --force
