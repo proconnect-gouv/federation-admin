@@ -22,7 +22,7 @@ export class StatsCSVController {
     private readonly csvService: CsvService,
   ) {}
 
-  @Get('stats/csv')
+  @Get('events/csv')
   @Roles(UserRole.OPERATOR)
   @Header('Content-Type', 'text/csv')
   @Header('Content-Disposition', 'attachment; filename=stats.csv')

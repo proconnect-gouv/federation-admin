@@ -81,9 +81,11 @@ describe('Account', () => {
       cy.get('body nav ul li').each(elem => {
         const tab = elem[0].innerText;
         cy.contains(tab).click();
-        cy.get('.btn-action-update').should('not.be.visible');
-        cy.get('.btn-action_generate-client-secret').should('not.be.visible');
-        cy.get('.btn-action-delete').should('not.be.visible');
+        cy.get('.btn-action-update', { timeout: 0 }).should('not.exist');
+        cy.get('.btn-action_generate-client-secret', { timeout: 0 }).should(
+          'not.exist',
+        );
+        cy.get('.btn-action-delete', { timeout: 0 }).should('not.exist');
       });
 
       cy.logout(USER_SECURITY);

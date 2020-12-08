@@ -37,17 +37,23 @@ describe('Account', () => {
       ).should('be.visible');
       cy.url().should('contain', `/account`);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-      cy.contains(`${userInfo.username}`).should('not.be.visible');
+      cy.get(`#${userInfo.username}`, { timeout: 0 }).should('not.exist');
 
       cy.logout(USER_ADMIN);
     });
 
     describe('Should not delete the user', () => {
       it('If cancel button is clicked in the modal confirmation', () => {
-        createUserAccount(userInfo, {...basicConfiguration, confirmSuppression: false });
+        createUserAccount(userInfo, {
+          ...basicConfiguration,
+          confirmSuppression: false,
+        });
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-        deleteUser(userInfo.username, {...basicConfiguration, confirmSuppression: false });
+        deleteUser(userInfo.username, {
+          ...basicConfiguration,
+          confirmSuppression: false,
+        });
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.contains(`${userInfo.username}`).should('be.visible');

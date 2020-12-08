@@ -1,8 +1,4 @@
-import {
-  USER_ADMIN,
-  USER_PASS,
-  LIMIT_PAGE,
-} from '../../support/constants';
+import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../support/constants';
 import { createUserAccount, createUserAndLogWith } from './account-create.util';
 import { deleteUser } from './account-delete.util';
 import { testIsCompliantPasswordEnrollment } from '../../support/request';
@@ -21,7 +17,7 @@ function logoutAndDeleteUser(username, basicConfiguration) {
 }
 
 describe('Account', () => {
-  before(() =>  cy.resetEnv('postgres'));
+  before(() => cy.resetEnv('postgres'));
   describe('Create user', () => {
     const userInfo = {
       username: 'christophe',
@@ -32,8 +28,8 @@ describe('Account', () => {
 
     const adminAccount = {
       admin: USER_ADMIN,
-      adminPass: USER_PASS
-    }
+      adminPass: USER_PASS,
+    };
 
     const basicConfiguration = {
       adminRole: true,
@@ -170,7 +166,7 @@ describe('Account', () => {
       cy.contains('Error - 500').should('be.visible');
 
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-      cy.contains(`${userInfo.username}`).should('not.be.visible');
+      cy.get(`#${userInfo.username}`, { timeout: 0 }).should('not.exist');
       cy.logout(USER_ADMIN);
     });
 
@@ -189,10 +185,16 @@ describe('Account', () => {
         });
 
         createUserAccount(userInfo, configuration);
-        cy.contains(`Le nom d'utilisateur doit être renseigné`).should('be.visible');
-        cy.contains(`Veuillez mettre une adresse email valide ( Ex: email@email.com )`).should('be.visible');
-        cy.contains(`Veuillez renseigner au moins un rôle`).should('be.visible');
-      })
+        cy.contains(`Le nom d'utilisateur doit être renseigné`).should(
+          'be.visible',
+        );
+        cy.contains(
+          `Veuillez mettre une adresse email valide ( Ex: email@email.com )`,
+        ).should('be.visible');
+        cy.contains(`Veuillez renseigner au moins un rôle`).should(
+          'be.visible',
+        );
+      });
 
       it('if an error occured in the form, we diplays error (name)', () => {
         const userInfo = {
@@ -205,8 +207,10 @@ describe('Account', () => {
         });
 
         createUserAccount(userInfo, configuration);
-        cy.contains(`Le nom d'utilisateur doit être renseigné`).should('be.visible');
-      })
+        cy.contains(`Le nom d'utilisateur doit être renseigné`).should(
+          'be.visible',
+        );
+      });
 
       it('if an error occured in the form, we diplays error (email)', () => {
         const userInfo = {
@@ -219,8 +223,10 @@ describe('Account', () => {
         });
 
         createUserAccount(userInfo, configuration);
-        cy.contains(`Veuillez mettre une adresse email valide ( Ex: email@email.com )`).should('be.visible');
-      })
+        cy.contains(
+          `Veuillez mettre une adresse email valide ( Ex: email@email.com )`,
+        ).should('be.visible');
+      });
 
       it('if an error occured in the form, we diplays error (roles)', () => {
         const configuration = Object.assign({}, basicConfiguration, {
@@ -231,8 +237,10 @@ describe('Account', () => {
         });
 
         createUserAccount(userInfo, configuration);
-        cy.contains(`Veuillez renseigner au moins un rôle`).should('be.visible');
-      })
+        cy.contains(`Veuillez renseigner au moins un rôle`).should(
+          'be.visible',
+        );
+      });
 
       it('if the totp is invalid', () => {
         const configuration = Object.assign({}, basicConfiguration, {
@@ -240,13 +248,10 @@ describe('Account', () => {
         });
 
         createUserAccount(userInfo, configuration);
-        cy.url().should(
-          'eq',
-          `${BASE_URL}/account/create`,
-        );
+        cy.url().should('eq', `${BASE_URL}/account/create`);
         cy.contains(`Veuillez mettre un code TOTP valide`).should('be.visible');
-      })
-    })
+      });
+    });
 
     describe('Patch enrollment', () => {
       it('should be possible for the new user to update his password, and type his totp token', () => {
@@ -278,7 +283,7 @@ describe('Account', () => {
 
       // voluntary skip - read @todo
       it.skip('should not be possible for the user to authenticate himself if his token has expired', () => {
-        const username ='activationTokenAlwaysExpired';
+        const username = 'activationTokenAlwaysExpired';
 
         const password = 'georgesmoustaki';
         const activationToken = '84bc8f7e-33ad-441c-826b-0c8e9c3b4044';
@@ -291,15 +296,17 @@ describe('Account', () => {
         // it's a test we need to come back on but whish is not doable for now.
         // tokenExpiresAt is set 48 hours after its creation, so we can't set it on the fly, we need to use user fixtures.
         // Thing is for a reason we haven't identified yet, fixtures do not fulfill tokenExpiresAt field.
-        // And so the test is not doable for now. 
-      })
+        // And so the test is not doable for now.
+      });
 
       it('Should not be possible for the new user to update his password if he is not respecting password format', () => {
         const configuration = Object.assign({}, basicConfiguration, {
           redirect: false,
           typeEvent: true,
         });
-        const user = Object.assign({}, userInfo, { password: 'MyNewPassword10' });
+        const user = Object.assign({}, userInfo, {
+          password: 'MyNewPassword10',
+        });
         cy.contains('Comptes utilisateurs').click();
         createUserAndLogWith(user, configuration);
 
@@ -361,77 +368,82 @@ describe('Account', () => {
         logoutAndDeleteUser(userInfo.username, configuration);
       });
 
-      it("Should throw an error if his password is too short", () => {
+      it('Should throw an error if his password is too short', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'short@Pass1',
-            passwordConfirmation:'short@Pass1', 
-            errorMessage: 'Le mot de passe saisi est invalide'
+            passwordConfirmation: 'short@Pass1',
+            errorMessage: 'Le mot de passe saisi est invalide',
           },
-          adminAccount
+          adminAccount,
         );
-      })
+      });
 
-      it("Should throw an error if his password does not contain lowercase letters", () => {
+      it('Should throw an error if his password does not contain lowercase letters', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'NO-LOWER@PASS10',
             passwordConfirmation: 'NO-LOWER@PASS10',
-            errorMessage: 'Le mot de passe saisi est invalide'
+            errorMessage: 'Le mot de passe saisi est invalide',
           },
-          adminAccount);
-      })
+          adminAccount,
+        );
+      });
 
-      it("Should throw an error if his password does not contain uppercase letters", () => {
+      it('Should throw an error if his password does not contain uppercase letters', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'no-upper@pass1',
             passwordConfirmation: 'no-upper@pass1',
-            errorMessage: 'Le mot de passe saisi est invalide'
+            errorMessage: 'Le mot de passe saisi est invalide',
           },
-          adminAccount);
-      })
+          adminAccount,
+        );
+      });
 
-      it("Should throw an error if his password does not contain special characters", () => {
+      it('Should throw an error if his password does not contain special characters', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'NoSpecialChars123',
             passwordConfirmation: 'NoSpecialChars123',
-            errorMessage: 'Le mot de passe saisi est invalide'
+            errorMessage: 'Le mot de passe saisi est invalide',
           },
-          adminAccount);
-      })
+          adminAccount,
+        );
+      });
 
-      it("Should throw an error if his password does not contain numbers", () => {
+      it('Should throw an error if his password does not contain numbers', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'NoNumbers@TryAgainBuddy',
             passwordConfirmation: 'NoNumbers@TryAgainBuddy',
             errorMessage: 'Le mot de passe saisi est invalide',
           },
-          adminAccount);
-      })
+          adminAccount,
+        );
+      });
 
-      it("Should throw an error if his passwords do not match", () => {
+      it('Should throw an error if his passwords do not match', () => {
         testIsCompliantPasswordEnrollment(
-          {...basicConfiguration},
+          { ...basicConfiguration },
           userInfo,
           {
             password: 'DoesNotMatch@Buddy10',
             passwordConfirmation: 'NotMatching@Buddy20',
-            errorMessage: 'Les mots de passe fournis ne correspondent pas'
+            errorMessage: 'Les mots de passe fournis ne correspondent pas',
           },
-          adminAccount);
+          adminAccount,
+        );
       });
 
       it('Should not be possible for the new user to update his password if using temporary password', () => {
@@ -448,47 +460,47 @@ describe('Account', () => {
         cy.formType('#username', userInfo.username, basicConfiguration);
         cy.formType('#email', userInfo.email, basicConfiguration);
         cy.get('form')
-        .find('[id="role-admin"]')
-        .check();
-        
+          .find('[id="role-admin"]')
+          .check();
+
         cy.totp(basicConfiguration);
-        
+
         cy.get('#tmpPassword').then(tmpPassword => {
           cy.contains("Créer l'utilisateur").click();
           cy.logout(USER_ADMIN);
-          const password = tmpPassword[0].textContent
+          const password = tmpPassword[0].textContent;
 
-          cy.getUserActivationToken(userInfo.username).then(({stdout: activationToken}) => {
-            cy.visit(`/first-login/${activationToken}`);
-            cy.formFill({ username: 'bibi', password}, { fast: true });
-            cy.get('button[type="submit"]').click();
-            
-            cy.url().should('contain', `/account/enrollment`);
-            
-            cy.get('#secret > td').then(async secret => {
-              cy.formType('#password', password, basicConfiguration);
-              cy.formType(
-                '#confirm-password',
-                password,
-                basicConfiguration,
-              );
-          
-              cy.totp({ totp: basicConfiguration.totpFirstLogin }, secret[0].textContent);
-          
-              if (basicConfiguration.submit) {
-                cy.get('button[type="submit"]').click();
-              }
-            });
+          cy.getUserActivationToken(userInfo.username).then(
+            ({ stdout: activationToken }) => {
+              cy.visit(`/first-login/${activationToken}`);
+              cy.formFill({ username: 'bibi', password }, { fast: true });
+              cy.get('button[type="submit"]').click();
 
-            cy.visit(`/logout`);
-            cy.login(USER_ADMIN, USER_PASS);
-            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+              cy.url().should('contain', `/account/enrollment`);
 
-            deleteUser(userInfo.username, basicConfiguration);
-            cy.logout(USER_ADMIN);
-          });
+              cy.get('#secret > td').then(async secret => {
+                cy.formType('#password', password, basicConfiguration);
+                cy.formType('#confirm-password', password, basicConfiguration);
+
+                cy.totp(
+                  { totp: basicConfiguration.totpFirstLogin },
+                  secret[0].textContent,
+                );
+
+                if (basicConfiguration.submit) {
+                  cy.get('button[type="submit"]').click();
+                }
+              });
+
+              cy.visit(`/logout`);
+              cy.login(USER_ADMIN, USER_PASS);
+              cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+
+              deleteUser(userInfo.username, basicConfiguration);
+              cy.logout(USER_ADMIN);
+            },
+          );
         });
-
       });
     });
   });
