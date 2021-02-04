@@ -1,5 +1,7 @@
 test/workers:
   stage: test
+  tags:
+    - nodejs
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   dependencies:
     - global-install

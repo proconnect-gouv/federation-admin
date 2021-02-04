@@ -6,6 +6,8 @@ stages:
 global-install:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   stage: install
+  tags:
+    - nodejs
   script:
     - yarn install
     - yarn lint
