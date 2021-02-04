@@ -3,8 +3,9 @@ test/shared:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   tags:
     - nodejs
-  dependencies:
-    - global-install
+  needs:
+    - job: global-install
+      artifacts: true
   script:
     - cd shared
     - yarn test

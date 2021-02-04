@@ -3,8 +3,9 @@ test/stats:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   tags:
     - nodejs
-  dependencies:
-    - global-install
+  needs:
+    - job: global-install
+      artifacts: true
   script:
     - cd fc-stats
     - yarn test
@@ -17,8 +18,6 @@ cypress/stats:
   variables:
     FC_ROOT : "$CI_BUILDS_DIR/france-connect"
     TZ: "Europe/Paris"
-  dependencies:
-    - global-install
   before_script:
     - rm -rf $FC_ROOT/fc-docker
     - git clone --single-branch -b $FC_DOCKER_VERSION https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc-docker.git $FC_ROOT/fc-docker
@@ -41,6 +40,9 @@ cypress/stats:
         (docker cp fc_fc-stats_1:/tmp/.pm2/logs fc-stats/cypress || true) &&
         (docker cp fc-rp-all:/var/log/nginx fc-stats/cypress/logs || true) &&
         exit 1)
+  needs:
+    - job: global-install
+      artifacts: true
   artifacts:
     expire_in: 1 hrs
     when: on_failure
@@ -50,4 +52,4 @@ cypress/stats:
     - fc-stats/cypress/logs
   after_script:
     - bash $CI_BUILDS_DIR/france-connect/fc-docker/docker-stack halt
-    - docker container prune --force && docker volume prune --force
+    - docker container prune --force
