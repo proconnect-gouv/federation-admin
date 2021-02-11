@@ -16,6 +16,11 @@ export class CitizenServiceBase {
       pivotIdentity.birthCountry,
     ].join('');
 
+    /**
+     * The "update" function default encoding was "binary" in NodeJS V4 when FranceConnect was starting
+     * Since changing it would cause people identity hash to change, we need to keep it as it
+     * @see https://nodejs.org/docs/latest-v4.x/api/crypto.html#crypto_hash_update_data_input_encoding
+     */
     return this.crypto
       .createHash('sha256')
       .update(data, 'binary')
