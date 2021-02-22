@@ -1,9 +1,6 @@
 {
   "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended",
-    "tslint-config-prettier"
-  ],
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
   "jsRules": {
     "no-unused-expression": true
   },
@@ -15,12 +12,13 @@
     "interface-name": [false],
     "arrow-parens": false,
     "object-literal-sort-keys": false,
-    "prettier": true
+    "prettier": true,
+    "variable-name": {
+      "options": ["allow-leading-underscore", "allow-pascal-case"]
+    }
   },
   "linterOptions": {
-       "exclude": [
-          "./shared/migrations"
-       ]
-   },
+    "exclude": ["./shared/migrations"]
+  },
   "rulesDirectory": ["tslint-plugin-prettier"]
 }
