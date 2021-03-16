@@ -25,7 +25,7 @@ export class PersonGenericDTO {
   readonly birthdate: string;
 
   @IsOptionalExtended()
-  @Matches(/^[0-9]{5}$/)
+  @Matches(/^(?:2[AB]|[0-9]{2})[0-9]{3}$/)
   @IsString()
   readonly birthPlace: string;
 
