@@ -39,14 +39,14 @@
     "isFrench": "male",
     "cog": "99217"
   },
-   "utilisateur_jamais_connecté": {
+  "utilisateur_jamais_connecté": {
     "gender": "male",
     "familyName": "DUPONT",
     "givenName": "Jean",
     "birthdate": "2019-10-15",
     "isFrench": "true",
     "cog": "75007"
-  }, 
+  },
   "utilisateur_étranger_désactivé_jamais_connecté": {
     "gender": "male",
     "familyName": "FLEURET",
@@ -102,5 +102,13 @@
     "birthdate": "0001-01-01",
     "isFrench": "true",
     "cog": "00000"
+  },
+  "utilisateur_corse": {
+    "gender": "male",
+    "familyName": "CORSE",
+    "givenName": "CLEMENT",
+    "birthdate": "1991-02-12",
+    "isFrench": "true",
+    "cog": "2A115"
   }
 }
