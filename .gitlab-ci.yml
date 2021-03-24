@@ -28,7 +28,7 @@ global-install:
       - fc-support/yarn.lock
       - fc-workers/yarn.lock
     expire_in: 1 hrs
-
+  interruptible: true
 include:
   - '/shared/.gitlab-ci.yml'
   - '/fc-exploitation/.gitlab-ci.yml'

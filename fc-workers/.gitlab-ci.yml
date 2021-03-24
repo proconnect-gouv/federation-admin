@@ -8,3 +8,4 @@ test/workers:
   script:
     - cd fc-workers
     - yarn test
+  interruptible: true
