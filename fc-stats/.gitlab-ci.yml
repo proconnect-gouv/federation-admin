@@ -9,6 +9,7 @@ test/stats:
   script:
     - cd fc-stats
     - yarn test
+  interruptible: true
 
 cypress/stats:
   stage: e2e
@@ -19,6 +20,7 @@ cypress/stats:
     FC_ROOT : "$CI_BUILDS_DIR/france-connect"
     TZ: "Europe/Paris"
   before_script:
+    - if [ "$(docker ps -a -q -f name=^fc-rp-all)" ]; then bash $CI_BUILDS_DIR/france-connect/fc-docker/docker-stack halt && docker container prune -f && docker volume prune -f; fi
     - rm -rf $FC_ROOT/fc-docker
     - git clone --single-branch -b $FC_DOCKER_VERSION https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc-docker.git $FC_ROOT/fc-docker
     - shopt -s expand_aliases
@@ -40,6 +42,7 @@ cypress/stats:
         (docker cp fc_fc-stats_1:/tmp/.pm2/logs fc-stats/cypress || true) &&
         (docker cp fc-rp-all:/var/log/nginx fc-stats/cypress/logs || true) &&
         exit 1)
+  interruptible: true
   needs:
     - job: global-install
       artifacts: true
@@ -52,4 +55,4 @@ cypress/stats:
     - fc-stats/cypress/logs
   after_script:
     - bash $CI_BUILDS_DIR/france-connect/fc-docker/docker-stack halt
-    - docker container prune --force
+    - docker container prune -f && docker volume prune -f
