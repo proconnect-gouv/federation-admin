@@ -1,7 +1,6 @@
 .idea
 .editorconfig
 node_modules
-yarn.lock
 
 # Cypress
 */cypress/plugins
