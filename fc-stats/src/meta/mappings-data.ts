@@ -60,6 +60,8 @@ export const MAPPINGS = {
     total_accounts: 'Api status (obsolète)',
     satisfaction: 'Retours usagers (obsolète)',
     userExitAuthenticationWebPage: 'Feedback (obsolète)',
+    get_access_token: "Récupération de l'access token",
+    get_user_info: "Accès aux données de l'usager par le FS",
   },
   metrics: {
     account: 'Comptes',

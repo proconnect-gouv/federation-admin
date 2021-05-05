@@ -67,6 +67,8 @@ module.exports = {
       type_action: 'deactivatedProviderAuthenticationAttempt',
     },
     { action: 'authentication', type_action: 'userInfosWithoutEmailError' },
+    { action: 'authentication', type_action: 'get_access_token' },
+    { action: 'authentication', type_action: 'get_user_info' },
     { action: 'checkedToken', type_action: 'verification' },
     { action: 'eidas', type_action: 'conflict' },
     { action: 'consent', type_action: 'demande' },

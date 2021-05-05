@@ -11,7 +11,7 @@ const START = moment()
 const STOP = moment()
   .add(3, 'month')
   .format('YYYY-MM-DD');
-  
+
 describe('Events visualisation UI', () => {
   before(() => {
     cy.resetEnv('events');
@@ -33,7 +33,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('#action-dropdown').within(() => {
       cy.get('button').click();
       cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.checked');
@@ -147,7 +147,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('.dropdown-item').should('have.length', 10);
@@ -168,7 +168,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('input[type=text]').type(searchString1);
@@ -193,7 +193,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('.dropdown-item').eq(1).click();
@@ -220,7 +220,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('canvas[data-type=bar]');
   });
 
@@ -237,7 +237,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('canvas[data-type=line]');
   });
 
@@ -335,7 +335,7 @@ describe('Events visualisation UI', () => {
       y: "fs"
     };
     cy.visit(`/events?${qs.stringify(query)}`);
-    
+
     cy.get('#action-dropdown').within(() => {
       cy.get('button').click();
       cy.get('label[for="filters[]action:consent"]').prev('input').should('be.checked');
@@ -349,7 +349,7 @@ describe('Events visualisation UI', () => {
 
   it('should deselect "Connexion" category', () => {
     cy.visit(`/events`);
-    
+
     cy.get('#action-dropdown').within(() => {
       cy.get('button').click();
       cy.get('label[for="filters[]action:authentication"]').prev('input').should('be.checked');
@@ -370,10 +370,10 @@ describe('Events visualisation UI', () => {
 
     // change dates
     cy.get('#start')
-      .clear({force: true})
+      .clear({ force: true })
       .type(start);
     cy.get('#stop')
-      .clear({force: true})
+      .clear({ force: true })
       .type(stop);
 
     // trigger search
@@ -405,6 +405,26 @@ describe('Events visualisation UI', () => {
     cy.get('#typeAction-dropdown').within(() => {
       cy.get('button').click();
       cy.get('.dropdown-item').should('have.length', 5);
+    });
+  });
+
+  it("should be possible to search the term 'Récupération de l'access token'", () => {
+    cy.visit(`/events`);
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('input[type=text]').type("Récupération de l'access token");
+      cy.get('.dropdown-item').contains("Récupération de l'access token").should('have.length', 1);
+    });
+  });
+
+  it("should be possible to search the term 'Accès aux données de l'usager par le FS'", () => {
+    cy.visit(`/events`);
+
+    cy.get('#typeAction-dropdown').within(() => {
+      cy.get('button').click();
+      cy.get('input[type=text]').type("Accès aux données de l'usager par le FS");
+      cy.get('.dropdown-item').contains("Accès aux données de l'usager par le FS").should('have.length', 1);
     });
   });
 });
