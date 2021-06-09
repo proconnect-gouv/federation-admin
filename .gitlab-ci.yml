@@ -2,12 +2,15 @@ stages:
   - install
   - test
   - e2e
+  - Checkmarx
 
 global-install:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   stage: install
   tags:
     - nodejs
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
   script:
     - yarn install
     - yarn lint
@@ -29,9 +32,12 @@ global-install:
       - fc-workers/yarn.lock
     expire_in: 1 hrs
   interruptible: true
+
+
 include:
   - '/shared/.gitlab-ci.yml'
   - '/fc-exploitation/.gitlab-ci.yml'
   - '/fc-stats/.gitlab-ci.yml'
   - '/fc-workers/.gitlab-ci.yml'
   - '/fc-support/.gitlab-ci.yml'
+  - '/.gitlab-checkmarx.yml'

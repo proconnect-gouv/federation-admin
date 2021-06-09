@@ -6,6 +6,8 @@ test/stats:
   needs:
     - job: global-install
       artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
   script:
     - cd fc-stats
     - yarn test
@@ -14,6 +16,8 @@ test/stats:
 cypress/stats:
   stage: e2e
   image: ${E2E_DOCKER_IMAGE}
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
   tags:
     - docker
   variables:

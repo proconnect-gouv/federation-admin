@@ -5,6 +5,8 @@ test/workers:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
   dependencies:
     - global-install
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
   script:
     - cd fc-workers
     - yarn test
