@@ -24,6 +24,10 @@
     "console": "node dist/console.js",
     "console:dev": "ts-node -r tsconfig-paths/register src/console.ts"
   },
+  "resolutions": {
+    "pg": "8.5.1",
+    "typeorm": "0.2.32"
+  },
   "dependencies": {
     "@elastic/elasticsearch": "^7.4.0",
     "@fc/shared": "^0.0.1",
@@ -55,7 +59,7 @@
     "moment": "^2.24.0",
     "nestjs-config": "^1.4.1",
     "nestjs-console": "^1.2.0",
-    "pg": "^7.11.0",
+    "pg": "^8.0.3",
     "popper.js": "^1.15.0",
     "query-string": "^6.8.2",
     "reflect-metadata": "^0.1.12",
