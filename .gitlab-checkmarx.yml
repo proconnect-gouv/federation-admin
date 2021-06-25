@@ -91,6 +91,8 @@ checkmarx-scan-mr:
   image:   
     name: checkmarx/${CHECKMARX_DOCKER_IMAGE}
     entrypoint: ['']
+  needs:
+    - job: global-install
   variables:
     CHECKMARX_INCREMENTAL: "false"
   script:
