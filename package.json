@@ -7,7 +7,14 @@
     "lint:commit": "./node-scripts/lint-commit.sh",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "test:e2e:exploitation": "cypress run -P fc-exploitation",
+    "test:e2e:support": "cypress run -P fc-support",
+    "test:e2e:stats": "cypress run -P fc-stats",
+    "cypress:open": "cypress open -P"
+  },
+  "resolutions": {
+    "cookie-signature": "1.1.0"
   },
   "repository": {
     "type": "git",
