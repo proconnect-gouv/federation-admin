@@ -62,7 +62,7 @@ export function formFill(inputs, configuration) {
         case 'INPUT':
           if (['checkbox', 'radio'].indexOf($input.attr('type')) > -1) {
             if (value) {
-              return input.check({ force: true });
+              return input.check(value,{ force: true });
             }
             return input.uncheck({ force: true });
           }
@@ -151,4 +151,5 @@ export function totp(subject, arg1, arg2) {
 
   cy.wrap(getTotp(secret)).as('totp:token');
   cy.get('@totp:token').then(token => formType(input, token, configuration));
+  cy.get('@totp:token').should('have.length',6)
 }
