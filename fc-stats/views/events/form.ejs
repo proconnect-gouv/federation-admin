@@ -42,9 +42,6 @@ function computeFilterValues(items, key) {
 
         <div class="form-group col-md-7">
         <% if (locals.meta) { %>
-
-
-
           <%- include('../partials/dropdown', {
             name: 'columns[]',
             label: 'Colonnes',
@@ -64,10 +61,10 @@ function computeFilterValues(items, key) {
           }) %>
           <%- include('../partials/dropdown-search', { name: 'filters[]',
             label: 'FS',
-            key: 'fs',
+            key: 'fs_label.keyword',
             type: 'multiple',
             valueType: 'composed',
-            values: computeFilterValues(locals.meta.fsLabelList, 'fs')
+            values: computeFilterValues(locals.meta.fsLabelList, 'fs_label.keyword')
           }) %>
           <%- include('../partials/dropdown-search', {
             name: 'filters[]',
