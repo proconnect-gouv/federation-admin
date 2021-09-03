@@ -1,5 +1,5 @@
 const SAFETY_EXEC_TIMEOUT = 10000; // 10 sec
-const LONG_EXEC_TIMEOUT = 60*1000; // 1 minutes
+const LONG_EXEC_TIMEOUT = 60 * 1000; // 1 minutes
 
 const DOCKER_DIR = 'cd $FC_ROOT/fc-docker';
 
@@ -18,7 +18,9 @@ export function resetMongoFC() {
 }
 
 export function resetPostgres() {
-  const command = ` ../shared/cypress/support/db.sh ${Cypress.env('APP_NAME')} apply`;
+  const command = ` ../shared/cypress/support/db.sh ${Cypress.env(
+    'APP_NAME',
+  )} apply`;
 
   cy.log(`
     Executing command:
@@ -26,38 +28,37 @@ export function resetPostgres() {
     `);
 
   return cy
-    .exec(command,{ timeout: SAFETY_EXEC_TIMEOUT })
+    .exec(command, { timeout: SAFETY_EXEC_TIMEOUT })
     .its('code')
     .should('eq', 0);
 }
 
 export function resetEventsStats() {
-    const command1 = `${DOCKER_DIR} && CI=1 ./docker-stack reset-stats`;
+  const command1 = `${DOCKER_DIR} && CI=1 ./docker-stack reset-stats`;
 
-    console.log(`
+  console.log(`
       Executing command:
       > ${command1}
     `);
-  
-    cy
-      .exec(command1, { timeout: SAFETY_EXEC_TIMEOUT })
-      .its('code')
-      .should('eq', 0);
 
-      const command2 = `${DOCKER_DIR} && CI=1 ./docker-stack generate-events`;
+  cy.exec(command1, { timeout: SAFETY_EXEC_TIMEOUT })
+    .its('code')
+    .should('eq', 0);
 
-      console.log(`
+  const command2 = `${DOCKER_DIR} && CI=1 ./docker-stack generate-events`;
+
+  console.log(`
         Executing command:
         > ${command2}
       `);
-    
-    /**
-     * the script requires a long time to load due to logs generating
-     */
-    return cy
-        .exec(command2, { timeout: LONG_EXEC_TIMEOUT })
-        .its('code')
-        .should('eq', 0);
+
+  /**
+   * the script requires a long time to load due to logs generating
+   */
+  return cy
+    .exec(command2, { timeout: LONG_EXEC_TIMEOUT })
+    .its('code')
+    .should('eq', 0);
 }
 
 export function resetMetricsStats() {
@@ -68,20 +69,19 @@ export function resetMetricsStats() {
     > ${command1}
   `);
 
-  cy
-    .exec(command1, { timeout: SAFETY_EXEC_TIMEOUT })
+  cy.exec(command1, { timeout: SAFETY_EXEC_TIMEOUT })
     .its('code')
     .should('eq', 0);
 
-    const command2 = `${DOCKER_DIR} && CI=1 ./docker-stack generate-metrics`;
+  const command2 = `${DOCKER_DIR} && CI=1 ./docker-stack generate-metrics`;
 
-    console.log(`
+  console.log(`
       Executing command:
       > ${command2}
     `);
 
   return cy
-      .exec(command2, { timeout: SAFETY_EXEC_TIMEOUT })
-      .its('code')
-      .should('eq', 0);
+    .exec(command2, { timeout: SAFETY_EXEC_TIMEOUT })
+    .its('code')
+    .should('eq', 0);
 }
