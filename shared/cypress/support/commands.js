@@ -1,5 +1,10 @@
 import { formType, formFill, formControl, totp } from './forms';
-import { resetMongoFC, resetPostgres, resetEventsStats, resetMetricsStats } from './reset';
+import {
+  resetMongoFC,
+  resetPostgres,
+  resetEventsStats,
+  resetMetricsStats,
+} from './reset';
 import { firstLogin, login, logout } from './login';
 import { getUserActivationToken } from './get-user-activation-token';
 

@@ -39,7 +39,7 @@ cypress/support:
     - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-support.docker.dev-franceconnect.fr/login)" != "200" ]];
         do echo "Waiting for fc-support..." && sleep 10; done' ||
         (echo 'Cannot connect to fc-support' && exit 1)
-    - npx cypress${CYPRESS_VERSION} run -c video=${CYPRESS_VIDEO} -P fc-support/ || (
+    - npx cypress${CYPRESS_VERSION:=@5.6.0} run -c video=${CYPRESS_VIDEO} -P fc-support/ || (
         (docker cp fc_fc-support_1:/tmp/.pm2/logs fc-support/cypress || true) &&
         (docker cp fc-rp-all:/var/log/nginx fc-support/cypress/logs || true) &&
         exit 1)
