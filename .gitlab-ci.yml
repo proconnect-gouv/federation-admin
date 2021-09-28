@@ -3,6 +3,11 @@ stages:
   - test
   - e2e
   - Checkmarx
+  - Build
+
+variables:
+  FC_ROOT: "$CI_BUILDS_DIR/france-connect"
+  PROXY_EXPLOITATION: "http://$EXPLOITATION_PROXY_HOST:$EXPLOITATION_PROXY_PORT"
 
 global-install:
   image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
@@ -37,7 +42,11 @@ global-install:
 include:
   - '/shared/.gitlab-ci.yml'
   - '/fc-exploitation/.gitlab-ci.yml'
+  - '/fc-exploitation/.gitlab-build.yml'
   - '/fc-stats/.gitlab-ci.yml'
+  - '/fc-stats/.gitlab-build.yml'
   - '/fc-workers/.gitlab-ci.yml'
+  - '/fc-workers/.gitlab-build.yml'
   - '/fc-support/.gitlab-ci.yml'
+  - '/fc-support/.gitlab-build.yml'
   - '/.gitlab-checkmarx.yml'

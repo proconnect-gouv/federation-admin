@@ -21,7 +21,6 @@ cypress/stats:
   tags:
     - cypress
   variables:
-    FC_ROOT : "$CI_BUILDS_DIR/france-connect"
     TZ: "Europe/Paris"
   before_script:
     - yarn config set proxy $PROXY_EXPLOITATION && yarn config set https-proxy $PROXY_EXPLOITATION
