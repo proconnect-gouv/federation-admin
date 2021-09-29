@@ -17,7 +17,7 @@ describe('IndexElasticLogs', () => {
       const result = IndexElasticLogs.getKey(entry);
       // Then
       expect(result).toBe(
-        'dad31bb411c060d88954eeb8392d767181f5a12782de8736934e66f47e0c37a5'
+        'b5bb74829f241ce0bfbb2f30ee943315685a5dfb026148751aa43765b2ccd2ae'
       );
     });
 
@@ -33,8 +33,32 @@ describe('IndexElasticLogs', () => {
       const result = IndexElasticLogs.getKey(entry);
       // Then
       expect(result).toBe(
-        '5071cafb69a4c6cf5f8632dd87a6eddac3cf1e72b69a08552af4a4b902517118'
+        '3a9a27468a8e02a40e4fa4f2819f2fd90e34699fa60c4e6d28b22ef574501391'
       );
+    });
+
+    it('Should return same keys if two entries have the same values', () => {
+      // Given
+      const entry1 = {
+        date: 'a',
+        action: 'b',
+        fi: 'd',
+        useless: 'e',
+      };
+      const entry2 = {
+        date: 'a',
+        fsId: 'b',
+        fiId: 'd',
+        useless: 'e',
+      };
+      // When
+      const result1 = IndexElasticLogs.getKey(entry1);
+      const result2 = IndexElasticLogs.getKey(entry2);
+      // Then
+      expect(result1).toBe(
+        '3a9a27468a8e02a40e4fa4f2819f2fd90e34699fa60c4e6d28b22ef574501391'
+      );
+      expect(result1).toBe(result2);
     });
   });
 

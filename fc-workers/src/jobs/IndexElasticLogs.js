@@ -19,11 +19,12 @@ class IndexElasticLogs extends Job {
   }
 
   static getKey(entry) {
-    const { date, action, typeAction, fs, fi } = entry;
-
+    const keys = Object.values(entry)
+      .sort()
+      .join('.');
     return crypto
       .createHash('sha256')
-      .update([date, action, typeAction, fs, fi].join('.'))
+      .update(keys)
       .digest('hex');
   }
 
