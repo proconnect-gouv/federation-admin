@@ -152,6 +152,13 @@ export const getByIntervalByFIFS = params => {
                 },
               },
               { fi: { terms: { field: 'fi', missing_bucket: true } } },
+              { fsId: { terms: { field: 'fsId', missing_bucket: true } } },
+              {
+                clientId: {
+                  terms: { field: 'clientId', missing_bucket: true },
+                },
+              },
+              { fiId: { terms: { field: 'fiId', missing_bucket: true } } },
             ],
           },
         },
