@@ -13,10 +13,10 @@ class PurgeES extends Job {
     return stats.getIdsToDelete(params);
   }
 
-  static createBulkDeleteQuery(ids) {
+  static createBulkDeleteQuery(ids, index) {
     const body = ids.map(id => ({
       delete: {
-        _index: 'franceconnect',
+        _index: index,
         _type: 'log',
         _id: id,
       },
@@ -60,7 +60,10 @@ class PurgeES extends Job {
   async recursiveDelete(params) {
     const bulk = await this.getBulk(params);
 
-    const deleteQuery = PurgeES.createBulkDeleteQuery(bulk.ids);
+    const config = this.container.get('config');
+    const index = config.getElasticMainIndex();
+
+    const deleteQuery = PurgeES.createBulkDeleteQuery(bulk.ids, index);
 
     if (deleteQuery.body.length > 0) {
       await this.sendBulkQuery(deleteQuery);
@@ -70,9 +73,6 @@ class PurgeES extends Job {
   }
 
   async run() {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
     const params = {
       from: 0,
       // Get big chunks:
@@ -90,7 +90,7 @@ class PurgeES extends Job {
       counter: 0,
     };
 
-    this.recursiveDelete(params);
+    await this.recursiveDelete(params);
   }
 }
 

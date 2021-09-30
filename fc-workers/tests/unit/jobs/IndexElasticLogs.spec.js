@@ -2,6 +2,77 @@ import IndexElasticLogs from '../../../src/jobs/IndexElasticLogs';
 import Container from '../../../src/services/Container';
 
 describe('IndexElasticLogs', () => {
+  const statsMock = {
+    executeBulkQuery: jest.fn(),
+    createBulkQuery: jest.fn(),
+    getByIntervalByFIFS: jest.fn(),
+  };
+
+  const loggerMock = {
+    info: jest.fn(),
+  };
+
+  const configMock = {
+    getElasticEventsIndex: jest.fn(),
+  };
+
+  const inputMock = {
+    get: jest.fn(),
+  };
+
+  const container = new Container();
+  container.add('logger', () => loggerMock);
+  container.add('stats', () => statsMock);
+  container.add('config', () => configMock);
+  container.add('input', () => inputMock);
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('usage()', () => {
+    it('should return usage instruction', () => {
+      // Given
+      // When
+      const usage = IndexElasticLogs.usage();
+      // Then
+      expect(usage).toBe(
+        '\n      Usage:\n      > IndexElasticLogs --start=<YYYY-MM-DD> --stop=<YYYY-MM-DD>\n    '
+      );
+    });
+  });
+
+  describe('fetchData()', () => {
+    let indexElasticLogs;
+
+    beforeEach(() => {
+      indexElasticLogs = new IndexElasticLogs(container);
+    });
+    it('it should return ES query based on date params', async () => {
+      // Given
+      const start = 'startValue';
+      const stop = 'stopValue';
+      const size = 42;
+      const after = true;
+      const queryMock = Symbol('query');
+      statsMock.getByIntervalByFIFS.mockReturnValueOnce(queryMock);
+
+      // When
+      const query = await indexElasticLogs.fetchData(start, stop, size, after);
+
+      // Then
+      expect(query).toBe(queryMock);
+      expect(statsMock.getByIntervalByFIFS).toHaveBeenCalledTimes(1);
+      expect(statsMock.getByIntervalByFIFS).toHaveBeenCalledWith(
+        start,
+        stop,
+        'day',
+        size,
+        after
+      );
+    });
+  });
   describe('getKey', () => {
     it('Should return key with given entry', () => {
       // Given
@@ -106,14 +177,12 @@ describe('IndexElasticLogs', () => {
   });
 
   describe('createDocuments', () => {
+    beforeEach(() => {
+      configMock.getElasticEventsIndex.mockReturnValueOnce('indexValue');
+    });
+
     it('Should call executeQuery as many time as there are chunks', async () => {
       // Given
-      const stats = {
-        executeBulkQuery: jest.fn(),
-        createBulkQuery: jest.fn(),
-      };
-      const container = new Container();
-      container.add('logger', () => ({}));
       const docList = [
         { id: 'a', a: 1 },
         { id: 'b', c: 2 },
@@ -124,11 +193,144 @@ describe('IndexElasticLogs', () => {
       const delay = 0;
       const job = new IndexElasticLogs(container);
       // When
-      container.add('stats', () => stats);
       await job.createDocuments(docList, chunkLength, delay);
       // Then
-      expect(stats.createBulkQuery).toHaveBeenCalledTimes(2);
-      expect(stats.executeBulkQuery).toHaveBeenCalledTimes(2);
+      expect(statsMock.createBulkQuery).toHaveBeenCalledTimes(2);
+      expect(statsMock.executeBulkQuery).toHaveBeenCalledTimes(2);
+    });
+
+    it('Should call executeQuery with the right index', async () => {
+      // Given
+      const docList = [{ id: 'a', a: 1 }];
+      const chunkLength = 1;
+      const delay = 0;
+      const job = new IndexElasticLogs(container);
+      // When
+      await job.createDocuments(docList, chunkLength, delay);
+      // Then
+      expect(configMock.getElasticEventsIndex).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('indexLogs()', () => {
+    const bucketsMock = [
+      {
+        key: {
+          date: new Date(),
+          action: 'actionValue1',
+          type_action: 'typeActionValue1',
+          fs: 'fsValue',
+          fi: 'fiValue',
+        },
+        doc_count: 3,
+      },
+      {
+        key: {
+          date: new Date(),
+          action: 'actionValue2',
+          type_action: 'typeActionValue2',
+          fs: 'fsValue',
+          fi: 'fiValue',
+        },
+        doc_count: 3,
+      },
+    ];
+
+    const dataMock = {
+      body: {
+        aggregations: {
+          date: {
+            buckets: bucketsMock,
+            after_key: false,
+          },
+        },
+      },
+    };
+
+    const resultsMock = Symbol('results');
+    const indexElasticLogs = new IndexElasticLogs(container);
+
+    let fetchDataMock;
+    let getKeyMock;
+    let getEventCountFromAggregatesMock;
+    let createDocumentsMock;
+    let getIndexationStatsMock;
+
+    beforeEach(() => {
+      fetchDataMock = jest.spyOn(indexElasticLogs, 'fetchData');
+      getKeyMock = jest.spyOn(IndexElasticLogs, 'getKey');
+      getEventCountFromAggregatesMock = jest.spyOn(
+        IndexElasticLogs,
+        'getEventCountFromAggregates'
+      );
+      createDocumentsMock = jest.spyOn(indexElasticLogs, 'createDocuments');
+      getIndexationStatsMock = jest.spyOn(
+        IndexElasticLogs,
+        'getIndexationStats'
+      );
+
+      fetchDataMock.mockResolvedValueOnce(dataMock);
+      getKeyMock.mockReturnValueOnce(42);
+      createDocumentsMock.mockResolvedValueOnce(resultsMock);
+
+      getIndexationStatsMock.mockReturnValueOnce(666);
+
+      getEventCountFromAggregatesMock
+        .mockReturnValueOnce(10)
+        .mockReturnValueOnce(20);
+    });
+
+    it('should create indexed logs', async () => {
+      const start = 'startValue';
+      const stop = 'stopValue';
+      const after = null;
+      const initialDelay = 0;
+
+      await indexElasticLogs.indexLogs(start, stop, after, initialDelay);
+
+      expect(loggerMock.info).toHaveBeenCalledTimes(6);
+      expect(fetchDataMock).toHaveBeenCalledTimes(1);
+      expect(getKeyMock).toHaveBeenCalledTimes(bucketsMock.length);
+      expect(createDocumentsMock).toHaveBeenCalledTimes(1);
+      expect(getEventCountFromAggregatesMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('run()', () => {
+    const indexElasticLogs = new IndexElasticLogs(container);
+
+    let indexLogsMock;
+
+    beforeEach(() => {
+      indexLogsMock = jest.spyOn(indexElasticLogs, 'indexLogs');
+    });
+
+    it('should run the script', async () => {
+      // Given
+      const start = 'startValue';
+      const stop = 'stopValue';
+      const paramsMock = {
+        start,
+        stop,
+      };
+
+      const schema = {
+        start: { type: 'date', mandatory: true },
+        stop: { type: 'date', mandatory: true },
+      };
+      indexLogsMock.mockReturnValueOnce(true);
+
+      inputMock.get.mockImplementationOnce((_schema, params) => params);
+
+      // When
+      await indexElasticLogs.run(paramsMock);
+
+      // Then
+      expect(inputMock.get).toHaveBeenCalledTimes(1);
+      expect(inputMock.get).toHaveBeenCalledWith(schema, paramsMock);
+
+      expect(indexLogsMock).toHaveBeenCalledTimes(1);
+      expect(indexLogsMock).toHaveBeenCalledWith(start, stop);
     });
   });
 });

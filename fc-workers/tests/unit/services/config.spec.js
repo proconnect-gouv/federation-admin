@@ -1,7 +1,7 @@
 import Config from '../../../src/services/Config';
 
-describe('config', () => {
-  describe('getAPIRoot', () => {
+describe('Config', () => {
+  describe('getAPIRoot()', () => {
     it('Should return a string', () => {
       // Given
       const input = { API_ROOT: 'foo' };
@@ -11,8 +11,18 @@ describe('config', () => {
       // Then
       expect(result).toBe('foo');
     });
+    it('Should return a empty string if API_ROOT is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getAPIRoot();
+      // Then
+      expect(result).toBe('http://localhost:3000/api/v1');
+    });
   });
-  describe('getMailjet', () => {
+
+  describe('getMailjet()', () => {
     it('Should return an object', () => {
       // Given
       const input = {
@@ -29,6 +39,207 @@ describe('config', () => {
         secret: 'fake-mailjet-secret',
         options: { proxyUrl: 'fake-proxy-url' },
       });
+    });
+  });
+
+  describe('getAPIKey()', () => {
+    it('Should return a string', () => {
+      // Given
+      const input = { API_KEY: 'foo' };
+      const config = new Config(input);
+      // When
+      const result = config.getAPIKey();
+      // Then
+      expect(result).toBe('foo');
+    });
+
+    it('Should return a empty string if API_KEY is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getAPIKey();
+      // Then
+      expect(result).toBe('');
+    });
+  });
+
+  describe('getMailerType()', () => {
+    it('Should return a string', () => {
+      // Given
+      const input = { MAILER: 'foo' };
+      const config = new Config(input);
+      // When
+      const result = config.getMailerType();
+      // Then
+      expect(result).toBe('foo');
+    });
+
+    it('Should return a empty string if MAILER is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getMailerType();
+      // Then
+      expect(result).toBe('log');
+    });
+  });
+
+  describe('getElasticOptions()', () => {
+    it('Should return a Elastic configuration', () => {
+      // Given
+      const input = {
+        ES_STATS_HOSTS: 'localhost:9300,localhost:9400',
+        REQUEST_TIMEOUT: 42,
+      };
+
+      const resultMock = {
+        node: ['http://localhost:9300', 'http://localhost:9400'],
+        requestTimeout: 42,
+      };
+      const config = new Config(input);
+      // When
+      const result = config.getElasticOptions();
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+
+    it('Should return a default Elastic configuration if host is not defined', () => {
+      // Given
+      const input = {
+        REQUEST_TIMEOUT: 42,
+      };
+
+      const resultMock = {
+        node: ['http://localhost:9200'],
+        requestTimeout: 42,
+      };
+      const config = new Config(input);
+      // When
+      const result = config.getElasticOptions();
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+  });
+
+  describe('getLogElastic()', () => {
+    it('Should return a Elastic configuration', () => {
+      // Given
+      const input = {
+        ES_LOGS_HOSTS: 'localhost:9300,localhost:9400',
+        REQUEST_TIMEOUT: 42,
+      };
+
+      const resultMock = {
+        node: ['http://localhost:9300', 'http://localhost:9400'],
+        requestTimeout: 42,
+      };
+      const config = new Config(input);
+      // When
+      const result = config.getLogElastic();
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+
+    it('Should return a default Elastic configuration if host is not defined', () => {
+      // Given
+      const input = {
+        REQUEST_TIMEOUT: 42,
+      };
+
+      const resultMock = {
+        node: ['http://localhost:9200'],
+        requestTimeout: 42,
+      };
+      const config = new Config(input);
+      // When
+      const result = config.getLogElastic();
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+  });
+
+  describe('getElasticMainIndex()', () => {
+    it('Should return a string', () => {
+      // Given
+      const input = { ES_MAIN_INDEX: 'foo' };
+      const config = new Config(input);
+      // When
+      const result = config.getElasticMainIndex();
+      // Then
+      expect(result).toBe('foo');
+    });
+
+    it('Should return a string even if env is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getElasticMainIndex();
+      // Then
+      expect(result).toBe('franceconnect');
+    });
+  });
+
+  describe('getElasticMetricsIndex()', () => {
+    it('Should return a string', () => {
+      // Given
+      const input = { ES_METRICS_INDEX: 'foo' };
+      const config = new Config(input);
+      // When
+      const result = config.getElasticMetricsIndex();
+      // Then
+      expect(result).toBe('foo');
+    });
+    it('Should return a string even if env is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getElasticMetricsIndex();
+      // Then
+      expect(result).toBe('metrics');
+    });
+  });
+
+  describe('getElasticEventsIndex()', () => {
+    it('Should return a string', () => {
+      // Given
+      const input = { ES_EVENTS_INDEX: 'foo' };
+      const config = new Config(input);
+      // When
+      const result = config.getElasticEventsIndex();
+      // Then
+      expect(result).toBe('foo');
+    });
+    it('Should return a string even if env is void', () => {
+      // Given
+      const input = {};
+      const config = new Config(input);
+      // When
+      const result = config.getElasticEventsIndex();
+      // Then
+      expect(result).toBe('events');
+    });
+  });
+
+  describe('getMongo()', () => {
+    it('Should return a mongo connection URL', () => {
+      // Given
+      const input = {
+        FC_DB_HOSTS: 'je',
+        FC_DB_USER: 'suis',
+        FC_DB_PASSWORD: 'un',
+        FC_DB_DATABASE: 'gentil',
+        FC_DB_CONNECT_OPTIONS: 'developpeur',
+      };
+      const resultMock = 'mongodb://suis:un@je/gentildeveloppeur';
+      const config = new Config(input);
+      // When
+      const result = config.getMongo();
+      // Then
+      expect(result).toBe(resultMock);
     });
   });
 });

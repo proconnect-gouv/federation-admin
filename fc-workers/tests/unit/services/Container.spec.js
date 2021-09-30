@@ -68,6 +68,20 @@ describe('services/containers', () => {
       expect(spy).toHaveBeenCalledTimes(1);
       expect(result1).toBe(result2);
     });
+
+    it("Should throw an error if service doesn't exist", () => {
+      // Given
+
+      const container = new Container();
+      container.instanciators.myService = 'myServiceValue';
+
+      expect(
+        // When
+        () => container.add('myService', () => {})
+
+        // Then
+      ).toThrow('A service with this name already exists');
+    });
   });
 
   describe('get', () => {

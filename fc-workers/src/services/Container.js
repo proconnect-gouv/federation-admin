@@ -21,6 +21,7 @@ class Container {
 
   getMultiples(names) {
     return names.reduce((services, name) => {
+      // eslint-disable-next-line no-param-reassign
       services[name] = this.get(name);
       return services;
     }, {});

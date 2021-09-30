@@ -6,12 +6,14 @@ class IndexMongoStats extends Job {
   static usage() {
     return `
       Usage:
-      > IndexMongoStats --count=<account|activeFsCount|desactivated|registration> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>
-    `;
+      > IndexMongoStats --count=<account|activeFsCount|desactivated|registration> --start=<<YYYY-MM-DD>> --range=<day|week|month|year>`;
   }
 
   async getMetric(metric, start, range) {
-    const { account, client } = this.db.models;
+    const db = await this.container.get('fcDatabase');
+    const {
+      models: { account, client },
+    } = db;
 
     switch (metric) {
       case 'account':
@@ -33,12 +35,11 @@ class IndexMongoStats extends Job {
 
   static getActiveFsMetric(client, start, range) {
     const stop = IndexMongoStats.getStopDateForRange(start, range);
+    const gte = new Date(Date.parse(start));
+    const lte = new Date(Date.parse(stop));
     const query = {
       active: true,
-      $and: [
-        { createdAt: { $gte: new Date(start) } },
-        { createdAt: { $lt: new Date(stop) } },
-      ],
+      $and: [{ createdAt: { $gte: gte } }, { createdAt: { $lt: lte } }],
     };
 
     return client.countDocuments(query);
@@ -46,11 +47,10 @@ class IndexMongoStats extends Job {
 
   static getRegistrationMetric(account, start, range) {
     const stop = IndexMongoStats.getStopDateForRange(start, range);
+    const gte = new Date(Date.parse(start));
+    const lte = new Date(Date.parse(stop));
     const query = {
-      $and: [
-        { createdAt: { $gte: new Date(start) } },
-        { createdAt: { $lt: new Date(stop) } },
-      ],
+      $and: [{ createdAt: { $gte: gte } }, { createdAt: { $lt: lte } }],
     };
 
     return account.countDocuments(query);
@@ -76,13 +76,14 @@ class IndexMongoStats extends Job {
   }
 
   async run(params) {
+    let db;
     try {
       this.log.info('Connection to database');
       // (async cause connection is made on demand)
-      this.db = await this.container.get('fcDatabase');
+      db = await this.container.get('fcDatabase');
 
       this.log.info('Input control');
-      const input = this.container.get('input');
+      const { input, config } = this.container.get(['input', 'config']);
       const schema = {
         count: { type: 'string', mandatory: true },
         start: { type: 'date', mandatory: true },
@@ -111,11 +112,13 @@ class IndexMongoStats extends Job {
       const id = IndexMongoStats.getMetricId(doc);
 
       this.log.info('Save document to index');
-      await statsService.index(doc, 'metrics', id);
+      const index = config.getElasticMetricsIndex();
+      await statsService.index(doc, index, id);
+
       this.log.info('All done');
     } finally {
       // Make sure we close connection
-      this.db.connections[0].close();
+      db.connections[0].close();
     }
   }
 }

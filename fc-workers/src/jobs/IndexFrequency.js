@@ -40,9 +40,7 @@ class IndexFrequency extends Job {
 
     const result = reg.exec(data);
 
-    if (result) {
-      return JSON.parse(result[1]);
-    }
+    return result ? JSON.parse(result[1]) : null;
   }
 
   static extractDoc(data) {
@@ -80,13 +78,13 @@ class IndexFrequency extends Job {
     accumulator,
     after = null
   ) {
-    return new Promise(async (resolve, reject) => {
-      let data = '';
-      let afterKey = null;
+    let data = '';
+    let afterKey = null;
 
-      const { body } = await this.fetchData(start, range, bucketsCount, after);
-      body.setEncoding('utf8');
+    const { body } = await this.fetchData(start, range, bucketsCount, after);
+    body.setEncoding('utf8');
 
+    return new Promise(resolve => {
       body.on('data', rawChunk => {
         const chunk = IndexFrequency.removeHeader(rawChunk);
         if (!afterKey) {
@@ -124,30 +122,14 @@ class IndexFrequency extends Job {
         resolve(afterKey);
       });
     });
-
-    // const { buckets, after_key: nextAfter } = await this.fetchData(
-    //   start,
-    //   range,
-    //   bucketsCount,
-    //   after
-    // );
-    // buckets.forEach(({ doc_count: count }) => {
-    //   if (!accumulator[count]) {
-    //     accumulator[count] = 0;
-    //   }
-
-    //   accumulator[count] += 1;
-    // });
-
-    // this.log.info(`${Math.ceil(process.memoryUsage().rss / 1048576)}Mb`);
-
-    // return nextAfter;
   }
 
   async computeAllData(start, range, wait, buckets, accumulator) {
     let nextAfter = false;
     do {
       this.log.info('Compute one');
+      // to complex to change
+      // eslint-disable-next-line no-await-in-loop
       nextAfter = await this.computeOne(
         start,
         range,
@@ -173,9 +155,9 @@ class IndexFrequency extends Job {
   }
 
   async createMetrics(data, date, range) {
-    const stats = this.container.get('stats');
+    const { stats, config } = this.container.get(['stats', 'config']);
 
-    Object.entries(data).forEach(async ([frequency, value]) => {
+    const jobs = Object.entries(data).map(async ([frequency, value]) => {
       const doc = stats.createMetricDocument({
         key: IndexFrequency.getFrequencyName(frequency),
         value,
@@ -183,13 +165,15 @@ class IndexFrequency extends Job {
         range,
       });
 
-      // this.log.info('Create a unique consistant id for idempotence');
+      this.log.info('Create a unique consistant id for idempotence');
       const id = IndexFrequency.getMetricId(doc);
 
-      // this.log.info('Save document to index');
+      this.log.info('Save document to index');
 
-      await stats.index(doc, 'metrics', id);
+      const index = config.getElasticMetricsIndex();
+      await stats.index(doc, index, id);
     });
+    await Promise.all(jobs);
 
     this.log.info('All done');
   }
