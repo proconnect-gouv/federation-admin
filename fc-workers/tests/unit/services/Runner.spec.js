@@ -1,7 +1,14 @@
+// eslint-disable-next-line max-classes-per-file
 import Runner from '../../../src/services/Runner';
 import Job from '../../../src/jobs/Job';
+import Container from '../../../src/services/Container';
 
 describe('Runner', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
   describe('usage', () => {
     // Given
     const jobs = { foo: {}, bar: {} };
@@ -54,22 +61,24 @@ describe('Runner', () => {
         return 'usage text';
       }
 
-      run(params) {
+      // eslint-disable-next-line class-methods-use-this
+      async run(params) {
         runMock(params);
-        return Promise.resolve(true);
+        return true;
       }
     }
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.spyOn(process, 'exit').mockImplementation(() => {});
     });
 
     it('Should throw if no job name provided', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
       container.get = key => container.services[key];
-      jest.spyOn(process, 'exit').mockImplementation(() => {});
+
       const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
       // When
       runner.run();
       // Then
@@ -84,6 +93,7 @@ describe('Runner', () => {
       // Given
       const jobs = { foo: {}, bar: {} };
       const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
       // When
       runner.run('wizz');
       // Then
@@ -100,6 +110,8 @@ describe('Runner', () => {
       const jobs = { Bar };
       const runner = new Runner(container, jobs);
       runner.handleError = jest.fn();
+      runner.traceIndices = jest.fn();
+
       // When
       await runner.run('Bar');
       // Then
@@ -124,6 +136,7 @@ describe('Runner', () => {
       // Given
       const jobs = { Foo };
       const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
       // When
       runner.run('Foo');
       // Then
@@ -137,10 +150,12 @@ describe('Runner', () => {
           runMock2(_container);
         }
 
+        // eslint-disable-next-line class-methods-use-this
         run() {}
       }
       const jobs = { Bar };
       const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
       // When
       runner.run('Bar');
       // Then
@@ -151,14 +166,30 @@ describe('Runner', () => {
       const jobs = { Foo };
       const params = {};
       const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
       // When
       runner.run('Foo', params);
       // Then
       expect(runMock.mock.calls[0][0]).toBe(params);
     });
+
+    it('Should log the ES indices when it starts running', () => {
+      // Given
+      const jobs = { Foo };
+      const runner = new Runner(container, jobs);
+      runner.traceIndices = jest.fn();
+      // When
+      runner.run('Foo');
+      // Then
+      expect(runner.traceIndices).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('handleError', () => {
+    let mockExit;
+    beforeEach(() => {
+      mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    });
     it('Should not log stack if error is not input and env is not dev', () => {
       // Given
       const error = { message: 'foo' };
@@ -170,7 +201,6 @@ describe('Runner', () => {
       };
       container.get = key => container.services[key];
       const jobs = { foo: 'foo' };
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
       const runner = new Runner(container, jobs);
       // When
       runner.handleError(error, jobName);
@@ -232,6 +262,49 @@ describe('Runner', () => {
       expect(container.services.logger.log.mock.calls).toHaveLength(1);
       expect(container.services.logger.log.mock.calls[0][0]).toBe('usage text');
       expect(jobs.bar.usage.mock.calls).toHaveLength(1);
+    });
+  });
+
+  describe('traceIndices()', () => {
+    let runner;
+
+    const loggerMock = {
+      debug: jest.fn(),
+    };
+
+    const configMock = {
+      getElasticMainIndex: jest.fn(),
+      getElasticMetricsIndex: jest.fn(),
+      getElasticEventsIndex: jest.fn(),
+    };
+
+    const container = new Container();
+    container.add('logger', () => loggerMock);
+    container.add('config', () => configMock);
+
+    beforeEach(() => {
+      configMock.getElasticMainIndex.mockReturnValueOnce('alpha');
+      configMock.getElasticMetricsIndex.mockReturnValueOnce('bravo');
+      configMock.getElasticEventsIndex.mockReturnValueOnce('charlie');
+
+      runner = new Runner(container);
+    });
+    it('should return the list of indices of ES from config', () => {
+      // Given
+
+      const loggerDebugMock =
+        '/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\ \n > current indices to handle ES:\n   * main : alpha\n   * metrics : bravo\n   * events : charlie';
+
+      // When
+      runner.traceIndices();
+
+      // Then
+      expect(loggerMock.debug).toHaveBeenCalledTimes(1);
+      expect(loggerMock.debug).toHaveBeenCalledWith(loggerDebugMock);
+
+      expect(configMock.getElasticMainIndex).toHaveBeenCalledTimes(1);
+      expect(configMock.getElasticMetricsIndex).toHaveBeenCalledTimes(1);
+      expect(configMock.getElasticEventsIndex).toHaveBeenCalledTimes(1);
     });
   });
 });

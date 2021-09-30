@@ -33,20 +33,41 @@ class Config {
     };
   }
 
-  getElastic() {
-    const hosts = this.config.ES_STATS_HOSTS || 'localhost:9200';
+  getElasticOptions() {
+    const {
+      ES_STATS_HOSTS: hosts = 'localhost:9200',
+      REQUEST_TIMEOUT,
+    } = this.config;
     return {
       node: hosts.split(',').map(host => `http://${host}`),
-      requestTimeout: process.env.REQUEST_TIMEOUT,
+      requestTimeout: REQUEST_TIMEOUT,
     };
   }
 
   getLogElastic() {
-    const hosts = this.config.ES_LOGS_HOSTS || 'localhost:9200';
+    const {
+      ES_LOGS_HOSTS: hosts = 'localhost:9200',
+      REQUEST_TIMEOUT,
+    } = this.config;
     return {
       node: hosts.split(',').map(host => `http://${host}`),
-      requestTimeout: process.env.REQUEST_TIMEOUT,
+      requestTimeout: REQUEST_TIMEOUT,
     };
+  }
+
+  getElasticMainIndex() {
+    const { ES_MAIN_INDEX: index } = this.config;
+    return index || 'franceconnect';
+  }
+
+  getElasticMetricsIndex() {
+    const { ES_METRICS_INDEX: index } = this.config;
+    return index || 'metrics';
+  }
+
+  getElasticEventsIndex() {
+    const { ES_EVENTS_INDEX: index } = this.config;
+    return index || 'events';
   }
 
   getMongo() {

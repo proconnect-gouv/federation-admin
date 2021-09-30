@@ -1,6 +1,5 @@
 import parseArgs from 'minimist';
 import axios from 'axios';
-// import elasticsearch from 'elasticsearch';
 import elasticsearch from '@elastic/elasticsearch';
 import * as jobs from './jobs';
 import Container, {
@@ -25,7 +24,7 @@ container.add('mailer', () =>
 container.add('runner', () => new Runner(container, jobs, Input));
 container.add(
   'dataApi',
-  () => new elasticsearch.Client(container.get('config').getElastic())
+  () => new elasticsearch.Client(container.get('config').getElasticOptions())
 );
 container.add(
   'logApi',

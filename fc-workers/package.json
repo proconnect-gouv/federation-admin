@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "NODE_ENV='development' node src/index.js",
     "test": "NODE_ENV='test' jest tests/",
+    "test:cov": "NODE_ENV='test' jest tests/ --coverage",
     "test:unit": "NODE_ENV='test' jest tests/unit",
     "test:e2e": "NODE_ENV='test' jest tests/e2e",
     "lint": "eslint src/ tests/"
@@ -46,5 +47,15 @@
     "mongoose": "~5.10.15",
     "node-mailjet": "^3.3.1",
     "uuid": "^3.3.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "rootDir": ".",
+    "testRegex": ".spec.js$",
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node"
   }
 }

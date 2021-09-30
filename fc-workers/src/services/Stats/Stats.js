@@ -1,29 +1,51 @@
 /* eslint-disable class-methods-use-this */
 import moment from 'moment';
+import { METRICS_INDEX, EVENTS_INDEX, FRANCECONNECT_INDEX } from './base';
 import * as queries from './queries';
 
 class Stats {
   constructor(container) {
     this.container = container;
+    this.dataApi = this.container.get('dataApi');
+    this.logApi = this.container.get('logApi');
+    this.inputs = this.container.get('input');
+    this.config = this.container.get('config');
+  }
+
+  addIndex(query, nameIndex = FRANCECONNECT_INDEX) {
+    let index;
+    switch (nameIndex) {
+      case EVENTS_INDEX:
+        index = this.config.getElasticEventsIndex();
+        break;
+      case METRICS_INDEX:
+        index = this.config.getElasticMetricsIndex();
+        break;
+      default:
+        index = this.config.getElasticMainIndex();
+        break;
+    }
+    return {
+      ...query,
+      index,
+    };
   }
 
   async getIdsToDelete(params) {
-    const api = this.container.get('dataApi');
     const { from, size } = params;
-    const query = queries.getIdsToDelete(params);
-    const data = await api.search(query);
+    const rawQuery = queries.getIdsToDelete(params);
+    const query = this.addIndex(rawQuery);
+    const data = await this.dataApi.search(query);
 
     const { total, hits } = data.hits;
-    // elasticsearch native variable name
-    // eslint-disable-next-line no-underscore-dangle
-    const ids = hits.map(document => document._id);
+
+    const ids = hits.map(({ _id: id }) => id);
 
     return { from, size, total, ids };
   }
 
   async getByIntervalByFIFS(start, stop, interval, size, after) {
-    const api = this.container.get('logApi');
-    const query = queries.getByIntervalByFIFS({
+    const rawQuery = queries.getByIntervalByFIFS({
       start,
       stop,
       interval,
@@ -31,17 +53,21 @@ class Stats {
       after,
     });
 
-    return api.search(query);
+    const query = this.addIndex(rawQuery);
+
+    return this.logApi.search(query);
   }
 
   async getTotalForActionsAndFiAndRangeByWeek(fi, start, stop) {
-    const api = this.container.get('logApi');
-    const query = queries.getTotalForActionsAndFiAndRangeByWeek({
+    const rawQuery = queries.getTotalForActionsAndFiAndRangeByWeek({
       fi,
       start,
       stop,
     });
-    const data = await api.search(query);
+
+    const query = this.addIndex(rawQuery, EVENTS_INDEX);
+
+    const data = await this.logApi.search(query);
 
     return data.body.aggregations.week.buckets.map(week => ({
       startDate: week.key,
@@ -53,21 +79,22 @@ class Stats {
   }
 
   async getActiveAccountsByRange(params) {
-    const api = this.container.get('logApi');
     const stop = this.getStopDateForRange(params);
-    const query = queries.getActiveAccount({ ...params, stop });
-    const data = await api.search(query);
+    const rawQuery = queries.getActiveAccount({ ...params, stop });
+
+    const query = this.addIndex(rawQuery);
+    const data = await this.logApi.search(query);
 
     return data.body.aggregations.activeUsers.value;
   }
 
   async getUsageCountsByRange(params) {
-    const api = this.container.get('logApi');
     const stop = this.getStopDateForRange(params);
-    const query = queries.getUsageCountsByRange({ ...params, stop });
-    return api.search(query, { asStream: true });
-    // const data = await api.search(query);
-    // return data.body.aggregations.accounts;
+    const rawQuery = queries.getUsageCountsByRange({ ...params, stop });
+
+    const query = this.addIndex(rawQuery);
+
+    return this.logApi.search(query, { asStream: true });
   }
 
   getStopDateForRange(params) {
@@ -86,15 +113,13 @@ class Stats {
   }
 
   createMetricDocument(params) {
-    const input = this.container.get('input');
-
     const schema = {
       key: { type: 'string', mandatory: true },
       value: { type: 'number', mandatory: true },
       date: { type: 'date', mandatory: true },
       range: { type: 'timeRange', mandatory: false },
     };
-    const { key, value, date, range } = input.get(schema, params);
+    const { key, value, date, range } = this.inputs.get(schema, params);
 
     return {
       key,
@@ -131,9 +156,8 @@ class Stats {
   }
 
   async executeBulkQuery(query) {
-    const api = this.container.get('dataApi');
     const body = Stats.stringifyQuery(query);
-    return api.bulk({ body });
+    return this.dataApi.bulk({ body });
   }
 
   async index(doc, index, id) {
@@ -141,7 +165,7 @@ class Stats {
        I can't figure out how to use elasticClient.index() method,
        there seems to be no more doc associated with our version.
 
-       Let's makke this work anyway by using bulk api for our only doc.
+       Let's make this work anyway by using bulk api for our only doc.
     */
     return this.executeBulkQuery(
       this.createBulkQuery([doc], 'index', index, () => id)

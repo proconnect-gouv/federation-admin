@@ -42,6 +42,21 @@ class Runner {
     process.exit(127);
   }
 
+  traceIndices() {
+    const { config, logger } = this.container.get(['config', 'logger']);
+    const main = config.getElasticMainIndex();
+    const metrics = config.getElasticMetricsIndex();
+    const events = config.getElasticEventsIndex();
+    const message = [
+      `/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\/!\\ `,
+      ` > current indices to handle ES:`,
+      `   * main : ${main}`,
+      `   * metrics : ${metrics}`,
+      `   * events : ${events}`,
+    ];
+    logger.debug(message.join('\n'));
+  }
+
   async run(jobName, params) {
     if (typeof jobName === 'undefined' || jobName === '') {
       return this.handleError(new Error('No job specified'), jobName);
@@ -55,6 +70,9 @@ class Runner {
       if (params && params.help) {
         return this.container.get('logger').log(this.jobs[jobName].usage());
       }
+
+      this.traceIndices();
+
       const job = new this.jobs[jobName](this.container);
 
       job.log.info(`New job: ${jobName}`);

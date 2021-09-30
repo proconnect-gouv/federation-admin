@@ -14,7 +14,10 @@ class InitMongoStats extends Job {
   }
 
   async getMetric(metric) {
-    const { account } = this.db.models;
+    const db = await this.container.get('fcDatabase');
+    const {
+      models: { account },
+    } = db;
 
     switch (metric) {
       case 'registration':
@@ -111,10 +114,11 @@ class InitMongoStats extends Job {
   }
 
   async run(params) {
+    let db;
     try {
       this.log.info('Connection to database');
       // (async cause connection is made on demand)
-      this.db = await this.container.get('fcDatabase');
+      db = await this.container.get('fcDatabase');
 
       this.log.info('Input control');
       const input = this.container.get('input');
@@ -163,29 +167,29 @@ class InitMongoStats extends Job {
       this.log.info('All done');
     } finally {
       // Make sure we close connection
-      this.db.connections[0].close();
+      db.connections[0].close();
     }
   }
 
   async createDocuments(docList, chunkLength, timePerRequest, delay) {
-    const statsService = this.container.get('stats');
+    const { stats, config } = this.container.get(['stats', 'config']);
+
     const chunks = _.chunk(docList, chunkLength);
 
+    const createIdFn = ({ key, date, range }) =>
+      IndexMongoStats.getMetricId({ key, date, range });
+
+    const index = config.getElasticMetricsIndex();
+
     const queries = chunks.map(chunk =>
-      statsService.createBulkQuery(
-        chunk,
-        'index',
-        'metrics',
-        ({ key, date, range }) =>
-          IndexMongoStats.getMetricId({ key, date, range })
-      )
+      stats.createBulkQuery(chunk, 'index', index, createIdFn)
     );
 
-    const promises = queries.map((query, index) => {
-      const timeout = delay + timePerRequest * index;
+    const promises = queries.map((query, idx) => {
+      const timeout = delay + timePerRequest * idx;
       return new Promise(res => {
         setTimeout(() => {
-          res(statsService.executeBulkQuery(query));
+          res(stats.executeBulkQuery(query));
         }, timeout);
       });
     });

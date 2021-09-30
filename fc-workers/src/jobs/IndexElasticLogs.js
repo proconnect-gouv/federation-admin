@@ -29,24 +29,19 @@ class IndexElasticLogs extends Job {
   }
 
   async createDocuments(docList, chunkLength, timePerRequest, delay) {
-    const statsService = this.container.get('stats');
+    const { stats, config } = this.container.get(['stats', 'config']);
     const chunks = _.chunk(docList, chunkLength);
 
+    const index = config.getElasticEventsIndex();
     const queries = chunks.map(chunk =>
-      statsService.createBulkQuery(
-        chunk,
-        'index',
-        'events',
-        doc => doc.id,
-        IndexElasticLogs.formatDocument
-      )
+      stats.createBulkQuery(chunk, 'index', index, doc => doc.id)
     );
 
-    const promises = queries.map((query, index) => {
-      const timeout = delay + timePerRequest * index;
+    const promises = queries.map((query, idx) => {
+      const timeout = delay + timePerRequest * idx;
       return new Promise(res => {
         setTimeout(() => {
-          res(statsService.executeBulkQuery(query));
+          res(stats.executeBulkQuery(query));
         }, timeout);
       });
     });
@@ -70,13 +65,8 @@ class IndexElasticLogs extends Job {
   async indexLogs(start, stop, after = null, initialDelay = 0) {
     this.log.info('Fetch the value we want from ES');
     const compositeSize = 10000;
-    let data;
-    try {
-      data = await this.fetchData(start, stop, compositeSize, after);
-    } catch (e) {
-      this.log.error(e);
-      return process.exit(1);
-    }
+    const data = await this.fetchData(start, stop, compositeSize, after);
+
     const { buckets, after_key: nextAfter } = data.body.aggregations.date;
 
     const docList = buckets.map(bucket => ({
@@ -136,9 +126,13 @@ class IndexElasticLogs extends Job {
 
     const { start, stop } = input.get(schema, params);
 
-    this.indexLogs(start, stop);
-
-    this.log.info('All done');
+    try {
+      this.indexLogs(start, stop);
+      this.log.info('All done');
+    } catch (e) {
+      this.log.error(e);
+      process.exit(1);
+    }
   }
 }
 

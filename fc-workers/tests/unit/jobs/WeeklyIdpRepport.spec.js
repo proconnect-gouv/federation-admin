@@ -2,6 +2,18 @@ import Container from '../../../src/services/Container';
 import WeeklyIdpRepport from '../../../src/jobs/WeeklyIdpRepport';
 
 describe('WeeklyIdpRepport', () => {
+  describe('usage()', () => {
+    it('should return usage instruction', () => {
+      // Given
+      // When
+      const usage = WeeklyIdpRepport.usage();
+      // Then
+      expect(usage).toBe(
+        '\n      Usage:\n      > WeeklyIdpRepport --idp=<idp identifier> --email=<email address to send repport to>\n    '
+      );
+    });
+  });
+
   describe('getShiftedDate', () => {
     it('Should return a new date object', () => {
       // Given
@@ -122,10 +134,10 @@ describe('WeeklyIdpRepport', () => {
       const events = [
         { label: 'identityProviderChoice', count: 2 },
         { label: 'identityProviderAuthentication', count: 2 },
-      ]
+      ];
 
       // When
-      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial')
+      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial');
 
       // then
       expect(result).toEqual(0);
@@ -137,10 +149,10 @@ describe('WeeklyIdpRepport', () => {
         { label: 'identityProviderChoice', count: 2 },
         { label: 'identityProviderAuthentication', count: 2 },
         { label: 'initial', count: 3 },
-      ]
+      ];
 
       // When
-      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial')
+      const result = WeeklyIdpRepport.getPropertyCount(events, 'initial');
 
       // then
       expect(result).toEqual(3);

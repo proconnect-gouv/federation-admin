@@ -32,7 +32,11 @@ class IndexElasticStats extends Job {
   }
 
   async run(params) {
-    const { input, stats } = this.container.get(['input', 'stats']);
+    const { input, stats, config } = this.container.get([
+      'input',
+      'stats',
+      'config',
+    ]);
 
     this.log.info('Input control');
     const schema = {
@@ -56,8 +60,10 @@ class IndexElasticStats extends Job {
     this.log.info('Create a unique consistant id for idempotence');
     const id = IndexElasticStats.getMetricId(doc);
 
+    const index = config.getElasticMetricsIndex();
+
     this.log.info('Save document to index');
-    await stats.index(doc, 'metrics', id);
+    await stats.index(doc, index, id);
 
     this.log.info('All done');
   }

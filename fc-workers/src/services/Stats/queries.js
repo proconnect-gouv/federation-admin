@@ -2,11 +2,9 @@ import moment from 'moment';
 
 export const getIdsToDelete = params => {
   const { from, size } = params;
-  const index = 'franceconnect';
   const type = 'log';
 
   const query = {
-    index,
     from,
     size,
     body: {
@@ -33,13 +31,11 @@ export const getIdsToDelete = params => {
 
 export const getTotalForActionsAndFiAndRangeByWeek = params => {
   const { fi, start, stop } = params;
-  const index = 'events';
 
   const startTime = moment(start).format('YYYY-MM-DD');
   const stopTime = moment(stop).format('YYYY-MM-DD');
 
   const query = {
-    index,
     size: 0,
     body: {
       query: {
@@ -106,13 +102,10 @@ export const getTotalForActionsAndFiAndRangeByWeek = params => {
 };
 export const getByIntervalByFIFS = params => {
   const { start, stop, interval, size, after } = params;
-  const index = 'franceconnect';
-
   const startTime = moment(start).format('YYYY-MM-DD');
   const stopTime = moment(stop).format('YYYY-MM-DD');
 
   const query = {
-    index,
     size: 0,
     body: {
       query: {
@@ -175,13 +168,11 @@ export const getByIntervalByFIFS = params => {
 
 export const getActiveAccount = params => {
   const { start, stop } = params;
-  const index = 'franceconnect';
 
   const startTime = moment(start).format('YYYY-MM-DD');
   const stopTime = moment(stop).format('YYYY-MM-DD');
 
   const query = {
-    index,
     size: 0,
     body: {
       query: {
@@ -216,13 +207,10 @@ export const getActiveAccount = params => {
 export const getUsageCountsByRange = params => {
   const { start, stop, after, buckets } = params;
 
-  const index = 'franceconnect';
-
   const startTime = moment(start).format('YYYY-MM-DD');
   const stopTime = moment(stop).format('YYYY-MM-DD');
 
   const query = {
-    index,
     size: 0,
     body: {
       query: {
