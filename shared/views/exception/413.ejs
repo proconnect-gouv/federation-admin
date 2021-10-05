@@ -5,7 +5,7 @@
   </head>
   <body id="generic-exception">
     <% if (locals.CURRENT_USER !== undefined) { %>
-    <% include partials/header.ejs %>
+    <%- include('partials/header.ejs') -%>
     <% } %>
     <section class="container-fluid error_section">
       <div class="card">

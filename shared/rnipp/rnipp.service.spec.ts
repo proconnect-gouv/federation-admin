@@ -75,7 +75,7 @@ describe('RnippService (e2e)', () => {
 
   describe(`getXmlFormRnippApi`, () => {
     it(`should return userInfo when called successfully`, async () => {
-      const result: AxiosResponse = {
+      const result: AxiosResponse<string> = {
         data: 'Components',
         status: 200,
         statusText: 'OK',
@@ -122,7 +122,7 @@ describe('RnippService (e2e)', () => {
     });
 
     it(`should reject an error when called with not a 200 from rnipp`, async () => {
-      const result: AxiosResponse = {
+      const result: AxiosResponse<string> = {
         data: 'Components',
         status: 500,
         statusText: 'Not Ok',

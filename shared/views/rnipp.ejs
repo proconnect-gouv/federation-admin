@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <% include partials/head.ejs %>
+  <%- include('partials/head.ejs') -%>
 </head>
 <body>
-  <% include partials/header.ejs %>
+  <%- include('partials/header.ejs') -%>
   <section class="mt-5">
     <div class="container-fluid">
       <div class="row">
@@ -289,4 +289,4 @@
     </script>
     <% } %>
   </section>
-<% include partials/footer.ejs %>
+<%- include('partials/footer.ejs') -%>

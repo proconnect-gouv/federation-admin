@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <% include partials/head.ejs %>
+    <%- include('partials/head.ejs') -%>
 </head>
 <body class="d-flex align-items-center justify-content-center">
-<% include partials/border.ejs %>
+<%- include('partials/border.ejs') -%>
 
 <div class="container-fluid">
   <form class="login-form" method="POST" novalidate>
@@ -14,7 +14,7 @@
         <%= messages.error %>
       </div>
     <% } %>
-    <% include partials/global-errors-handler.ejs %>
+    <%- include('partials/global-errors-handler.ejs') -%>
     <input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
     <label for="username" class="sr-only">Username</label>
     <input type="text" name="username" class="form-control" placeholder="Username" required autofocus="">
