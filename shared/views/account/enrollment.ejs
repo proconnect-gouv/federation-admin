@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <head>
-  <% include partials/head.ejs %>
+  <%- include('partials/head.ejs') -%>
 </head>
 
 <body>
@@ -14,7 +14,7 @@
       </div>
 
       <div class="card col-lg-12">
-        <% include partials/global-errors-handler.ejs %>
+        <%- include('partials/global-errors-handler.ejs') -%>
 
         <div class="card-body">
           <form action="<%= locals.APP_ROOT %>/account/enrollment/<%= locals.id%>?_method=PATCH" method="POST"

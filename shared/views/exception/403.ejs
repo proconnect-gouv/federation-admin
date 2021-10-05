@@ -5,7 +5,7 @@
   </head>
   <body id="forbidden-exception">
     <% if (locals.CURRENT_USER !== undefined) { %>
-    <% include partials/header.ejs %>
+    <%- include('partials/header.ejs') -%>
     <% } %>
     <div class="forbidden-container">
       <h1>

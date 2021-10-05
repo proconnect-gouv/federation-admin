@@ -37,7 +37,7 @@
     "commander": "^4.0.0",
     "cookie-parser": "^1.4.4",
     "dotenv": "^8.0.0",
-    "ejs": "^2.6.1",
+    "ejs": "^3.1.0",
     "express-flash": "0.0.2",
     "express-rate-limit": "^5.0.0",
     "express-session": "^1.16.1",
