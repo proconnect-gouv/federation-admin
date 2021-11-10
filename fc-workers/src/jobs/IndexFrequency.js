@@ -1,7 +1,6 @@
 import crypto from 'crypto';
+import { sleep } from '../utils';
 import Job from './Job';
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Can't get the data easily with current index

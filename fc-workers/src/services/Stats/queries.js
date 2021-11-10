@@ -252,3 +252,42 @@ export const getUsageCountsByRange = params => {
 
   return query;
 };
+
+export const getLastIdentitiesCount = params => {
+  const { date } = params;
+
+  const limitTime = moment(date).format('YYYY-MM-DD');
+
+  const query = {
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                key: 'identity',
+              },
+            },
+            {
+              match: {
+                range: 'month',
+              },
+            },
+            {
+              range: {
+                date: {
+                  lte: limitTime,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    size: 1,
+    from: 0,
+    sort: ['date:desc'],
+  };
+
+  return query;
+};

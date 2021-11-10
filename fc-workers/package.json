@@ -11,7 +11,8 @@
     "test:cov": "NODE_ENV='test' jest tests/ --coverage",
     "test:unit": "NODE_ENV='test' jest tests/unit",
     "test:e2e": "NODE_ENV='test' jest tests/e2e",
-    "lint": "eslint src/ tests/"
+    "lint": "eslint src/ tests/",
+    "debug": "node tests/fixtures/"
   },
   "author": "",
   "license": "ISC",
@@ -42,6 +43,7 @@
     "babel": "^6.23.0",
     "elasticsearch": "^16.1.1",
     "lodash": "^4.17.11",
+    "luxon": "^2.0.2",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
     "mongoose": "~5.10.15",

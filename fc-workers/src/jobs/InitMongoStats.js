@@ -1,19 +1,23 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import _ from 'lodash';
 import Job from './Job';
+import { sleep } from '../utils';
 import IndexMongoStats from './IndexMongoStats';
 
-const DATE_FORMAT = 'YYYY-MM-DD';
+export const isLastDayOfMonth = date => {
+  const ref = DateTime.fromISO(date, { zone: 'utc' });
+  return ref.endOf('month').hasSame(ref, 'day');
+};
 
 class InitMongoStats extends Job {
   static usage() {
     return `
       Usage:
-      > InitMongoStats --metric=<registration>
+      > InitMongoStats --metric=<registration|identity>
     `;
   }
 
-  async getMetric(metric) {
+  async getData(metric) {
     const db = await this.container.get('fcDatabase');
     const {
       models: { account },
@@ -21,6 +25,7 @@ class InitMongoStats extends Job {
 
     switch (metric) {
       case 'registration':
+      case 'identity':
         /**
          * We use a single aggregation at the day level and then generate data for the wider ranges.
          * It's easier done in pure javascript than in a Mongo aggregation and we need to fetch this data anyway.
@@ -43,16 +48,47 @@ class InitMongoStats extends Job {
    * @return Promise<array>
    */
   static async getInitRegistrationMetric(account) {
-    return account.aggregate([
-      {
-        $group: {
-          _id: {
-            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
-          },
-          count: { $sum: 1 },
+    // we want only full day so we exclude current date
+    const exclude = DateTime.now()
+      .setZone('utc')
+      .startOf('day')
+      .toISODate();
+
+    const groupByDate = {
+      $group: {
+        _id: {
+          $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
         },
+        count: { $sum: 1 },
       },
-    ]);
+    };
+
+    const renameData = {
+      $project: {
+        _id: 0,
+        date: '$_id',
+        value: '$count',
+      },
+    };
+
+    const excludeTodayAndNull = {
+      $match: {
+        $and: [
+          {
+            date: {
+              $ne: exclude,
+            },
+          },
+          {
+            date: {
+              $ne: null,
+            },
+          },
+        ],
+      },
+    };
+
+    return account.aggregate([groupByDate, renameData, excludeTodayAndNull]);
   }
 
   /**
@@ -63,9 +99,9 @@ class InitMongoStats extends Job {
    */
   static periodReducer(period) {
     return (acc, { date, value }) => {
-      const firstDayOfPeriod = moment(date, DATE_FORMAT)
+      const firstDayOfPeriod = DateTime.fromISO(date)
         .startOf(period)
-        .format(DATE_FORMAT);
+        .toISODate();
 
       const periodValue = (acc[firstDayOfPeriod] || 0) + value;
 
@@ -94,7 +130,7 @@ class InitMongoStats extends Job {
   }
 
   static daysToWeeks(days) {
-    return InitMongoStats.daysToPeriod(days, 'isoWeek');
+    return InitMongoStats.daysToPeriod(days, 'week');
   }
 
   static daysToMonths(days) {
@@ -113,62 +149,92 @@ class InitMongoStats extends Job {
     }));
   }
 
-  async run(params) {
-    let db;
-    try {
-      this.log.info('Connection to database');
-      // (async cause connection is made on demand)
-      db = await this.container.get('fcDatabase');
+  static buildScaleFromMetrics(metricData, key) {
+    const weekValues = InitMongoStats.daysToWeeks(metricData);
+    const monthsValues = InitMongoStats.daysToMonths(metricData);
+    const yearValues = InitMongoStats.daysToYears(metricData);
 
-      this.log.info('Input control');
-      const input = this.container.get('input');
-      const schema = {
-        metric: { type: 'string', mandatory: true },
+    const docList = [].concat(
+      InitMongoStats.resultToDoc(metricData, key, 'day'),
+      InitMongoStats.resultToDoc(weekValues, key, 'week'),
+      InitMongoStats.resultToDoc(monthsValues, key, 'month'),
+      InitMongoStats.resultToDoc(yearValues, key, 'year')
+    );
+    return docList;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  selectDaysToRegister(metricData, lastDate) {
+    const referenceDate = DateTime.fromISO(lastDate, { zone: 'utc' });
+
+    const computeData = metricData
+      .filter(
+        ({ date }) => DateTime.fromISO(date, { zone: 'utc' }) > referenceDate
+      )
+      .sort(({ date: a }, { date: b }) => {
+        // dates are in format : yyyy-mm-dd
+        const timeA = a.split('-').join('');
+        const timeB = b.split('-').join('');
+        return timeA - timeB;
+      });
+    return computeData;
+  }
+
+  computeMetricDocs({ data, identities, key }) {
+    let cumul = identities;
+    const daily = data.map(({ date, value }) => {
+      cumul += value;
+      return {
+        key,
+        date,
+        value: cumul,
+        range: 'day',
       };
+    });
 
-      const { metric } = input.get(schema, params);
+    this.log.info(` > Current account number: ${cumul} persons`);
 
-      this.log.info(`Found parameters: ${JSON.stringify({ metric })}`);
+    const monthly = daily
+      .filter(({ date }) => isLastDayOfMonth(date))
+      .map(doc => ({
+        ...doc,
+        range: 'month',
+      }));
 
-      this.log.info('Fetch the values we want from DB');
-      const values = await this.getMetric(metric);
+    this.log.info(` > Number of daily docs to registered: ${daily.length}`);
+    this.log.info(` > Number of monthly docs to registered: ${monthly.length}`);
 
-      // Remove invalid values such as empty createdAt
-      const dayValues = values
-        .filter(
-          // MongoDB field
-          // eslint-disable-next-line no-underscore-dangle
-          value => value._id
-        )
-        .map(({ _id, count }) => ({ date: _id, value: count }));
-      const weekValues = InitMongoStats.daysToWeeks(dayValues);
-      const monthsValues = InitMongoStats.daysToMonths(dayValues);
-      const yearValues = InitMongoStats.daysToYears(dayValues);
+    return [...daily, ...monthly];
+  }
 
-      const docList = [].concat(
-        InitMongoStats.resultToDoc(dayValues, metric, 'day'),
-        InitMongoStats.resultToDoc(weekValues, metric, 'week'),
-        InitMongoStats.resultToDoc(monthsValues, metric, 'month'),
-        InitMongoStats.resultToDoc(yearValues, metric, 'year')
-      );
+  async buildAccountFromMetrics(metricData, key) {
+    const { stats } = this.container.get(['stats']);
 
-      this.log.info('Post new entries to metric index');
+    // only full days must be registered...
+    const startDate = DateTime.now()
+      .setZone('utc')
+      .startOf('day')
+      .minus({ days: 1 })
+      .toISO();
 
-      const chunkSize = 1000;
-      const timePerRequest = 100;
-      const delay = Math.floor(
-        ((docList.length / chunkSize) * timePerRequest) / 1000
-      );
-      this.log.info(
-        `   > This will take at least ${delay} seconds, please hold on...`
-      );
+    this.log.info(` > Select measure date : ${startDate}`);
 
-      await this.createDocuments(docList, chunkSize, timePerRequest, 0);
-      this.log.info('All done');
-    } finally {
-      // Make sure we close connection
-      db.connections[0].close();
-    }
+    const { identities, lastDate } = await stats.getLastAccountNumber({
+      date: startDate,
+    });
+
+    this.log.info(
+      ` > Last account number: ${identities} persons on ${lastDate}`
+    );
+
+    const data = this.selectDaysToRegister(metricData, lastDate);
+
+    const docs = this.computeMetricDocs({
+      data,
+      identities,
+      key,
+    });
+    return docs;
   }
 
   async createDocuments(docList, chunkLength, timePerRequest, delay) {
@@ -185,16 +251,74 @@ class InitMongoStats extends Job {
       stats.createBulkQuery(chunk, 'index', index, createIdFn)
     );
 
-    const promises = queries.map((query, idx) => {
+    const jobs = queries.map(async (query, idx) => {
       const timeout = delay + timePerRequest * idx;
-      return new Promise(res => {
-        setTimeout(() => {
-          res(stats.executeBulkQuery(query));
-        }, timeout);
-      });
+      await sleep(timeout);
+      return stats.executeBulkQuery(query);
     });
 
-    return Promise.all(promises);
+    return Promise.all(jobs);
+  }
+
+  async computeData(metricData, key) {
+    switch (key) {
+      case 'registration':
+        return InitMongoStats.buildScaleFromMetrics(metricData, key);
+      case 'identity':
+        return this.buildAccountFromMetrics(metricData, key);
+      default:
+        throw new Error(`Unknown metric: <${key}>`);
+    }
+  }
+
+  prepareDocs(dataList) {
+    const stats = this.container.get('stats');
+
+    return dataList.map(raw => stats.createMetricDocument(raw));
+  }
+
+  async run(params) {
+    let db;
+    try {
+      this.log.info('Connection to database');
+      // (async cause connection is made on demand)
+      db = await this.container.get('fcDatabase');
+      const input = this.container.get('input');
+
+      this.log.info('Input control');
+      const schema = {
+        metric: { type: 'string', mandatory: true },
+      };
+
+      const { metric: key } = input.get(schema, params);
+
+      this.log.info(`Found parameters: ${JSON.stringify({ metric: key })}`);
+
+      this.log.info('Fetch the values we want from DB');
+      const metricData = await this.getData(key);
+
+      const computeList = await this.computeData(metricData, key);
+
+      const docList = this.prepareDocs(computeList);
+
+      this.log.info('Post new entries to metric index');
+
+      const chunkSize = 1000;
+      const timePerRequest = 100;
+      const delay =
+        Math.floor((docList.length / chunkSize) * timePerRequest) / 1000;
+      this.log.info(
+        ` > This will take at least ${delay.toFixed(
+          2
+        )} seconds, please hold on...`
+      );
+
+      await this.createDocuments(docList, chunkSize, timePerRequest, delay);
+      this.log.info('All done');
+    } finally {
+      // Make sure we close connection
+      db.connections[0].close();
+    }
   }
 }
 

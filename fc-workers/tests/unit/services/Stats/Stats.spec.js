@@ -103,6 +103,59 @@ describe('Stats', () => {
       expect(result).toStrictEqual(resultMock);
     });
   });
+
+  describe('getLastAccountNumber()', () => {
+    const rawQueryMock = {
+      test: 'testValue',
+    };
+    const queryMock = {
+      ...rawQueryMock,
+      index: 'metrics',
+    };
+
+    beforeEach(() => {
+      queries.getLastIdentitiesCount.mockReturnValueOnce();
+      addIndexMock = jest.spyOn(statsService, 'addIndex');
+      addIndexMock.mockReturnValueOnce(queryMock);
+    });
+
+    it('should return the last number of accounts in database', async () => {
+      // Given
+      const paramsMock = {
+        date: '2019-02-12',
+      };
+      const resultMock = {
+        lastDate: '2019-01-31',
+        identities: 42,
+      };
+
+      const searchMock = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  date: '2019-01-31',
+                  value: 42,
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      logApiMock.search.mockResolvedValueOnce(searchMock);
+
+      // When
+      const result = await statsService.getLastAccountNumber(paramsMock);
+
+      // Then
+      expect(result).toStrictEqual(resultMock);
+      expect(logApiMock.search).toHaveBeenCalledTimes(1);
+      expect(queries.getLastIdentitiesCount).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('getIdsToDelete()', () => {
     const rawQueryMock = {
       test: 'testValue',
@@ -112,7 +165,6 @@ describe('Stats', () => {
       index: 'franceconnect',
     };
 
-    let addIndexMock;
     beforeEach(() => {
       queries.getIdsToDelete.mockReturnValueOnce();
       addIndexMock = jest.spyOn(statsService, 'addIndex');

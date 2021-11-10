@@ -127,7 +127,7 @@ class IndexElasticLogs extends Job {
     const { start, stop } = input.get(schema, params);
 
     try {
-      this.indexLogs(start, stop);
+      await this.indexLogs(start, stop);
       this.log.info('All done');
     } catch (e) {
       this.log.error(e);

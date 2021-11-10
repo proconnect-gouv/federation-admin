@@ -4,6 +4,7 @@ import {
   getByIntervalByFIFS,
   getActiveAccount,
   getUsageCountsByRange,
+  getLastIdentitiesCount,
 } from '../../../../src/services/Stats/queries';
 
 describe('Queries', () => {
@@ -379,5 +380,47 @@ describe('Queries', () => {
 
       expect(result).toStrictEqual(resultMock);
     });
+  });
+
+  describe('getLastIdentitiesCount()', () => {
+    // Given
+    const params = {
+      date: '2019-02-12',
+    };
+    const resultMock = {
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  key: 'identity',
+                },
+              },
+              {
+                match: {
+                  range: 'month',
+                },
+              },
+              {
+                range: {
+                  date: {
+                    lte: '2019-02-12',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      size: 1,
+      from: 0,
+      sort: ['date:desc'],
+    };
+    // When
+    const result = getLastIdentitiesCount(params);
+
+    // Then
+    expect(result).toStrictEqual(resultMock);
   });
 });
