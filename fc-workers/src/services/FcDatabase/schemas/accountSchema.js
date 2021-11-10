@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 
+// eslint-disable-next-line import/prefer-default-export
 export const accountSchema = new Schema({
   id: String,
   identityHash: { type: String, index: true },

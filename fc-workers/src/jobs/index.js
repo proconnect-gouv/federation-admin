@@ -6,3 +6,4 @@ export { default as IndexElasticLogs } from './IndexElasticLogs';
 export { default as IndexElasticStats } from './IndexElasticStats';
 export { default as IndexFrequency } from './IndexFrequency';
 export { default as InitMongoStats } from './InitMongoStats';
+export { default as InitIdentityES } from './InitIdentityES';

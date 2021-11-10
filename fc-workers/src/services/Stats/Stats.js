@@ -31,6 +31,39 @@ class Stats {
     };
   }
 
+  /**
+   * Search the number of aggregated Identities registered in ES to the end of the previous month
+   * (ex: 14/12/2021 will give us the number of Identities registered the 30/11/2021)
+   * @param { date: Date} params contains a date params as the reference in time
+   * @returns { identities: number, lastDate: Date } return last aggregated identities number with its metric date
+   */
+  async getLastAccountNumber(params) {
+    const { date } = params;
+
+    const rawQuery = queries.getLastIdentitiesCount({
+      date,
+    });
+
+    const query = this.addIndex(rawQuery, METRICS_INDEX);
+
+    const data = await this.logApi.search(query);
+    const {
+      body: {
+        hits: { hits },
+      },
+    } = data;
+    const [result] = hits;
+
+    const {
+      _source: { date: lastDate, value: identities },
+    } = result;
+
+    return {
+      lastDate,
+      identities,
+    };
+  }
+
   async getIdsToDelete(params) {
     const { from, size } = params;
     const rawQuery = queries.getIdsToDelete(params);
@@ -104,7 +137,7 @@ class Stats {
       moment(start)
         // Add given range
         .add(1, range)
-        // Remove one day to get only wante period
+        // Remove one day to get only wanted period
         // ie. for 1 month we want 2018/01/01 to 2018/01/31, not to 2018/02/01
         .add(-1, 'day')
         // Return a native javascript object

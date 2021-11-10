@@ -318,7 +318,7 @@ describe('IndexElasticLogs', () => {
         start: { type: 'date', mandatory: true },
         stop: { type: 'date', mandatory: true },
       };
-      indexLogsMock.mockReturnValueOnce(true);
+      indexLogsMock.mockResolvedValueOnce(true);
 
       inputMock.get.mockImplementationOnce((_schema, params) => params);
 

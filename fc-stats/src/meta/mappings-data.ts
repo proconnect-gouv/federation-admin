@@ -69,6 +69,7 @@ export const MAPPINGS = {
     activeFsCount: 'FS actifs',
     disabled: 'Comptes désactivés',
     registration: 'Comptes créés',
+    identity: 'Identités cumulées',
   },
   granularity: {
     day: 'Jour',

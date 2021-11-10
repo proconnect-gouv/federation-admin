@@ -90,19 +90,19 @@ class IndexMongoStats extends Job {
         range: { type: 'timeRange', mandatory: true },
       };
 
-      const { count, start, range } = input.get(schema, params);
+      const { count: key, start, range } = input.get(schema, params);
 
       this.log.info(
-        `Found parameters: ${JSON.stringify({ count, start, range })}`
+        `Found parameters: ${JSON.stringify({ key, start, range })}`
       );
 
       this.log.info('Fetch the value we want from DB');
-      const value = await this.getMetric(count, start, range);
+      const value = await this.getMetric(key, start, range);
 
       this.log.info('build a document');
       const statsService = this.container.get('stats');
       const doc = statsService.createMetricDocument({
-        key: count,
+        key,
         value,
         date: start,
         range,
