@@ -81,7 +81,7 @@ export function resetMetricsStats() {
     `);
 
   return cy
-    .exec(command2, { timeout: SAFETY_EXEC_TIMEOUT })
+    .exec(command2, { timeout: SAFETY_EXEC_TIMEOUT * 3 })
     .its('code')
     .should('eq', 0);
 }
