@@ -9,11 +9,11 @@ export const isLastDayOfMonth = date => {
   return ref.endOf('month').hasSame(ref, 'day');
 };
 
-class InitMongoStats extends Job {
+class IndexUserStats extends Job {
   static usage() {
     return `
       Usage:
-      > InitMongoStats --metric=<registration|identity>
+      > IndexUserStats --metric=<registration|identity>
     `;
   }
 
@@ -35,7 +35,7 @@ class InitMongoStats extends Job {
          * resulting in a limited number of documents (365 + 52 + 12 + 1 per year)
          * Do not do this for large datasets!
          */
-        return InitMongoStats.getInitRegistrationMetric(account);
+        return IndexUserStats.getInitRegistrationMetric(account);
 
       default:
         throw new Error(`Unknown metric: <${metric}>`);
@@ -119,7 +119,7 @@ class InitMongoStats extends Job {
    */
   static daysToPeriod(days, period) {
     const reducedAsObject = days.reduce(
-      InitMongoStats.periodReducer(period),
+      IndexUserStats.periodReducer(period),
       {}
     );
 
@@ -130,15 +130,15 @@ class InitMongoStats extends Job {
   }
 
   static daysToWeeks(days) {
-    return InitMongoStats.daysToPeriod(days, 'week');
+    return IndexUserStats.daysToPeriod(days, 'week');
   }
 
   static daysToMonths(days) {
-    return InitMongoStats.daysToPeriod(days, 'month');
+    return IndexUserStats.daysToPeriod(days, 'month');
   }
 
   static daysToYears(days) {
-    return InitMongoStats.daysToPeriod(days, 'year');
+    return IndexUserStats.daysToPeriod(days, 'year');
   }
 
   static resultToDoc(results, key, range) {
@@ -150,15 +150,15 @@ class InitMongoStats extends Job {
   }
 
   static buildScaleFromMetrics(metricData, key) {
-    const weekValues = InitMongoStats.daysToWeeks(metricData);
-    const monthsValues = InitMongoStats.daysToMonths(metricData);
-    const yearValues = InitMongoStats.daysToYears(metricData);
+    const weekValues = IndexUserStats.daysToWeeks(metricData);
+    const monthsValues = IndexUserStats.daysToMonths(metricData);
+    const yearValues = IndexUserStats.daysToYears(metricData);
 
     const docList = [].concat(
-      InitMongoStats.resultToDoc(metricData, key, 'day'),
-      InitMongoStats.resultToDoc(weekValues, key, 'week'),
-      InitMongoStats.resultToDoc(monthsValues, key, 'month'),
-      InitMongoStats.resultToDoc(yearValues, key, 'year')
+      IndexUserStats.resultToDoc(metricData, key, 'day'),
+      IndexUserStats.resultToDoc(weekValues, key, 'week'),
+      IndexUserStats.resultToDoc(monthsValues, key, 'month'),
+      IndexUserStats.resultToDoc(yearValues, key, 'year')
     );
     return docList;
   }
@@ -263,7 +263,7 @@ class InitMongoStats extends Job {
   async computeData(metricData, key) {
     switch (key) {
       case 'registration':
-        return InitMongoStats.buildScaleFromMetrics(metricData, key);
+        return IndexUserStats.buildScaleFromMetrics(metricData, key);
       case 'identity':
         return this.buildAccountFromMetrics(metricData, key);
       default:
@@ -322,7 +322,7 @@ class InitMongoStats extends Job {
   }
 }
 
-InitMongoStats.description =
-  'Initialize data from mongoDB and index it in stats elastic';
+IndexUserStats.description =
+  'compute User Registration data from mongoDB and index all metrics in ES stats';
 
-export default InitMongoStats;
+export default IndexUserStats;
