@@ -1,7 +1,7 @@
 import IndexMongoStats from '../../../src/jobs/IndexMongoStats';
-import InitMongoStats, {
+import IndexUserStats, {
   isLastDayOfMonth,
-} from '../../../src/jobs/InitMongoStats';
+} from '../../../src/jobs/IndexUserStats';
 import Container from '../../../src/services/Container';
 
 const daysMock = [
@@ -51,8 +51,8 @@ describe('isLastDay()', () => {
   });
 });
 
-describe('InitMongoStats', () => {
-  let initMongoStats;
+describe('IndexUserStats', () => {
+  let indexUserStats;
 
   const statsMock = {
     createBulkQuery: jest.fn(),
@@ -97,17 +97,17 @@ describe('InitMongoStats', () => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
 
-    initMongoStats = new InitMongoStats(container);
+    indexUserStats = new IndexUserStats(container);
   });
 
   describe('usage()', () => {
     it('should return usage instruction', () => {
       // Given
       // When
-      const usage = InitMongoStats.usage();
+      const usage = IndexUserStats.usage();
       // Then
       expect(usage).toBe(
-        '\n      Usage:\n      > InitMongoStats --metric=<registration|identity>\n    '
+        '\n      Usage:\n      > IndexUserStats --metric=<registration|identity>\n    '
       );
     });
   });
@@ -118,7 +118,7 @@ describe('InitMongoStats', () => {
     const getInitRegistrationResult = Symbol('getInitRegistrationResult');
     beforeEach(() => {
       getInitRegistrationMock = jest.spyOn(
-        InitMongoStats,
+        IndexUserStats,
         'getInitRegistrationMetric'
       );
       getInitRegistrationMock.mockResolvedValueOnce(getInitRegistrationResult);
@@ -127,7 +127,7 @@ describe('InitMongoStats', () => {
       // Given
       const metric = 'registration';
       // When
-      const result = await initMongoStats.getData(metric);
+      const result = await indexUserStats.getData(metric);
       // Then
       expect(result).toStrictEqual(getInitRegistrationResult);
       expect(getInitRegistrationMock).toHaveBeenCalledTimes(1);
@@ -138,7 +138,7 @@ describe('InitMongoStats', () => {
       const metric = 'Harpagon';
       await expect(
         // When
-        initMongoStats.getData(metric)
+        indexUserStats.getData(metric)
         // Then
       ).rejects.toThrow(`Unknown metric: <${metric}>`);
     });
@@ -181,7 +181,7 @@ describe('InitMongoStats', () => {
         },
       ];
       // When
-      const result = await InitMongoStats.getInitRegistrationMetric(
+      const result = await IndexUserStats.getInitRegistrationMetric(
         accountMock
       );
       // Then
@@ -196,7 +196,7 @@ describe('InitMongoStats', () => {
       // Given
       const period = 'week';
       // When
-      const result = InitMongoStats.periodReducer(period);
+      const result = IndexUserStats.periodReducer(period);
       // Then
       expect(typeof result).toBe('function');
     });
@@ -204,7 +204,7 @@ describe('InitMongoStats', () => {
       // Given
       const period = 'week';
       // When
-      const result = daysMock.reduce(InitMongoStats.periodReducer(period), {});
+      const result = daysMock.reduce(IndexUserStats.periodReducer(period), {});
       // Then
       expect(typeof result).toBe('object');
     });
@@ -212,7 +212,7 @@ describe('InitMongoStats', () => {
       // Given
       const period = 'week';
       // When
-      const result = daysMock.reduce(InitMongoStats.periodReducer(period), {});
+      const result = daysMock.reduce(IndexUserStats.periodReducer(period), {});
       // Then
       expect(Object.keys(result)).toEqual([
         '2020-12-14',
@@ -226,10 +226,10 @@ describe('InitMongoStats', () => {
   describe('daysToPeriod()', () => {
     it('should call periodReducer', () => {
       // Given
-      const periodReducerSpy = jest.spyOn(InitMongoStats, 'periodReducer');
+      const periodReducerSpy = jest.spyOn(IndexUserStats, 'periodReducer');
       const period = 'week';
       // When
-      InitMongoStats.daysToPeriod(daysMock, period);
+      IndexUserStats.daysToPeriod(daysMock, period);
       // Then
       expect(periodReducerSpy).toHaveBeenCalledTimes(1);
       expect(periodReducerSpy).toHaveBeenCalledWith(period);
@@ -237,23 +237,23 @@ describe('InitMongoStats', () => {
   });
 
   describe('daysToWeeks()', () => {
-    it('should call InitMongoStats.daysToPeriod ', () => {
+    it('should call IndexUserStats.daysToPeriod ', () => {
       // Given
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
       // When
-      InitMongoStats.daysToWeeks(daysMock);
+      IndexUserStats.daysToWeeks(daysMock);
       // Then
-      expect(InitMongoStatsSpy).toHaveBeenCalledTimes(1);
-      expect(InitMongoStatsSpy).toHaveBeenCalledWith(daysMock, 'week');
+      expect(IndexUserStatsSpy).toHaveBeenCalledTimes(1);
+      expect(IndexUserStatsSpy).toHaveBeenCalledWith(daysMock, 'week');
     });
 
-    it('should return result from InitMongoStats.daysToPeriod ', () => {
+    it('should return result from IndexUserStats.daysToPeriod ', () => {
       // Given
       const mockReturnValue = Symbol('daysToPeriod return value');
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
-      InitMongoStatsSpy.mockReturnValue(mockReturnValue);
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
+      IndexUserStatsSpy.mockReturnValue(mockReturnValue);
       // When
-      const result = InitMongoStats.daysToWeeks(daysMock);
+      const result = IndexUserStats.daysToWeeks(daysMock);
       // Then
       expect(result).toBe(mockReturnValue);
     });
@@ -261,7 +261,7 @@ describe('InitMongoStats', () => {
     // Integration test
     it('should return week aggregation', () => {
       // When
-      const result = InitMongoStats.daysToWeeks(daysMock);
+      const result = IndexUserStats.daysToWeeks(daysMock);
       // Then
       expect(result).toEqual([
         { date: '2020-12-14', value: 18 },
@@ -273,23 +273,23 @@ describe('InitMongoStats', () => {
   });
 
   describe('daysToMonths()', () => {
-    it('should call InitMongoStats.daysToPeriod ', () => {
+    it('should call IndexUserStats.daysToPeriod ', () => {
       // Given
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
       // When
-      InitMongoStats.daysToMonths(daysMock);
+      IndexUserStats.daysToMonths(daysMock);
       // Then
-      expect(InitMongoStatsSpy).toHaveBeenCalledTimes(1);
-      expect(InitMongoStatsSpy).toHaveBeenCalledWith(daysMock, 'month');
+      expect(IndexUserStatsSpy).toHaveBeenCalledTimes(1);
+      expect(IndexUserStatsSpy).toHaveBeenCalledWith(daysMock, 'month');
     });
 
-    it('should return result from InitMongoStats.daysToPeriod ', () => {
+    it('should return result from IndexUserStats.daysToPeriod ', () => {
       // Given
       const mockReturnValue = Symbol('daysToPeriod return value');
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
-      InitMongoStatsSpy.mockReturnValue(mockReturnValue);
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
+      IndexUserStatsSpy.mockReturnValue(mockReturnValue);
       // When
-      const result = InitMongoStats.daysToMonths(daysMock);
+      const result = IndexUserStats.daysToMonths(daysMock);
       // Then
       expect(result).toBe(mockReturnValue);
     });
@@ -297,7 +297,7 @@ describe('InitMongoStats', () => {
     // Integration test
     it('should return month aggregation', () => {
       // When
-      const result = InitMongoStats.daysToMonths(daysMock);
+      const result = IndexUserStats.daysToMonths(daysMock);
       // Then
       expect(result).toEqual([
         { date: '2020-12-01', value: 50 },
@@ -307,23 +307,23 @@ describe('InitMongoStats', () => {
   });
 
   describe('daysToYears()', () => {
-    it('should call InitMongoStats.daysToPeriod ', () => {
+    it('should call IndexUserStats.daysToPeriod ', () => {
       // Given
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
       // When
-      InitMongoStats.daysToYears(daysMock);
+      IndexUserStats.daysToYears(daysMock);
       // Then
-      expect(InitMongoStatsSpy).toHaveBeenCalledTimes(1);
-      expect(InitMongoStatsSpy).toHaveBeenCalledWith(daysMock, 'year');
+      expect(IndexUserStatsSpy).toHaveBeenCalledTimes(1);
+      expect(IndexUserStatsSpy).toHaveBeenCalledWith(daysMock, 'year');
     });
 
-    it('should return result from InitMongoStats.daysToPeriod ', () => {
+    it('should return result from IndexUserStats.daysToPeriod ', () => {
       // Given
       const mockReturnValue = Symbol('daysToPeriod return value');
-      const InitMongoStatsSpy = jest.spyOn(InitMongoStats, 'daysToPeriod');
-      InitMongoStatsSpy.mockReturnValue(mockReturnValue);
+      const IndexUserStatsSpy = jest.spyOn(IndexUserStats, 'daysToPeriod');
+      IndexUserStatsSpy.mockReturnValue(mockReturnValue);
       // When
-      const result = InitMongoStats.daysToYears(daysMock);
+      const result = IndexUserStats.daysToYears(daysMock);
       // Then
       expect(result).toBe(mockReturnValue);
     });
@@ -331,7 +331,7 @@ describe('InitMongoStats', () => {
     // Integration test
     it('should return year aggregation', () => {
       // When
-      const result = InitMongoStats.daysToYears(daysMock);
+      const result = IndexUserStats.daysToYears(daysMock);
       // Then
       expect(result).toEqual([
         { date: '2020-01-01', value: 50 },
@@ -350,7 +350,7 @@ describe('InitMongoStats', () => {
       const key = 'registration';
       const range = 'day';
       // When
-      const result = InitMongoStats.resultToDoc(input, key, range);
+      const result = IndexUserStats.resultToDoc(input, key, range);
       // Then
       expect(result).toEqual([
         {
@@ -380,15 +380,15 @@ describe('InitMongoStats', () => {
     const daysToYearsResult = Symbol('daysToYears');
 
     beforeEach(() => {
-      daysToWeeksMock = jest.spyOn(InitMongoStats, 'daysToWeeks');
+      daysToWeeksMock = jest.spyOn(IndexUserStats, 'daysToWeeks');
       daysToWeeksMock.mockReturnValueOnce(daysToWeeksResult);
 
-      daysToMonthsMock = jest.spyOn(InitMongoStats, 'daysToMonths');
+      daysToMonthsMock = jest.spyOn(IndexUserStats, 'daysToMonths');
       daysToMonthsMock.mockReturnValueOnce(daysToMonthsResult);
 
-      daysToYearsMock = jest.spyOn(InitMongoStats, 'daysToYears');
+      daysToYearsMock = jest.spyOn(IndexUserStats, 'daysToYears');
       daysToYearsMock.mockReturnValueOnce(daysToYearsResult);
-      resultToDocMock = jest.spyOn(InitMongoStats, 'resultToDoc');
+      resultToDocMock = jest.spyOn(IndexUserStats, 'resultToDoc');
     });
 
     it('should build scales of values', () => {
@@ -410,7 +410,7 @@ describe('InitMongoStats', () => {
       const docListResult = [1, 2, 3, 4];
 
       // When
-      const docList = InitMongoStats.buildScaleFromMetrics(daysParams, keyMock);
+      const docList = IndexUserStats.buildScaleFromMetrics(daysParams, keyMock);
 
       // Then
       expect(docList).toEqual(docListResult);
@@ -436,7 +436,7 @@ describe('InitMongoStats', () => {
       const lastDayMock = '2019-01-01';
 
       // When
-      const results = initMongoStats.selectDaysToRegister(
+      const results = indexUserStats.selectDaysToRegister(
         metricDataMock,
         lastDayMock
       );
@@ -484,13 +484,13 @@ describe('InitMongoStats', () => {
           value: 11142,
         },
       ];
-      const results = initMongoStats.computeMetricDocs(paramsMock);
+      const results = indexUserStats.computeMetricDocs(paramsMock);
 
       expect(results).toStrictEqual(resultsMock);
     });
 
     it('should present metrics informations in logs', () => {
-      initMongoStats.computeMetricDocs(paramsMock);
+      indexUserStats.computeMetricDocs(paramsMock);
 
       expect(loggerMock.info).toHaveBeenCalledTimes(3);
       expect(loggerMock.info).toHaveBeenNthCalledWith(
@@ -547,10 +547,10 @@ describe('InitMongoStats', () => {
     beforeEach(() => {
       statsMock.getLastAccountNumber.mockResolvedValueOnce(lastAccountMock);
 
-      selectDaysMock = jest.spyOn(initMongoStats, 'selectDaysToRegister');
+      selectDaysMock = jest.spyOn(indexUserStats, 'selectDaysToRegister');
       selectDaysMock.mockReturnValueOnce(selectedDaysMock);
 
-      computeMetricMock = jest.spyOn(initMongoStats, 'computeMetricDocs');
+      computeMetricMock = jest.spyOn(indexUserStats, 'computeMetricDocs');
       computeMetricMock.mockReturnValueOnce(resultsMock);
     });
 
@@ -558,7 +558,7 @@ describe('InitMongoStats', () => {
       // Given
 
       // When
-      const docs = await initMongoStats.buildAccountFromMetrics(
+      const docs = await indexUserStats.buildAccountFromMetrics(
         dataMock,
         keyMock
       );
@@ -587,7 +587,7 @@ describe('InitMongoStats', () => {
     it('should present metrics informations in logs', async () => {
       // Given
       // When
-      await initMongoStats.buildAccountFromMetrics(dataMock, keyMock);
+      await indexUserStats.buildAccountFromMetrics(dataMock, keyMock);
 
       // Then
       expect(loggerMock.info).toHaveBeenCalledTimes(2);
@@ -632,16 +632,16 @@ describe('InitMongoStats', () => {
     ];
 
     beforeEach(() => {
-      buildScaleMock = jest.spyOn(InitMongoStats, 'buildScaleFromMetrics');
+      buildScaleMock = jest.spyOn(IndexUserStats, 'buildScaleFromMetrics');
       buildScaleMock.mockReturnValueOnce(scaleDataMock);
 
-      buildAccountMock = jest.spyOn(initMongoStats, 'buildAccountFromMetrics');
+      buildAccountMock = jest.spyOn(indexUserStats, 'buildAccountFromMetrics');
       buildAccountMock.mockResolvedValueOnce(accountDataMock);
     });
     it('should compute data with registration key', async () => {
       // Given
       // When
-      const result = await initMongoStats.computeData(
+      const result = await indexUserStats.computeData(
         metricData,
         registrationMock
       );
@@ -656,7 +656,7 @@ describe('InitMongoStats', () => {
     it('should compute data with identity key', async () => {
       // Given
       // When
-      const result = await initMongoStats.computeData(metricData, identityMock);
+      const result = await indexUserStats.computeData(metricData, identityMock);
       // Then
       expect(result).toStrictEqual(accountDataMock);
       expect(buildAccountMock).toHaveBeenCalledTimes(1);
@@ -669,7 +669,7 @@ describe('InitMongoStats', () => {
       // Given
       // When
       await expect(
-        initMongoStats.computeData(metricData, 'pikachu')
+        indexUserStats.computeData(metricData, 'pikachu')
         // Then
       ).rejects.toThrow(`Unknown metric: <pikachu>`);
       expect(buildAccountMock).toHaveBeenCalledTimes(0);
@@ -686,7 +686,7 @@ describe('InitMongoStats', () => {
       statsMock.createMetricDocument.mockImplementation(value => value * 2);
 
       // When
-      const result = initMongoStats.prepareDocs(list);
+      const result = indexUserStats.prepareDocs(list);
 
       // then
       expect(result).toEqual(resultMock);
@@ -743,16 +743,16 @@ describe('InitMongoStats', () => {
     };
 
     beforeEach(() => {
-      getDataMock = jest.spyOn(initMongoStats, 'getData');
+      getDataMock = jest.spyOn(indexUserStats, 'getData');
       getDataMock.mockResolvedValueOnce(metricData);
 
-      computeMock = jest.spyOn(initMongoStats, 'computeData');
+      computeMock = jest.spyOn(indexUserStats, 'computeData');
       computeMock.mockResolvedValueOnce(computeData);
 
-      prepareDocsMock = jest.spyOn(initMongoStats, 'prepareDocs');
+      prepareDocsMock = jest.spyOn(indexUserStats, 'prepareDocs');
       prepareDocsMock.mockReturnValueOnce(docData);
 
-      createDocumentsMock = jest.spyOn(initMongoStats, 'createDocuments');
+      createDocumentsMock = jest.spyOn(indexUserStats, 'createDocuments');
       createDocumentsMock.mockReturnValueOnce();
     });
 
@@ -766,7 +766,7 @@ describe('InitMongoStats', () => {
       const paramsMock = Symbol('params');
 
       // When
-      await initMongoStats.run(paramsMock);
+      await indexUserStats.run(paramsMock);
 
       // Then
       expect(loggerMock.info).toHaveBeenCalledTimes(7);
@@ -828,7 +828,7 @@ describe('InitMongoStats', () => {
       };
 
       // When
-      const result = await initMongoStats.createDocuments(
+      const result = await indexUserStats.createDocuments(
         docListMock,
         chunkLength,
         timePerRequest,

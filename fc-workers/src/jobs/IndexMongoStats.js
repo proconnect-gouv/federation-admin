@@ -124,6 +124,6 @@ class IndexMongoStats extends Job {
 }
 
 IndexMongoStats.description =
-  'Compute data from mongoDB and index it in stats elastic';
+  'Compute data from mongoDB and index one document at the time in ES stats';
 
 export default IndexMongoStats;
