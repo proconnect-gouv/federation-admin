@@ -22,6 +22,7 @@ import { CliModule } from '@fc/shared/cli/cli.module';
 import { LoggerModule } from '@fc/shared/logger/logger.module';
 import { StatsModule } from './stats/stats.module';
 import { LocalsInterceptor } from './meta/locals.interceptor';
+import { StatsApiModule } from './stats-api/stats-api.module';
 import * as otplib from 'otplib';
 
 const otplibProvider = {
@@ -42,6 +43,7 @@ const otplibProvider = {
       inject: [ConfigService],
     }),
     StatsModule,
+    StatsApiModule,
   ],
   providers: [LocalsInterceptor, otplibProvider],
   controllers: [AppController],
