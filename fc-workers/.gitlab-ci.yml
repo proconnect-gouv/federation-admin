@@ -2,7 +2,7 @@ test/workers:
   stage: test
   tags:
     - node
-  image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
+  image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   dependencies:
     - global-install
   rules:

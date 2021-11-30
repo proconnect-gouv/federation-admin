@@ -11,7 +11,7 @@ variables:
   PROXY_EXPLOITATION: "http://$EXPLOITATION_PROXY_HOST:$EXPLOITATION_PROXY_PORT"
 
 global-install:
-  image: gitlab.dev-franceconnect.fr:5005/france-connect/infra/nodejs:${NODE_VERSION}-dev
+  image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   stage: install
   tags:
     - node
