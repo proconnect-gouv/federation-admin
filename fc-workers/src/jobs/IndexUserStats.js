@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import _ from 'lodash';
 import Job from './Job';
-import { sleep } from '../utils';
+import { getDaysAsDate, sleep } from '../utils';
 import IndexMongoStats from './IndexMongoStats';
 
 export const isLastDayOfMonth = date => {
@@ -180,6 +180,28 @@ class IndexUserStats extends Job {
     return computeData;
   }
 
+  fulfillMetrics(metricsData, { start, stop }) {
+    const startDate = DateTime.fromISO(start, { zone: 'utc' });
+    const stopDate = DateTime.fromISO(stop, { zone: 'utc' });
+    const dates = getDaysAsDate(startDate, stopDate);
+
+    const fillData = dates.map(date => {
+      const { value = 0 } =
+        metricsData.find(({ date: source }) => source === date) || {};
+
+      const gapData = {
+        date,
+        value,
+      };
+
+      return gapData;
+    });
+
+    this.log.info(` > ${fillData.length - metricsData.length} docs added`);
+
+    return fillData;
+  }
+
   computeMetricDocs({ data, identities, key }) {
     let cumul = identities;
     const daily = data.map(({ date, value }) => {
@@ -211,23 +233,29 @@ class IndexUserStats extends Job {
     const { stats } = this.container.get(['stats']);
 
     // only full days must be registered...
-    const startDate = DateTime.now()
+    const measureDate = DateTime.now()
       .setZone('utc')
       .startOf('day')
       .minus({ days: 1 })
       .toISO();
 
-    this.log.info(` > Select measure date : ${startDate}`);
+    this.log.info(` > Select measure date : ${measureDate}`);
 
     const { identities, lastDate } = await stats.getLastAccountNumber({
-      date: startDate,
+      date: measureDate,
     });
 
     this.log.info(
       ` > Last account number: ${identities} persons on ${lastDate}`
     );
 
-    const data = this.selectDaysToRegister(metricData, lastDate);
+    const extractedData = this.selectDaysToRegister(metricData, lastDate);
+
+    const reference = {
+      start: lastDate,
+      stop: measureDate,
+    };
+    const data = this.fulfillMetrics(extractedData, reference);
 
     const docs = this.computeMetricDocs({
       data,
