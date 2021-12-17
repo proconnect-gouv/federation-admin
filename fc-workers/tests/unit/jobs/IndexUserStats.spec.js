@@ -446,6 +446,121 @@ describe('IndexUserStats', () => {
     });
   });
 
+  describe('fulfillMetrics()', () => {
+    it('should add missing metrics if days are missing in values and reference date are out of metric dates', () => {
+      const referenceDate = {
+        start: '2000-09-30',
+        stop: '2000-10-10',
+      };
+      // Given
+      const metricsDataMock = [
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-07', value: 10000 },
+      ];
+      const resultMock = [
+        { date: '2000-09-30', value: 0 },
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-02', value: 0 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-04', value: 0 },
+        { date: '2000-10-05', value: 0 },
+        { date: '2000-10-06', value: 0 },
+        { date: '2000-10-07', value: 10000 },
+        { date: '2000-10-08', value: 0 },
+        { date: '2000-10-09', value: 0 },
+        { date: '2000-10-10', value: 0 },
+      ];
+
+      // When
+      const result = indexUserStats.fulfillMetrics(
+        metricsDataMock,
+        referenceDate
+      );
+
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+
+    it('should get the same number of metrics if all days are presents', () => {
+      // Given
+      const referenceDate = {
+        start: '2000-10-01',
+        stop: '2000-10-07',
+      };
+
+      const metricsDataMock = [
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-02', value: 200 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-04', value: 2000 },
+        { date: '2000-10-05', value: 3000 },
+        { date: '2000-10-06', value: 5000 },
+        { date: '2000-10-07', value: 10000 },
+      ];
+      const resultMock = [
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-02', value: 200 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-04', value: 2000 },
+        { date: '2000-10-05', value: 3000 },
+        { date: '2000-10-06', value: 5000 },
+        { date: '2000-10-07', value: 10000 },
+      ];
+
+      // When
+      const result = indexUserStats.fulfillMetrics(
+        metricsDataMock,
+        referenceDate
+      );
+
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+
+    it('should add missing metrics if reference date are out of metric dates', () => {
+      // Given
+      const referenceDate = {
+        start: '2000-09-28',
+        stop: '2000-10-10',
+      };
+
+      const metricsDataMock = [
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-02', value: 200 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-04', value: 2000 },
+        { date: '2000-10-05', value: 3000 },
+        { date: '2000-10-06', value: 5000 },
+        { date: '2000-10-07', value: 10000 },
+      ];
+      const resultMock = [
+        { date: '2000-09-28', value: 0 },
+        { date: '2000-09-29', value: 0 },
+        { date: '2000-09-30', value: 0 },
+        { date: '2000-10-01', value: 100 },
+        { date: '2000-10-02', value: 200 },
+        { date: '2000-10-03', value: 1000 },
+        { date: '2000-10-04', value: 2000 },
+        { date: '2000-10-05', value: 3000 },
+        { date: '2000-10-06', value: 5000 },
+        { date: '2000-10-07', value: 10000 },
+        { date: '2000-10-08', value: 0 },
+        { date: '2000-10-09', value: 0 },
+        { date: '2000-10-10', value: 0 },
+      ];
+
+      // When
+      const result = indexUserStats.fulfillMetrics(
+        metricsDataMock,
+        referenceDate
+      );
+
+      // Then
+      expect(result).toStrictEqual(resultMock);
+    });
+  });
+
   describe('computeMetricDocs()', () => {
     const paramsMock = {
       data: [
@@ -510,6 +625,7 @@ describe('IndexUserStats', () => {
 
   describe('buildAccountFromMetrics()', () => {
     let selectDaysMock;
+    let fulfillMetricsMock;
     let computeMetricMock;
 
     const dataMock = [
@@ -526,7 +642,17 @@ describe('IndexUserStats', () => {
 
     const selectedDaysMock = [
       { date: '2000-06-01', value: 1000 },
-      { date: '2000-12-31', value: 10000 },
+      { date: '2000-06-07', value: 10000 },
+    ];
+
+    const fulfillDaysMock = [
+      { date: '2000-06-01', value: 1000 },
+      { date: '2000-06-02', value: 1000 },
+      { date: '2000-06-03', value: 1000 },
+      { date: '2000-06-04', value: 1000 },
+      { date: '2000-06-05', value: 1000 },
+      { date: '2000-06-06', value: 1000 },
+      { date: '2000-06-07', value: 10000 },
     ];
 
     const resultsMock = [
@@ -549,6 +675,9 @@ describe('IndexUserStats', () => {
 
       selectDaysMock = jest.spyOn(indexUserStats, 'selectDaysToRegister');
       selectDaysMock.mockReturnValueOnce(selectedDaysMock);
+
+      fulfillMetricsMock = jest.spyOn(indexUserStats, 'fulfillMetrics');
+      fulfillMetricsMock.mockReturnValueOnce(fulfillDaysMock);
 
       computeMetricMock = jest.spyOn(indexUserStats, 'computeMetricDocs');
       computeMetricMock.mockReturnValueOnce(resultsMock);
@@ -576,9 +705,15 @@ describe('IndexUserStats', () => {
         lastAccountMock.lastDate
       );
 
+      expect(fulfillMetricsMock).toHaveBeenCalledTimes(1);
+      expect(fulfillMetricsMock).toHaveBeenCalledWith(selectedDaysMock, {
+        start: lastAccountMock.lastDate,
+        stop: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T00:00:00.000Z$/),
+      });
+
       expect(computeMetricMock).toHaveBeenCalledTimes(1);
       expect(computeMetricMock).toHaveBeenCalledWith({
-        data: selectedDaysMock,
+        data: fulfillDaysMock,
         identities: lastAccountMock.identities,
         key: keyMock,
       });

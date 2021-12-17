@@ -2,7 +2,7 @@
 /* eslint-disable import/extensions */
 import { DateTime } from 'luxon';
 
-import { getDayArray, getRandomInt } from '../../src/utils/index.js';
+import { getDaysAsIso, getRandomInt } from '../../src/utils/index.js';
 import Container, {
   Config,
   Logger,
@@ -20,7 +20,7 @@ class SimulateMongoStats {
 
   // eslint-disable-next-line class-methods-use-this
   buildDocuments(start, stop) {
-    const allDays = getDayArray(start, stop);
+    const allDays = getDaysAsIso(start, stop);
 
     const first = allDays[0];
     const last = allDays[allDays.length - 1];
@@ -28,7 +28,7 @@ class SimulateMongoStats {
 
     const allInsert = allDays
       .map(date => {
-        const entries = getRandomInt(MAX_OCCURENCES_PER_DAY, 1);
+        const entries = getRandomInt(MAX_OCCURENCES_PER_DAY, 0);
         return Array.from({ length: entries }, (_no, i) => ({
           // to track fake data
           id: 'test',
