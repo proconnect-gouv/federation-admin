@@ -18,13 +18,7 @@ describe('StatsService', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [
-        ElasticsearchModule.register({
-          host: 'localhost:9200',
-          log: 'trace',
-        }),
-      ],
-      providers: [StatsService, StatsQueries],
+      providers: [StatsService, StatsQueries, ElasticsearchService],
     })
       .overrideProvider(ElasticsearchService)
       .useValue(elasticsearchService)

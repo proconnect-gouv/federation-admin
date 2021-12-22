@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
-import * as express from 'express';
+import { static as expressStatic, urlencoded } from 'express';
 import * as flash from 'express-flash';
 import * as helmet from 'helmet';
 import * as methodOverride from 'method-override';
@@ -21,6 +21,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: false,
   });
+
+  /**
+   * We can't set the query parser to "simple" because we use the complex parsing.
+   */
 
   const logger = app.get(LoggerService);
   app.useLogger(logger);
@@ -40,7 +44,7 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   // Static files
-  app.use(express.static('dist/client'));
+  app.use(expressStatic('dist/client'));
 
   // override http method
   app.use(methodOverride('_method'));
@@ -62,6 +66,8 @@ async function bootstrap() {
   );
   app.use(helmet.permittedCrossDomainPolicies());
   app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
+
+  app.use(urlencoded({ extended: false }));
 
   // Sessions initialization
   app.use(session(configService.get('session')));

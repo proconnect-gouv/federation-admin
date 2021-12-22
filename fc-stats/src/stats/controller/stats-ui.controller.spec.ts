@@ -3,10 +3,7 @@ import { StatsUIController } from './stats-ui.controller';
 import { StatsService } from '../service/stats.service';
 import { SummaryService } from '../service/sumary.service';
 import { StatsQueries } from '../stats.queries';
-import {
-  ElasticsearchModule,
-  ElasticsearchService,
-} from '@nestjs/elasticsearch';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { aggregations } from '../../../fixtures/aggregation';
 
 describe('StatsUIController', () => {
@@ -18,13 +15,12 @@ describe('StatsUIController', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [
-        ElasticsearchModule.register({
-          host: 'localhost:9200',
-          log: 'trace',
-        }),
+      providers: [
+        StatsService,
+        StatsQueries,
+        SummaryService,
+        ElasticsearchService,
       ],
-      providers: [StatsService, StatsQueries, SummaryService],
       controllers: [StatsUIController],
     })
       .overrideProvider(ElasticsearchService)
