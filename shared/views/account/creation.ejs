@@ -59,7 +59,7 @@
                 <div class="col-10">
                   <% USER_ROLES_OPTIONS.filter(({value}) => !['new_account','blocked_user','inactive_'].some(role => value.startsWith(role))).forEach((roleOption, index) => { %>
                   <div class="form-check">
-                    <input class="form-check-input <%= locals.messages.errors && messages.errors[0].roles && 'is-invalid' %>" name="roles[]"
+                    <input class="form-check-input <%= locals.messages.errors && messages.errors[0].roles && 'is-invalid' %>" name="roles"
                     type="checkbox"
                     id="role-<%= roleOption.value %>" <%= locals.messages.values && messages.values[0].roles && messages.values[0].roles.indexOf(roleOption.value) !== -1 && 'checked' %>
                     value="<%= roleOption.value %>">

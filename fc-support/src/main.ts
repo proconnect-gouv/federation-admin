@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
-import * as express from 'express';
+import { static as expressStatic, urlencoded } from 'express';
 import * as flash from 'express-flash';
 import * as helmet from 'helmet';
 import * as methodOverride from 'method-override';
@@ -23,6 +23,12 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: false,
   });
+
+  /**
+   * @see https://expressjs.com/fr/api.html#app.set
+   * @see https://github.com/expressjs/express/issues/3361
+   */
+  app.set('query parser', 'simple');
 
   const logger = app.get(LoggerService);
   app.useLogger(logger);
@@ -42,7 +48,7 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   // Static files
-  app.use(express.static('dist/client'));
+  app.use(expressStatic('dist/client'));
 
   // override http method
   app.use(methodOverride('_method'));
@@ -69,6 +75,8 @@ async function bootstrap() {
   app.use(session(configService.get('session')));
 
   app.use(cookieParser());
+
+  app.use(urlencoded({ extended: false }));
 
   // Passport initialization
   const passport = app.get(PASSPORT);

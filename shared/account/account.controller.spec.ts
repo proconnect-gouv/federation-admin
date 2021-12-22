@@ -301,20 +301,26 @@ describe('AccountController', () => {
       // action
       await accountController.createUser(createUserDto, req, res);
       // assertion
-      expect(req.body.roles[0]).toContain('inactive_');
-      expect(req.body.roles[1]).toContain('inactive_');
-      expect(req.body.roles).toContain('new_account');
-      expect(req.body.secret).toEqual('KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD');
       expect(req.flash).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account');
     });
 
     it('uses the user service to create users', async () => {
+      // setup
+      const expectedUser = {
+        email: 'jean@moust.lol',
+        password: 'yolo',
+        roles: ['inactive_operator', 'new_account'],
+        secret: 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD',
+        username: 'jean_moust',
+      };
+
+      // action
       await accountController.createUser(createUserDto, req, res);
 
       expect(userService.createUser).toHaveBeenCalledTimes(1);
-      expect(userService.createUser).toHaveBeenCalledWith(createUserDto);
+      expect(userService.createUser).toHaveBeenCalledWith(expectedUser);
     });
 
     it('falls back in the catch when a not valid user is provided', async () => {

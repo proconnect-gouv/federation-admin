@@ -50,24 +50,32 @@ export class AccountController {
   @Post('create')
   @Roles(UserRole.ADMIN)
   @UseInterceptors(new FormErrorsInterceptor(`/account/create`))
-  @UsePipes(ValidationPipe)
+  @UsePipes(new ValidationPipe({ transform: true }))
   async createUser(
-    @Body() createUserDto: CreateUserDto,
+    @Body() { username, email, password, roles }: CreateUserDto,
     @Req() req,
     @Res() res,
   ) {
-    req.body.roles = req.body.roles.map(role => `inactive_${role}`);
-    req.body.roles.push('new_account');
-    req.body.secret = this.totpService.generateTotpSecret();
+    const rolesToRegister = roles.map(role => `inactive_${role}`);
+    rolesToRegister.push('new_account');
+
+    const newAccount: CreateUserDto = {
+      username,
+      email,
+      password,
+      roles: rolesToRegister as UserRole[],
+      secret: this.totpService.generateTotpSecret(),
+    };
+
     try {
-      await this.userService.createUser(createUserDto);
+      await this.userService.createUser(newAccount);
     } catch (error) {
       req.flash('globalError', { code: '23505' });
       return res.redirect(`${res.locals.APP_ROOT}/account/create`);
     }
     req.flash(
       'success',
-      `L'utilisateur ${createUserDto.username} a été créé avec succès !`,
+      `L'utilisateur ${newAccount.username} a été créé avec succès !`,
     );
     return res.redirect(`${res.locals.APP_ROOT}/account`);
   }

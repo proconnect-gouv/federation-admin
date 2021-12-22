@@ -1,4 +1,8 @@
+/* istanbul ignore file */
+
+// Declarative code
 import { UserRole } from '@fc/shared/user/roles.enum';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsEmail,
@@ -33,6 +37,7 @@ export class CreateUserDto {
     each: true,
     message: 'Veuillez renseigner des rôles valides',
   })
+  @Transform(value => (typeof value === 'string' ? [value] : value))
   readonly roles: UserRole[];
 
   @IsString()
