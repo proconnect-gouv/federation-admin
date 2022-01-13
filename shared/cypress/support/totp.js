@@ -1,5 +1,7 @@
 import * as otplib from 'otplib';
 
+const MIN_REMAINING_TIME = 5;
+
 export async function getTotp(key) {
   if (Cypress.env('TOTP_WINDOW') === 'loose') {
     return otplib.authenticator.generate(key);
@@ -7,11 +9,11 @@ export async function getTotp(key) {
 
   return new Promise(resolve => {
     const ttl = otplib.authenticator.timeRemaining();
-    // If TOTP expires in less than 2 seconds
+    // If TOTP expires in less than 5 seconds
     // we'll wait for the next timeframe
     // in order to be sure to have a valid TOTP
     // at the time the form is submited
-    const wait = ttl < 2 ? ttl + 1 : 0;
+    const wait = ttl < MIN_REMAINING_TIME ? ttl + 1 : 0;
 
     setTimeout(() => {
       resolve(otplib.authenticator.generate(key));

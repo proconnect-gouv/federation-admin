@@ -1,3 +1,4 @@
+import 'cypress-file-upload';
 import { formType, formFill, formControl, totp } from './forms';
 import {
   resetMongoFC,
