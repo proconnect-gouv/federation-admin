@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ES="http://elasticsearch:9200"
+ES="http://localhost:9200"
 LOG_FILE="/tmp/out.log"
 CURRENT_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 

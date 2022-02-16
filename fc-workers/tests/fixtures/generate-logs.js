@@ -5,12 +5,12 @@ const elasticsearch = require('elasticsearch');
 const DEFAULT_PORT = 9200;
 const LIST_HOSTS = [
   {
-    host: 'elasticsearch',
+    host: 'haproxy_es',
     protocol: 'http',
     port: DEFAULT_PORT,
   },
   {
-    host: 'fc_elasticsearch_1',
+    host: 'fc_haproxy_es_1',
     protocol: 'http',
     port: DEFAULT_PORT,
   },
