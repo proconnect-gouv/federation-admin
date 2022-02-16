@@ -122,7 +122,7 @@ async function indexDocs(list) {
 
 function sendToElastic(bulk) {
   const body = `${bulk.join('\n')}\n`;
-  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://elasticsearch:9200/_bulk' --data-binary '${body}'; echo`;
+  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://haproxy_es:9200/_bulk' --data-binary '${body}'; echo`;
 
   // eslint-disable-next-line no-console
   return exec(command).catch(console.error);

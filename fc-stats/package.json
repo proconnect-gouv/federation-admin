@@ -9,7 +9,7 @@
     "prebuild": "parcel build -d ./dist/client ./public/javascript/main.js && cp ./public/favicon.ico ./dist/client/ && cp -R ./public/images ./dist/client/ ",
     "build": "tsc -p tsconfig.build.json",
     "fixtures:load": "fixtures ../shared/fixtures --config src/config/database.ts --require=ts-node/register --require=tsconfig-paths/register",
-    "fixtures:es": "curl -XPUT http://elasticsearch:9200/_bulk --data-binary @fixtures/bulk.json",
+    "fixtures:es": "curl -XPUT http://localhost:9200/_bulk --data-binary @fixtures/bulk.json",
     "migrations:run": "yarn typeorm migration:run && echo '\n\n ***Make sure to load fixtures and create backup DB for E2E***\n from you host run:\n > ../shared/cypress/support/db.sh stats create'",
     "format": "prettier --write \"src/**/*.ts\"",
     "prestart": "yarn run prebuild",
