@@ -10,7 +10,7 @@ export function connect(
   options?: ConnectOptions,
 ): Email.Client;
 
-export function connect(apiToken: string, options?: ConnectOptions): SMS.Client;
+export function connect(apiToken: string, options?: ConnectOptions);
 
 export interface ConnectOptions {
   readonly proxyUrl?: string;
@@ -21,11 +21,9 @@ export interface ConnectOptions {
 }
 
 export interface ConfigOptions {
-  readonly url?: string;
-  readonly version?: string;
-  readonly output?: string;
-  readonly perform_api_call?: boolean;
-  readonly secured?: boolean;
+  readonly host?: string;
+  readonly port?: number;
+  readonly secure?: boolean;
 }
 
 // *** Email API interfaces *** //
@@ -169,134 +167,5 @@ export namespace Email {
     readonly Count: number;
     readonly Data: ReadonlyArray<object>;
     readonly Total: number;
-  }
-}
-
-// *** SMS API interfaces *** ///
-// tslint:disable-next-line: no-namespace
-export namespace SMS {
-  interface Client {
-    get(action: string): GetResource;
-
-    post(action: string): PostResource;
-  }
-
-  // resources
-  interface GetResource {
-    id(value: string): GetResource;
-
-    action(action: string): GetResourceAction;
-
-    request(params?: GetParams): Promise<GetResponse>;
-  }
-
-  interface PostResource {
-    action(action: string): PostResource;
-
-    request(params: SendParams): Promise<SendResponse>;
-
-    request(params?: ExportParams): Promise<ExportResponse>;
-  }
-
-  interface GetResourceAction {
-    id(value: string): GetResourceActionId;
-
-    request(params?: GetParams): Promise<GetResponseAction>;
-  }
-
-  interface GetResourceActionId {
-    request(): Promise<ExportResponse>;
-  }
-
-  // responses
-  interface GetResponse {
-    readonly body: GetResponseData;
-  }
-
-  interface SendResponse {
-    readonly body: PostResponseData;
-    readonly url: string;
-  }
-
-  interface ExportResponse {
-    readonly body: ExportResponseData;
-  }
-
-  interface GetResponseAction {
-    readonly body: GetResponseActionData;
-  }
-
-  // request params
-  interface GetParams {
-    FromTS?: number;
-    ToTS?: number;
-    To?: string;
-    StatusCode?: number[];
-    Limit?: number;
-    Offset?: number;
-  }
-
-  interface SendParams {
-    Text: string;
-    To: string;
-    From: string;
-  }
-
-  interface ExportParams {
-    FromTS: number;
-    ToTS: number;
-  }
-
-  // other types
-  interface GetResponseDataData {
-    readonly From: string;
-    readonly To: string;
-    readonly Status: ResponseStatus;
-    readonly MessageId: string;
-    readonly CreationTS: number;
-    readonly SentTS: number;
-    readonly SMSCount: number;
-    readonly Cost: ResponseCost;
-  }
-
-  interface ResponseStatus {
-    readonly Code: number;
-    readonly Name: string;
-    readonly Description: string;
-  }
-
-  interface ResponseCost {
-    readonly Value: number;
-    readonly Currency: string;
-  }
-
-  interface GetResponseData {
-    readonly Data: ReadonlyArray<GetResponseDataData>;
-  }
-
-  interface PostResponseData {
-    readonly From: string;
-    readonly To: string;
-    readonly Text: string;
-    readonly MessageId: string;
-    readonly SmsCount: number;
-    readonly CreationTS: number;
-    readonly SentTS: number;
-    readonly Cost: ResponseCost;
-    readonly Status: ResponseStatus;
-  }
-
-  interface ExportResponseData {
-    readonly ID: number;
-    readonly CreationTS?: number;
-    readonly ExpirationTS?: number;
-    readonly Status: ResponseStatus;
-    readonly URL?: string;
-    readonly FromTs?: number;
-    readonly ToTs?: number;
-  }
-
-  interface GetResponseActionData {
-    readonly Count: number;
   }
 }

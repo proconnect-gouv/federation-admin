@@ -12,11 +12,11 @@ import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
 import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
-import { MailerService } from '../mailer/mailer.service';
 import { IMailerParams } from '../mailer/interfaces';
-import { Email } from '../mailer/mailjet';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { MailerService } from '../mailer/mailer.service';
+import { Email } from '../mailer/mailer.types';
 
 @Injectable()
 export class UserService implements IUserService {

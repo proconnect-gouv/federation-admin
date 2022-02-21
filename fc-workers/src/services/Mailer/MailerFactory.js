@@ -1,8 +1,8 @@
-import MailJetMailer from './MailJetMailer';
+import SmtpMailer from './SmtpMailer';
 import StdoutMailer from './StdoutMailer';
 
 const classMap = {
-  mailjet: MailJetMailer,
+  smtp: SmtpMailer,
   log: StdoutMailer,
 };
 

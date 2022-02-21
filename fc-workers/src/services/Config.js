@@ -18,18 +18,24 @@ class Config {
   getMailerType() {
     const { MAILER } = this.config;
 
-    return MAILER || 'log';
+    return MAILER;
   }
 
-  getMailjet() {
-    const { MAILJET_KEY, MAILJET_SECRET, HTTPS_PROXY } = this.config;
+  getMail() {
+    const {
+      HTTPS_PROXY,
+      MAILER_HOST,
+      MAILER_PORT,
+      MAILER_SECURE,
+      MAILER_IGNORE_TLS,
+    } = this.config;
 
     return {
-      key: MAILJET_KEY,
-      secret: MAILJET_SECRET,
-      options: {
-        proxyUrl: HTTPS_PROXY,
-      },
+      proxyUrl: HTTPS_PROXY,
+      host: MAILER_HOST,
+      port: parseInt(MAILER_PORT, 10),
+      secure: JSON.parse(MAILER_SECURE),
+      ignoreTLS: JSON.parse(MAILER_IGNORE_TLS),
     };
   }
 

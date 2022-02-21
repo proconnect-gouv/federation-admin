@@ -10,9 +10,8 @@ import { TotpService } from '@fc/shared/authentication/totp/totp.service';
 import { UserService } from '@fc/shared/user/user.service';
 import * as generatePassword from 'generate-password';
 import { MailerModule } from '../mailer/mailer.module';
-import { ConfigModule, ConfigService } from 'nestjs-config';
-import { MailerService } from '../mailer/mailer.service';
 import { EjsAdapter } from '../mailer/ejs.adapter';
+import { ConfigModule, ConfigService } from 'nestjs-config';
 
 const generatePasswordProvider = {
   provide: 'generatePassword',
@@ -47,7 +46,6 @@ const generatePasswordProvider = {
     UserService,
     TotpService,
     generatePasswordProvider,
-    MailerService,
   ],
 })
 export class AccountModule {}

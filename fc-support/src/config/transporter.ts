@@ -1,11 +1,17 @@
+import { parseBoolean } from '@fc/shared/transforms/parse-boolean';
+
 export default {
-  transport: process.env.EMAIL_TRANSPORT || 'stdout',
-  mailjetKey: process.env.MAILJET_KEY || '',
-  mailjetSecret: process.env.MAILJET_SECRET || '',
-  smtpSenderName: process.env.SMTP_SENDER_NAME || 'FranceConnect',
-  smtpSenderEmail:
-    process.env.SMTP_SENDER_EMAIL || 'ne-pas-repondre@franceconnect.gouv.fr',
+  transport: process.env.MAILER_TRANSPORT,
+  from: {
+    name: process.env.SMTP_SENDER_NAME,
+    email: process.env.SMTP_SENDER_EMAIL,
+  },
+
   options: {
-    proxyUrl: process.env.HTTPS_PROXY || '',
+    proxyUrl: process.env.HTTPS_PROXY,
+    host: process.env.MAILER_HOST,
+    port: parseInt(process.env.MAILER_PORT, 10),
+    secure: parseBoolean(process.env.MAILER_SECURE),
+    ignoreTLS: parseBoolean(process.env.MAILER_IGNORE_TLS),
   },
 };
