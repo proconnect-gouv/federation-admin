@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { get } from 'lodash';
 
 import { Message } from '../dto/message.dto';
-import { Email } from '../mailjet';
+import { Email } from '../mailer.types';
 import {
   IMailerParams,
   ITemplateAdapter,
@@ -63,9 +63,9 @@ export abstract class Transport {
     mailerParams: IMailerParams,
     transporterOptions: IMailerModuleOptions,
   ): Promise<Email.SendParams> {
-    let HTMLPART: string = '';
+    let HTMLPart: string = '';
     try {
-      HTMLPART = await this.setHtmlPart(transporterOptions, mailerParams);
+      HTMLPart = await this.setHtmlPart(transporterOptions, mailerParams);
     } catch (error) {
       throw new Error(`Cannot generate ejs template from body: ${error}`);
     }
@@ -78,7 +78,7 @@ export abstract class Transport {
         },
         To: sendParamsMessage.To,
         Subject: sendParamsMessage.Subject,
-        HTMLPART,
+        HTMLPart,
       },
     ];
 

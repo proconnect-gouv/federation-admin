@@ -149,13 +149,12 @@ class WeeklyIdpRepport extends Job {
 
     const emailContent = WeeklyIdpRepport.formatMessage(idp, data);
     const subject = WeeklyIdpRepport.getSubject(idp);
-
     // Render
     mailer.send({
       subject,
       fromEmail: 'ne-pas-repondre@franceconnect.gouv.fr',
       fromName: 'FranceConnect',
-      recipients: [{ Email: email }],
+      recipients:  [email],
       body: emailContent,
     });
   }

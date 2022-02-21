@@ -4,10 +4,9 @@ import { UserModule } from '@fc/shared/user/user.module';
 import { UserService } from '@fc/shared/user/user.service';
 import { TotpService } from '@fc/shared/authentication/totp/totp.service';
 import { CliService } from './cli.service';
-import { MailerService } from '../mailer/mailer.service';
 import { MailerModule } from '../mailer/mailer.module';
-import { ConfigModule, ConfigService } from 'nestjs-config';
 import { EjsAdapter } from '../mailer/ejs.adapter';
+import { ConfigModule, ConfigService } from 'nestjs-config';
 
 @Module({
   imports: [
@@ -29,7 +28,7 @@ import { EjsAdapter } from '../mailer/ejs.adapter';
       inject: [ConfigService],
     }),
   ],
-  providers: [CliService, UserService, TotpService, MailerService],
+  providers: [CliService, UserService, TotpService],
   exports: [CliService],
 })
 export class CliModule {}

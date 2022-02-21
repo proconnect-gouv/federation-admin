@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 
 import { Transport } from './transport';
-import { Email } from '../mailjet';
+import { Email } from '../mailer.types';
 import { IMailerParams, IMailerModuleOptions } from '../interfaces';
 
 @Injectable()

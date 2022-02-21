@@ -22,22 +22,26 @@ describe('Config', () => {
     });
   });
 
-  describe('getMailjet()', () => {
+  describe('getMail()', () => {
     it('Should return an object', () => {
       // Given
       const input = {
-        MAILJET_KEY: 'fake-mailjet-key',
-        MAILJET_SECRET: 'fake-mailjet-secret',
         HTTPS_PROXY: 'fake-proxy-url',
+        MAILER_HOST: 'fake-proxy-host',
+        MAILER_PORT: '465',
+        MAILER_SECURE: 'false',
+        MAILER_IGNORE_TLS: 'true',
       };
       const config = new Config(input);
       // When
-      const result = config.getMailjet();
+      const result = config.getMail();
       // Then
       expect(result).toEqual({
-        key: 'fake-mailjet-key',
-        secret: 'fake-mailjet-secret',
-        options: { proxyUrl: 'fake-proxy-url' },
+        proxyUrl: 'fake-proxy-url',
+        host: 'fake-proxy-host',
+        port: parseInt('465', 10),
+        secure: false,
+        ignoreTLS: true,
       });
     });
   });
@@ -75,14 +79,14 @@ describe('Config', () => {
       expect(result).toBe('foo');
     });
 
-    it('Should return a empty string if MAILER is void', () => {
+    it('Should return undefined if no mailer', () => {
       // Given
       const input = {};
       const config = new Config(input);
       // When
       const result = config.getMailerType();
       // Then
-      expect(result).toBe('log');
+      expect(result).toBe(undefined);
     });
   });
 

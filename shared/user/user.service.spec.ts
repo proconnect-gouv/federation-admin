@@ -86,8 +86,10 @@ describe('UserService', () => {
         MailerModule.forRoot({
           transport: 'log',
           emailOptions: {
-            mailjetKey: 'someKey',
-            mailjetSecret: 'someSecret',
+            from: {
+              name: 'batou',
+              email: 'batou@gotham.bt',
+            },
             smtpSenderName: 'someName',
             smtpSenderEmail: 'someEmail',
           },

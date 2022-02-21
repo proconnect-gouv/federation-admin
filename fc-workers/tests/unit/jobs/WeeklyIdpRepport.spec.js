@@ -226,9 +226,7 @@ describe('WeeklyIdpRepport', () => {
       expect(send.mock.calls[0][0].body).toEqual(
         expect.stringContaining(resultBody)
       );
-      expect(send.mock.calls[0][0].recipients).toEqual([
-        { Email: params.email },
-      ]);
+      expect(send.mock.calls[0][0].recipients).toEqual([params.email]);
     });
   });
 });

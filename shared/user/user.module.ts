@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ConfigModule, ConfigService } from 'nestjs-config';
-import { MailerService } from '../mailer/mailer.service';
 import { MailerModule } from '../mailer/mailer.module';
-import { EjsAdapter } from '../mailer/ejs.adapter';
 import { User } from './user.sql.entity';
 import { Password } from './password.sql.entity';
 import { UserService } from './user.service';
 import * as generatePassword from 'generate-password';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { ConfigModule, ConfigService } from 'nestjs-config';
+import { EjsAdapter } from '../mailer/ejs.adapter';
 
 const generatePasswordProvider = {
   provide: 'generatePassword',
@@ -35,12 +34,7 @@ const generatePasswordProvider = {
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    UserService,
-    generatePasswordProvider,
-    MailerService,
-    LoggerService,
-  ],
+  providers: [UserService, generatePasswordProvider, LoggerService],
   exports: [
     UserService,
     TypeOrmModule.forFeature([User]),

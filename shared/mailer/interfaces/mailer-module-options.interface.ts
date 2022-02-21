@@ -1,11 +1,13 @@
 import { ITemplateAdapter } from './template-adapter.interface';
-import { ConfigOptions } from '../mailjet';
+import { ConfigOptions } from '../mailer.types';
 
 export interface IMailerModuleOptions {
   transport: string;
   emailOptions?: {
-    mailjetKey: string;
-    mailjetSecret: string;
+    from: {
+      name: string;
+      email: string;
+    };
     smtpSenderName: string;
     smtpSenderEmail: string;
     options?: ConfigOptions;

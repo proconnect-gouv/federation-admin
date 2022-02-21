@@ -1,15 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
 
 import { MAILER_MODULE_OPTIONS } from './mailer.constant';
-import { MailjetTransport } from './transporters/mailjet.transporter';
 import { StdoutTransport } from './transporters/stdout.transporter';
 import { IMailerParams, IMailerModuleOptions } from './interfaces';
-import { Email } from './mailjet';
+import { Email } from './mailer.types';
+import { SmtpTransport } from './transporters/smtp.transporter';
 
 @Injectable()
 export class MailerService {
   protected transporterMap = {
-    mailjet: MailjetTransport,
+    smtp: SmtpTransport,
     stdout: StdoutTransport,
   };
   protected transporter;
