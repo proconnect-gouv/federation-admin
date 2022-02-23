@@ -29,7 +29,7 @@
     "typeorm": "0.2.32"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.4.0",
+    "@elastic/elasticsearch": "7.15.0",
     "@fc/shared": "^0.0.1",
     "@nest-middlewares/csurf": "^6.0.0",
     "@nestjs/common": "^6.0.0",
