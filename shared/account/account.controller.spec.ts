@@ -104,6 +104,7 @@ describe('AccountController', () => {
       user: {
         id: '05e4fadf-fda6-4ad8-ae75-b7f315843827',
         roles: [],
+        username: 'userNameValue',
       },
       body: {
         roles: ['admin', 'operator'],
@@ -320,7 +321,10 @@ describe('AccountController', () => {
       await accountController.createUser(createUserDto, req, res);
 
       expect(userService.createUser).toHaveBeenCalledTimes(1);
-      expect(userService.createUser).toHaveBeenCalledWith(expectedUser);
+      expect(userService.createUser).toHaveBeenCalledWith(
+        expectedUser,
+        req.user.username,
+      );
     });
 
     it('falls back in the catch when a not valid user is provided', async () => {
@@ -537,7 +541,10 @@ describe('AccountController', () => {
       await accountController.deleteUser(id, req, res);
       // assertion
       expect(userService.deleteUserById).toHaveBeenCalledTimes(1);
-      expect(userService.deleteUserById).toHaveBeenCalledWith(id);
+      expect(userService.deleteUserById).toHaveBeenCalledWith(
+        id,
+        req.user.username,
+      );
       expect(res.redirect).toHaveBeenCalledWith('/foo/bar/account');
     });
 

@@ -24,6 +24,7 @@ describe('Account', () => {
     };
     beforeEach(() => {
       cy.login(USER_ADMIN, USER_PASS);
+      cy.clearBusinessLog();
     });
 
     it('Should delete the user if confirm button is clicked and should be kept on the accounts list page after', () => {
@@ -38,6 +39,13 @@ describe('Account', () => {
       cy.url().should('contain', `/account`);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.get(`#${userInfo.username}`, { timeout: 0 }).should('not.exist');
+
+      cy.hasBusinessLog({
+        entity: 'user',
+        action: 'delete',
+        user: USER_ADMIN,
+        name: userInfo.email,
+      });
 
       cy.logout(USER_ADMIN);
     });

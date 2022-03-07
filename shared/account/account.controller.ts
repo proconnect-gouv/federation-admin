@@ -68,7 +68,7 @@ export class AccountController {
     };
 
     try {
-      await this.userService.createUser(newAccount);
+      await this.userService.createUser(newAccount, req.user.username);
     } catch (error) {
       req.flash('globalError', { code: '23505' });
       return res.redirect(`${res.locals.APP_ROOT}/account/create`);
@@ -167,7 +167,7 @@ export class AccountController {
     }
 
     try {
-      await this.userService.deleteUserById(id);
+      await this.userService.deleteUserById(id, req.user.username);
       req.flash(
         'success',
         `Le compte ${req.body.username} a été supprimé avec succès !`,

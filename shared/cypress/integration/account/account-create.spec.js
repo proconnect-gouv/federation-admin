@@ -46,12 +46,21 @@ describe('Account', () => {
     };
 
     beforeEach(() => {
+      cy.clearBusinessLog();
+
       cy.resetEnv('postgres');
       cy.login(USER_ADMIN, USER_PASS);
     });
 
     it('should be possible for an admin to create a new user with all the roles', () => {
       createUserAccount(userInfo, basicConfiguration);
+
+      cy.hasBusinessLog({
+        entity: 'user',
+        action: 'create',
+        user: USER_ADMIN,
+        name: userInfo.email,
+      });
       cy.contains(`L\'utilisateur ${userInfo.username} a été créé avec succès`);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.contains(`${userInfo.username}`).should('be.visible');
