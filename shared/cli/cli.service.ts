@@ -21,7 +21,7 @@ export class CliService {
     try {
       const user = await this.getUser(username, email, roles);
 
-      await this.userService.createUser(user);
+      await this.userService.createUser(user, 'cli');
 
       // We are in a CLI app
       // tslint:disable-next-line no-console

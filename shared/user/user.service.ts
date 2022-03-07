@@ -1,9 +1,17 @@
 import * as bcrypt from 'bcrypt';
+import { Repository, DeleteResult, UpdateResult } from 'typeorm';
+import { v4 as uuid } from 'uuid';
+import { InjectConfig, ConfigService } from 'nestjs-config';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeleteResult, UpdateResult } from 'typeorm';
-import { InjectConfig, ConfigService } from 'nestjs-config';
-import { v4 as uuid } from 'uuid';
+
+import { UserRole } from '@fc/shared/user/roles.enum';
+import { LoggerService } from '@fc/shared/logger/logger.service';
+
+import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
+import { MailerService } from '../mailer/mailer.service';
+import { Email } from '../mailer/mailer.types';
+import { IMailerParams } from '../mailer/interfaces';
 
 import { User } from './user.sql.entity';
 import { Password } from './password.sql.entity';
@@ -11,12 +19,7 @@ import { IUserPasswordUpdateDTO } from './interface/user-password-update-dto.int
 import { IEnrollUserDto } from './interface/enroll-user-dto.interface';
 import { IUserService } from './interface/user-service.interface';
 import { ICreateUserDTO } from './interface/create-user-dto.interface';
-import { IsPasswordCompliant } from '../account/validator/is-compliant.validator';
-import { IMailerParams } from '../mailer/interfaces';
-import { UserRole } from '@fc/shared/user/roles.enum';
-import { LoggerService } from '@fc/shared/logger/logger.service';
-import { MailerService } from '../mailer/mailer.service';
-import { Email } from '../mailer/mailer.types';
+import { IUserTrack } from './interface/user-track.interface';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -35,6 +38,10 @@ export class UserService implements IUserService {
   ) {
     this.userTokenExpiresIn =
       this.config.get('app').userTokenExpiresIn * 60 * 1000;
+  }
+
+  private track(log: IUserTrack) {
+    this.logger.businessEvent({ entity: 'user', ...log });
   }
 
   callGeneratePassword() {
@@ -74,6 +81,13 @@ export class UserService implements IUserService {
     const roles = user.roles
       .filter(role => role !== 'new_account')
       .map(role => role.replace('inactive_', ''));
+
+    this.track({
+      action: 'enroll',
+      user: user.username,
+      id: user.id,
+      name: user.email,
+    });
 
     try {
       return await this.updatePassword(user, enrollmentPassword.password, {
@@ -121,7 +135,7 @@ export class UserService implements IUserService {
     return bcrypt.compare(password, hash);
   }
 
-  async createUser(user: ICreateUserDTO): Promise<User> {
+  async createUser(user: ICreateUserDTO, author: string): Promise<User> {
     const { appFqdn } = this.config.get('app');
     const { username, email, roles, secret } = user;
     const token: string = uuid();
@@ -169,6 +183,12 @@ export class UserService implements IUserService {
 
       await this.savePassword(username, passwordHash, updatedAt);
 
+      this.track({
+        action: 'create',
+        user: author,
+        name: email,
+      });
+
       return enrolledUser;
     } catch (err) {
       throw new Error('The user could not be saved');
@@ -179,7 +199,9 @@ export class UserService implements IUserService {
     let blockedUser;
 
     try {
-      blockedUser = await this.userRepository.update(
+      blockedUser = await this.userRepository.findOne({ username });
+
+      await this.userRepository.update(
         { username },
         { roles: [UserRole.BLOCKED_USER] },
       );
@@ -188,18 +210,43 @@ export class UserService implements IUserService {
       throw new Error('The user could not be blocked due to a database error');
     }
 
+    this.track({
+      action: 'block',
+      user: username,
+      id: blockedUser.id,
+      name: blockedUser.email,
+    });
+
     return blockedUser;
   }
 
-  async deleteUserById(id: string): Promise<DeleteResult> {
-    return this.userRepository.delete({ id });
+  async deleteUserById(id: string, author: string): Promise<DeleteResult> {
+    const user = await this.userRepository.findOne(id);
+
+    const result = await this.userRepository.delete({ id });
+
+    this.track({
+      action: 'delete',
+      user: author,
+      id,
+      name: user.email,
+    });
+
+    return result;
   }
 
   async updatePassword(
-    { username, id },
+    { username, id, email },
     password,
     userData,
   ): Promise<UpdateResult> {
+    this.track({
+      action: 'updatePassword',
+      user: username,
+      id,
+      name: email,
+    });
+
     const newPasswordHash = await bcrypt.hash(password, this.SALT_ROUNDS);
     let userEntity;
 

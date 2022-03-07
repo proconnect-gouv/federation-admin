@@ -59,6 +59,7 @@ describe('UserService', () => {
       'inactive_operator',
       'inactive_security',
     ],
+    email: 'foo@bar.com',
     passwordHash:
       // correspond à ce password : 'MyPass20!!'
       '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
@@ -74,6 +75,8 @@ describe('UserService', () => {
     delete: jest.fn(),
     update: jest.fn(),
   };
+
+  const authorMock = 'authorMockValue';
 
   beforeEach(async () => {
     configServiceMock.get.mockReturnValue({
@@ -229,6 +232,42 @@ describe('UserService', () => {
       }
       expect.hasAssertions();
     });
+
+    it('should call track()', async () => {
+      // setup
+      const enrollmentPassword = {
+        password: 'MyPass10!!',
+        passwordConfirmation: 'MyPass10!!',
+      };
+      userService.updatePassword = jest.fn().mockReturnValueOnce({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: [
+          'new_account',
+          'inactive_admin',
+          'inactive_operator',
+          'inactive_security',
+        ],
+        email: 'foo@bar.com',
+      });
+      const expectedRoles = ['admin', 'operator', 'security'];
+      // tslint:disable-next-line:no-string-literal
+      userService['track'] = jest.fn();
+
+      // action
+      const result = await userService.enrollUser(user, enrollmentPassword);
+
+      // assertion
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledTimes(1);
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledWith({
+        action: 'enroll',
+        user: 'fred',
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        name: user.email,
+      });
+    });
   });
 
   describe('compareHash', () => {
@@ -341,7 +380,7 @@ describe('UserService', () => {
       userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
 
       // action
-      await userService.createUser(userMock);
+      await userService.createUser(userMock, authorMock);
 
       // expect
       expect(userRepositoryMock.save).toHaveBeenCalledTimes(1);
@@ -356,6 +395,50 @@ describe('UserService', () => {
         tokenCreatedAt: '2020-03-03T16:36:56.135Z',
         tokenExpiresAt: '2020-03-05T16:36:56.135Z',
         username: 'jean_moust',
+      });
+    });
+
+    it('call track()', async () => {
+      // setup
+      const userMock: ICreateUserDTO = {
+        username: 'jean_moust',
+        email: 'jean@moust.lol',
+        password: 'georgesmoustaki',
+        roles: [UserRole.ADMIN, UserRole.OPERATOR, UserRole.SECURITY],
+        secret: '1234',
+      };
+
+      configServiceMock.get.mockReturnValueOnce({
+        app_root: '/foo/bar',
+        appName: 'Exploitation',
+        smtpSenderName: 'someString',
+        smtpSenderEmail: 'someString',
+      });
+
+      // Private method testing https://stackoverflow.com/a/35991491/1071169
+      userService[
+        // tslint:disable-next-line no-string-literal
+        'setAuthenticationTokenExpirationDate'
+      ] = jest.fn().mockReturnValue({
+        tokenCreatedAt: '2020-03-03T16:36:56.135Z',
+        tokenExpiresAt: '2020-03-05T16:36:56.135Z',
+      });
+
+      userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
+      // tslint:disable-next-line:no-string-literal
+      userService['track'] = jest.fn();
+
+      // action
+      await userService.createUser(userMock, authorMock);
+
+      // expect
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledTimes(1);
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledWith({
+        action: 'create',
+        user: authorMock,
+        name: userMock.email,
       });
     });
 
@@ -384,7 +467,7 @@ describe('UserService', () => {
 
       userService.sendNewAccountEmail = jest.fn().mockReturnValueOnce({});
       try {
-        await userService.createUser(userMock);
+        await userService.createUser(userMock, authorMock);
       } catch (err) {
         const { message } = err;
         expect(message).toEqual('The user could not be saved');
@@ -409,7 +492,7 @@ describe('UserService', () => {
         app_root: '/foo/bar',
       });
       try {
-        await userService.createUser(userMock);
+        await userService.createUser(userMock, authorMock);
       } catch (err) {
         const { message } = err;
         expect(message).toEqual('password hash could not be generated');
@@ -451,6 +534,19 @@ describe('UserService', () => {
   });
 
   describe('blockUser', () => {
+    const mockedUserUpdateResponse = {
+      id: 'foo',
+    };
+    beforeEach(() => {
+      userRepositoryMock.update.mockResolvedValue(mockedUserUpdateResponse);
+      userRepositoryMock.findOne.mockResolvedValue({
+        email: 'toto@toto.com',
+        roles: ['admin'],
+        passwordHash: 'MyPass',
+        secret: 'MySecret',
+        id: 'some-id',
+      });
+    });
     it('should block a user', async () => {
       // setup
       const username = 'user';
@@ -463,6 +559,27 @@ describe('UserService', () => {
         { username },
         { roles: [UserRole.BLOCKED_USER] },
       );
+    });
+
+    it('call track()', async () => {
+      // setup
+      const username = 'user';
+      // tslint:disable-next-line:no-string-literal
+      userService['track'] = jest.fn();
+
+      // action
+      await userService.blockUser(username);
+
+      // assertion
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledTimes(1);
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledWith({
+        action: 'block',
+        user: username,
+        id: 'some-id',
+        name: 'toto@toto.com',
+      });
     });
 
     it('should fall back in catch statement if update failed', async () => {
@@ -487,17 +604,47 @@ describe('UserService', () => {
   });
 
   describe('deleteUserById', () => {
+    beforeEach(() => {
+      userRepositoryMock.findOne.mockResolvedValue({
+        email: 'toto@toto.com',
+        roles: ['admin'],
+        passwordHash: 'MyPass',
+        secret: 'MySecret',
+      });
+    });
     it('calls the delete function of the userRepositoryMock', async () => {
       // set up
       const id = '123';
       const expectedRepositoryDeleteArguments = { id: '123' };
+      const userMock = 'userMockValue';
       // action
-      await userService.deleteUserById(id);
+      await userService.deleteUserById(id, userMock);
       // assertion
       expect(userRepositoryMock.delete).toHaveBeenCalledTimes(1);
       expect(userRepositoryMock.delete).toHaveBeenCalledWith(
         expectedRepositoryDeleteArguments,
       );
+    });
+    it('calls track()', async () => {
+      // set up
+      const id = '123';
+      const expectedRepositoryDeleteArguments = { id: '123' };
+      const userMock = 'userMockValue';
+      // tslint:disable-next-line:no-string-literal
+      userService['track'] = jest.fn();
+
+      // action
+      await userService.deleteUserById(id, userMock);
+      // assertion
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledTimes(1);
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledWith({
+        action: 'delete',
+        user: userMock,
+        id,
+        name: 'toto@toto.com',
+      });
     });
   });
 
@@ -698,6 +845,45 @@ describe('UserService', () => {
         expect(message).toEqual('password could not be updated');
       }
       expect.hasAssertions();
+    });
+
+    it('calls track()', async () => {
+      // setup
+      const dataMock: IUserPasswordUpdateDTO = {
+        currentPassword: 'MyPass20!!',
+        password: 'MyPasswordIsValid10!!',
+        passwordConfirmation: 'MyPasswordIsValid10!!',
+      };
+      userService.findByUsername = jest.fn().mockResolvedValue({
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        username: 'fred',
+        roles: ['admin'],
+        passwordHash:
+          '$2b$10$UeDbulgX0zaMzviq/61wQeFWtpO97py/cvxrzo6dRMIMD4dgdOGci',
+      });
+      // need to mock the private mthod
+      // tslint:disable-next-line: no-string-literal
+      userService['savePassword'] = jest.fn().mockResolvedValueOnce('ok');
+      // tslint:disable-next-line:no-string-literal
+      userService['track'] = jest.fn();
+
+      // action
+      const result = await userService.updatePassword(
+        user,
+        dataMock.password,
+        dataMock,
+      );
+
+      // assert
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledTimes(1);
+      // tslint:disable-next-line:no-string-literal
+      expect(userService['track']).toHaveBeenCalledWith({
+        action: 'updatePassword',
+        user: user.username,
+        id: 'ae21881b-0bba-4072-93b1-2436b3280c9f',
+        name: user.email,
+      });
     });
   });
 

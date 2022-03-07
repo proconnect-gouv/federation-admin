@@ -17,6 +17,7 @@ describe('Authentication failures', () => {
        * Should not be necessary but csrf issues occurs *sometimes* without this
        */
       cy.clearCookies();
+      cy.clearBusinessLog();
       cy.resetEnv('postgres');
     });
 
@@ -90,7 +91,7 @@ describe('Authentication failures', () => {
       cy.get('.login-form').contains('Connexion impossible');
     });
 
-    it('should block the user after the fifth error on his password', () => {
+    it.only('should block the user after the fifth error on his password', () => {
       cy.visit('/login');
 
       cy.formFill(
@@ -134,6 +135,12 @@ describe('Authentication failures', () => {
       cy.get('.login-form').contains(
         "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
       );
+
+      cy.hasBusinessLog({
+        entity: 'user',
+        action: 'block',
+        user: 'pwd_fail',
+      });
 
       cy.formFill(
         { username: 'pwd_fail', password: 'georgesmoustaki' },
