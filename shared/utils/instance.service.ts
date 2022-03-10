@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { ConfigService, InjectConfig } from 'nestjs-config';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InstanceService {
@@ -8,5 +8,15 @@ export class InstanceService {
   async isFca() {
     const { instanceFor } = await this.configService.get('app');
     return instanceFor === 'FCA';
+  }
+
+  async isFcp() {
+    const { instanceFor } = await this.configService.get('app');
+    return instanceFor === 'FCP';
+  }
+
+  async isFc() {
+    const { instanceFor } = await this.configService.get('app');
+    return instanceFor === 'FC';
   }
 }
