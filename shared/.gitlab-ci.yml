@@ -3,12 +3,22 @@ test/shared:
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   tags:
     - node
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
   needs:
     - job: global-install
-      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   script:
     - cd shared
+    - yarn install
     - yarn test
   interruptible: true

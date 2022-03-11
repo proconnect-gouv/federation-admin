@@ -5,11 +5,21 @@ test/stats:
     - node
   needs:
     - job: global-install
-      artifacts: true
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   script:
     - cd fc-stats
+    - yarn install
     - yarn test
   interruptible: true
 
@@ -22,6 +32,16 @@ cypress/stats:
     - cypress
   variables:
     TZ: "Europe/Paris"
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   before_script:
     - yarn config set proxy $PROXY_EXPLOITATION && yarn config set https-proxy $PROXY_EXPLOITATION
     - echo "FC_DOCKER_VERSION=$FC_DOCKER_VERSION"
@@ -39,6 +59,7 @@ cypress/stats:
     - cd $CI_PROJECT_DIR
   script:
     - docker-stack up fc-stats fc-workers
+    - docker-stack dep fc-stats fc-workers
     - docker-stack fixtures fc-stats
     - docker-stack start fc-stats
     - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-stats.docker.dev-franceconnect.fr/login)" != "200" ]];
@@ -51,7 +72,6 @@ cypress/stats:
   interruptible: true
   needs:
     - job: global-install
-      artifacts: true
   artifacts:
     expire_in: 1 hrs
     when: on_failure

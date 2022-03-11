@@ -5,11 +5,21 @@ test/support:
     - node
   needs:
     - job: global-install
-      artifacts: true
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   script:
     - cd fc-support
+    - yarn install
     - yarn test
 
 cypress/support:
@@ -21,6 +31,16 @@ cypress/support:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"' 
   variables:
     TZ: "Europe/Paris"
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   before_script:
     - yarn config set proxy $PROXY_EXPLOITATION && yarn config set https-proxy $PROXY_EXPLOITATION
     - echo "FC_DOCKER_VERSION=$FC_DOCKER_VERSION"
@@ -36,6 +56,7 @@ cypress/support:
     - cd $CI_PROJECT_DIR
   script:
     - docker-stack up fc-support rnipp
+    - docker-stack dep fc-support
     - docker-stack fixtures fc-support
     - docker-stack start fc-support rnipp
     - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-support.docker.dev-franceconnect.fr/login)" != "200" ]];
@@ -48,7 +69,6 @@ cypress/support:
   interruptible: true
   needs:
     - job: global-install
-      artifacts: true
   artifacts:
     expire_in: 1 hrs
     when: on_failure

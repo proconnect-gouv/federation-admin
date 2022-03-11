@@ -3,6 +3,7 @@ stages:
   - test
   - e2e
   - Checkmarx
+  - Cache
   - Build
   - Tag
 
@@ -23,7 +24,15 @@ global-install:
     - yarn test --coverage
     - ./node-scripts/coverage.sh
   coverage: '/Global coverage is: \[([\d\.]+)%\]/'
-  artifacts:
+  interruptible: true
+
+build-cache:
+  image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
+  tags:
+    - node
+  cache:
+    key: '${CI_PROJECT_ID}'
+    policy: push
     paths:
       - node_modules
       - fc-exploitation/node_modules
@@ -32,13 +41,13 @@ global-install:
       - fc-workers/node_modules
       - shared/node_modules
       - yarn.lock
-      - fc-exploitation/yarn.lock
-      - fc-stats/yarn.lock
-      - fc-support/yarn.lock
-      - fc-workers/yarn.lock
-    expire_in: 1 hrs
+  stage: Cache
+  script:
+    - yarn install
+  dependencies: []
   interruptible: true
-
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "staging"'
 
 include:
   - '/shared/.gitlab-ci.yml'
