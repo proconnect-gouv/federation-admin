@@ -40,7 +40,6 @@ build-cache:
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
-      - yarn.lock
   stage: Cache
   script:
     - yarn install
