@@ -54,7 +54,7 @@ describe('isFca', () => {
   it('Should display true if we are in an FranceConnect legacy instance', async () => {
     // Setup
     mockConfigService.get.mockReturnValue({
-      instanceFor: 'FC',
+      instanceFor: 'CL',
     });
 
     // Action

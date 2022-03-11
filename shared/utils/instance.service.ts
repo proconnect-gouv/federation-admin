@@ -17,6 +17,6 @@ export class InstanceService {
 
   async isFc() {
     const { instanceFor } = await this.configService.get('app');
-    return instanceFor === 'FC';
+    return instanceFor === 'CL';
   }
 }
