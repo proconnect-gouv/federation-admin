@@ -57,9 +57,9 @@ cypress/stats:
     - ln -s $CI_PROJECT_DIR $FC_ROOT/fc-docker/volumes/src/fc-apps
     - for mock in `find $FC_ROOT/mocks -maxdepth 1 -mindepth 1 -type d`; do cd $mock && git fetch && git checkout -f origin/master && git clean -df && echo "Installing depedencies for $(/usr/bin/basename $mock)" && npm install; ln -sfn $mock $FC_ROOT/fc-docker/volumes/src; done
     - cd $CI_PROJECT_DIR
+    - yarn install
   script:
     - docker-stack up fc-stats fc-workers
-    - docker-stack dep fc-stats fc-workers
     - docker-stack fixtures fc-stats
     - docker-stack start fc-stats
     - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-stats.docker.dev-franceconnect.fr/login)" != "200" ]];
