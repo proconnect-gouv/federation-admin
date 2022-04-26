@@ -110,5 +110,13 @@
     "birthdate": "1991-02-12",
     "isFrench": "true",
     "cog": "2A115"
+  },
+  "TRACE_USER": {
+    "gender": "male",
+    "familyName": "TRACE_USER",
+    "givenName": "utilisateur traces",
+    "birthdate": "1985-01-01",
+    "isFrench": "true",
+    "cog": "75107"
   }
 }

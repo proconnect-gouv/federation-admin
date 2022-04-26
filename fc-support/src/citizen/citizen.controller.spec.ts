@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { CitizenController } from './citizen.controller';
 import { CitizenService } from './citizen.service';
@@ -14,6 +14,7 @@ describe('CitizenController', () => {
     createBlockedCitizen: jest.fn(),
     generateLegacyAccountId: jest.fn(),
     setActive: jest.fn(),
+    findIdpPreferences: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -58,6 +59,7 @@ describe('CitizenController', () => {
       const result = await citizenController.getCitizenStatus(identity);
       // Then
       expect(result).toEqual({
+        havePreferencesSettings: false,
         active: true,
         lastConnection: '2019-06-01T12:34:56.000Z',
       });

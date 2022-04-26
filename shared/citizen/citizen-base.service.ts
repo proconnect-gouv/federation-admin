@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { IPivotIdentity } from './interfaces/pivot-identity.interface';
+import { ILegacyPivotIdentity } from './interfaces/legacy-identity-pivot.interface';
 import { Inject } from '@nestjs/common';
 
 export class CitizenServiceBase {
@@ -32,6 +33,17 @@ export class CitizenServiceBase {
       .createHash('sha256')
       .update(uuid())
       .digest('hex');
+  }
+
+  generateOIDCIdentity(rnippIdentity: IPivotIdentity): ILegacyPivotIdentity {
+    return {
+      given_name: rnippIdentity.givenName,
+      family_name: rnippIdentity.familyName,
+      birthdate: rnippIdentity.birthdate,
+      gender: rnippIdentity.gender,
+      birthplace: rnippIdentity.birthPlace,
+      birthcountry: rnippIdentity.birthCountry,
+    };
   }
 
   /**

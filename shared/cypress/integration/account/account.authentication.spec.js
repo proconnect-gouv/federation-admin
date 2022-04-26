@@ -91,7 +91,7 @@ describe('Authentication failures', () => {
       cy.get('.login-form').contains('Connexion impossible');
     });
 
-    it.only('should block the user after the fifth error on his password', () => {
+    it('should block the user after the fifth error on his password', () => {
       cy.visit('/login');
 
       cy.formFill(

@@ -6,6 +6,7 @@ import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
 import { ConfigService } from 'nestjs-config';
 import * as crypto from 'crypto';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { UserPreferencesService } from '@fc/shared/user-preferences';
 
 describe('CitizenService', () => {
   let module: TestingModule;
@@ -31,10 +32,42 @@ describe('CitizenService', () => {
     supportUserAcountStatus: jest.fn(),
   };
 
+  const brokerMock = {
+    publish: jest.fn(),
+  };
+
+  const brokerMockResponse = {
+    allowFutureIdp: false,
+    idpList: [
+      {
+        uid: 'idp_uid',
+        name: 'idp',
+        image: 'idp.png',
+        title: 'IDP',
+        active: true,
+        isChecked: true,
+      },
+      {
+        uid: 'idp_uid',
+        name: 'idp',
+        image: 'idp.png',
+        title: 'IDP',
+        active: true,
+        isChecked: true,
+      },
+    ],
+  };
+
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [TypeOrmModule.forFeature([Citizen], 'fc-mongo')],
-      providers: [CitizenService, Repository, cryptoProvider, LoggerService],
+      providers: [
+        CitizenService,
+        Repository,
+        cryptoProvider,
+        LoggerService,
+        UserPreferencesService,
+      ],
     })
       .overrideProvider(getRepositoryToken(Citizen, 'fc-mongo'))
       .useValue(citizenRepository)
@@ -42,6 +75,8 @@ describe('CitizenService', () => {
       .useValue(configServiceMock)
       .overrideProvider(LoggerService)
       .useValue(loggerProvider)
+      .overrideProvider(UserPreferencesService)
+      .useValue(brokerMock)
       .compile();
 
     citizenService = await module.get<CitizenService>(CitizenService);
@@ -62,6 +97,51 @@ describe('CitizenService', () => {
 
       // Then
       expect(citizenRepository.findOne).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findIdpPreferences', () => {
+    it('should get a user idp setting', async () => {
+      // Given
+      const expected = {
+        allowFutureIdp: false,
+        idpList: [
+          {
+            uid: 'idp_uid',
+            name: 'idp',
+            image: 'idp.png',
+            title: 'IDP',
+            active: true,
+            isChecked: true,
+          },
+          {
+            uid: 'idp_uid',
+            name: 'idp',
+            image: 'idp.png',
+            title: 'IDP',
+            active: true,
+            isChecked: true,
+          },
+        ],
+      };
+
+      const userIdentity = {
+        givenName: 'givenName',
+        familyName: 'familyName',
+        birthdate: 'birthdate',
+        gender: 'gender',
+        preferred_username: 'preferredUsername',
+        birthCountry: 'birthCountry',
+        birthPlace: 'birthPlace',
+      };
+      brokerMock.publish.mockResolvedValue(brokerMockResponse);
+
+      // When
+      const result = await citizenService.findIdpPreferences(userIdentity);
+
+      // Then
+      expect(brokerMock.publish).toHaveBeenCalledTimes(1);
+      expect(result).toStrictEqual(expected);
     });
   });
 });

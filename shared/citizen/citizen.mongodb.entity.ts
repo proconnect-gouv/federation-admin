@@ -46,4 +46,13 @@ export class Citizen {
 
   @Column({ name: 'lastConnection' })
   lastConnection?: Date;
+
+  @Column({ name: 'preferences' })
+  preferences?: {
+    idpSettings?: {
+      updatedAt: Date;
+      isExcludeList: boolean;
+      list: string[];
+    };
+  };
 }

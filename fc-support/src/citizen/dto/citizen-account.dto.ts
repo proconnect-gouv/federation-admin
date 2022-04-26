@@ -1,4 +1,12 @@
-import { IsString, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsDateString,
+  IsArray,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { PreferencesDTO } from './preferences.dto';
 
 export class CitizenAccountDTO {
   @IsString()
@@ -36,4 +44,10 @@ export class CitizenAccountDTO {
 
   @IsDateString()
   lastConnection?: Date;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PreferencesDTO)
+  preferences?: PreferencesDTO;
 }
