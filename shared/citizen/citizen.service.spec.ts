@@ -148,4 +148,31 @@ describe('CitizenService', () => {
       expect(result).toStrictEqual(expected);
     });
   });
+
+  describe('generateOIDCIdentity', () => {
+    it('should return a legacy formated idp', () => {
+      // given
+      const expected = {
+        given_name: 'foo',
+        family_name: 'foo',
+        birthdate: 'foo',
+        gender: 'foo',
+        birthcountry: 'foo',
+        birthplace: 'foo',
+      };
+
+      // Then
+      const result = citizenService.generateOIDCIdentity({
+        givenName: 'foo',
+        familyName: 'foo',
+        birthdate: 'foo',
+        gender: 'foo',
+        birthCountry: 'foo',
+        birthPlace: 'foo',
+      });
+
+      // Expected
+      expect(result).toStrictEqual(expected);
+    });
+  });
 });

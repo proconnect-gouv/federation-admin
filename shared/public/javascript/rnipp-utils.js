@@ -51,6 +51,25 @@ function updateUIError(data) {
   }
 
   $('#citizen-status').html(`<p>${content}</p>`);
+  $('#citizen-idp-preferences').html(`<p>${content}</p>`);
+}
+
+function createUserIdpList(idpList) {
+  let li = '';
+
+  idpList.forEach(({ name, title, isChecked }) => {
+    const idpBadge = isChecked ? 'success' : 'danger';
+    const idpLabel = isChecked ? 'Autorisé' : 'Bloqué';
+    li += `<li data-testid="${name}"><b>${title} : </b><span class="badge badge-${idpBadge}">${idpLabel}</span></li>`;
+  });
+  return li;
+}
+
+function createFuturesIdpPreferences(allowFutureIdp) {
+  const futurIdpBadge = allowFutureIdp ? 'success' : 'danger';
+  const futurIdpLabel = allowFutureIdp ? 'Autorisés' : 'Bloqués';
+
+  return `<b>Futurs fournisseurs d'identité : </b><span class="badge badge-${futurIdpBadge}">${futurIdpLabel}</span>`;
 }
 
 function updateUISuccess(data) {
@@ -74,10 +93,29 @@ function updateUISuccess(data) {
       ${accountIdHTML}
     </ul>
   `);
+
+  if (data.havePreferencesSettings && data.userIdpSettings !== undefined) {
+    const { allowFutureIdp, idpList } = data.userIdpSettings;
+    const userIdpList = createUserIdpList(idpList);
+    const FuturesIdpPreferences = createFuturesIdpPreferences(allowFutureIdp);
+
+    $('#result').append(`
+      <h3>Préférences FI</h3>
+      <div id="citizen-idp-preferences"></div>
+    `);
+
+    $('#citizen-idp-preferences').html(`
+      <p data-testid="future-idp-preferences">${FuturesIdpPreferences}</p>
+      <ul>${userIdpList}</ul>
+    `);
+  }
 }
 
 function setLoadingUI() {
   $('#citizen-status').html('<div class="spinner"><i></i></div> Chargement...');
+  $('#citizen-idp-preferences').html(
+    '<div class="spinner"><i></i></div> Chargement...',
+  );
 }
 
 function postAjaxForm(form) {
@@ -98,7 +136,6 @@ function initUI() {
     <h3>Statut de l'usager</h3>
     <div id="citizen-status"></div>
   `);
-
   setLoadingUI();
 }
 

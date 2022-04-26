@@ -3,6 +3,7 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Patch,
   Post,
   Req,
@@ -35,7 +36,20 @@ export class CitizenController {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
 
+    if (citizenAccount.preferences !== undefined) {
+      const userIdpSettings = await this.citizenService.findIdpPreferences(
+        citizenIdentity,
+      );
+      return {
+        userIdpSettings,
+        havePreferencesSettings: true,
+        active: citizenAccount.active,
+        lastConnection: this.getLastConnection(citizenAccount),
+      };
+    }
+
     return {
+      havePreferencesSettings: false,
       active: citizenAccount.active,
       lastConnection: this.getLastConnection(citizenAccount),
     };

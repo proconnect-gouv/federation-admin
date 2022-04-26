@@ -4,7 +4,7 @@ import {
   USER_PASS,
 } from '../../../../shared/cypress/support/constants';
 
-import *  as rnippIdentities from '../../../../shared/cypress/fixtures/rnipp-test-identities';
+import * as rnippIdentities from '../../../../shared/cypress/fixtures/rnipp-test-identities';
 
 const configuration = {};
 
@@ -32,7 +32,9 @@ describe('Citizen Management', () => {
     // Should
     cy.url().should('equal', `${BASE_URL}/research`);
     cy.get('#result').contains('Résultat du redressement RNIPP');
-    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+    cy.get(
+      '#result > .card > .card-body > div.mb-2 > div.font-weight-bold',
+    ).should($divs => {
       // Expect
       expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
@@ -48,11 +50,16 @@ describe('Citizen Management', () => {
     cy.formControl({ ...person, familyName: 'NORRIS' });
 
     // Wait for the status to be fetched from database
-    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should('have.class', 'badge-success');
+    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should(
+      'have.class',
+      'badge-success',
+    );
     cy.contains('Dernière connexion : le 08/01/2020 à 15:33:26');
-    cy.get('#citizen-status', { timeout: 2000 }).should('not.contain', 'Identity Hash :');
+    cy.get('#citizen-status', { timeout: 2000 }).should(
+      'not.contain',
+      'Identity Hash :',
+    );
   });
-
 
   it('Should find a user that is desactivated and has never connect to FC', () => {
     cy.url().should('equal', `${BASE_URL}/rnipp`);
@@ -69,7 +76,9 @@ describe('Citizen Management', () => {
     // Should
     cy.url().should('equal', `${BASE_URL}/research`);
     cy.get('#result').contains('Résultat du redressement RNIPP');
-    cy.get('#result > .card > .card-body > div.mb-2 > div.font-weight-bold').should($divs => {
+    cy.get(
+      '#result > .card > .card-body > div.mb-2 > div.font-weight-bold',
+    ).should($divs => {
       // Expect
       expect($divs).to.have.length(8);
       expect($divs.eq(0)).to.contain('1234567891234567');
@@ -85,8 +94,14 @@ describe('Citizen Management', () => {
     cy.formControl({ ...person });
 
     // Wait for the status to be fetched from database
-    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should('have.class', 'badge-danger');
+    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should(
+      'have.class',
+      'badge-danger',
+    );
     cy.contains('Dernière connexion : Jamais');
-    cy.get('#citizen-status', { timeout: 2000 }).should('not.contain', 'Identity Hash :');
+    cy.get('#citizen-status', { timeout: 2000 }).should(
+      'not.contain',
+      'Identity Hash :',
+    );
   });
 });
