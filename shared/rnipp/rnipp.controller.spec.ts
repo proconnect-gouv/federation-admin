@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from 'nestjs-config';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
 import { formattedXml, rawXml } from '../fixtures/xmlMockedString';
@@ -25,6 +26,16 @@ describe('RnippController', () => {
     birthCountry: '99100',
   };
 
+  const oidcIdentity = {
+    gender: 'male',
+    family_name: 'Dupont',
+    preferred_username: 'Henri',
+    given_name: 'Pierr',
+    birthdate: '1992-03-03',
+    birthplace: '75107',
+    birthcountry: '99100',
+  };
+
   const rectificationRequest: RectificationRequestDTO = {
     supportId: '1234567891234567',
     gender: 'male',
@@ -35,6 +46,7 @@ describe('RnippController', () => {
     isFrench: true,
     cog: '75107',
     toIdentity: () => identity,
+    toOidc: () => oidcIdentity,
   };
 
   const req = {
@@ -50,15 +62,27 @@ describe('RnippController', () => {
     businessEvent: jest.fn(),
   };
 
+  const configMock = {
+    defaultValues: {},
+    instanceFor: 'FCP',
+    appName: 'FC_EXPLOITATION',
+  };
+
+  const configServiceMock = {
+    get: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RnippController],
-      providers: [RnippService, LoggerService],
+      providers: [RnippService, LoggerService, ConfigService],
     })
       .overrideProvider(RnippService)
       .useValue(rnippService)
       .overrideProvider(LoggerService)
       .useValue(loggerMock)
+      .overrideProvider(ConfigService)
+      .useValue(configServiceMock)
       .compile();
 
     rnippController = module.get<RnippController>(RnippController);
@@ -66,6 +90,7 @@ describe('RnippController', () => {
   });
 
   describe('researchRnipp', () => {
+    const instanceFor = 'FCP';
     it('should return an object of person', async () => {
       const mockedRnippService: IResponseFromRnipp = {
         rectifiedIdentity: {
@@ -84,6 +109,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: PersonFoundDTO = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           requestedIdentity: {
             gender: 'male',
@@ -116,6 +143,8 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
+
+      configServiceMock.get.mockReturnValueOnce(configMock);
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,
@@ -143,6 +172,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: PersonFoundDTO = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           requestedIdentity: {
             gender: 'male',
@@ -175,6 +206,8 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
+
+      configServiceMock.get.mockReturnValueOnce(configMock);
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,
@@ -202,6 +235,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: PersonFoundDTO = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           dead: false,
           requestedIdentity: {
@@ -235,6 +270,8 @@ describe('RnippController', () => {
         return mockedRnippService;
       });
 
+      configServiceMock.get.mockReturnValueOnce(configMock);
+
       const result = await rnippController.researchRnipp(
         rectificationRequest,
         req,
@@ -255,6 +292,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         csrfToken: 'mygreatcsrftoken',
         person: {
           dead: false,
@@ -279,6 +318,8 @@ describe('RnippController', () => {
         mockedRnippService,
       );
 
+      configServiceMock.get.mockReturnValueOnce(configMock);
+
       const result = await rnippController.researchRnipp(
         rectificationRequest,
         req,
@@ -295,6 +336,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
@@ -310,6 +353,8 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
+
+      configServiceMock.get.mockReturnValueOnce(configMock);
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,
@@ -327,6 +372,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
@@ -342,6 +389,8 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
+
+      configServiceMock.get.mockReturnValueOnce(configMock);
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,
@@ -362,6 +411,8 @@ describe('RnippController', () => {
       };
 
       const expectedResult: ErrorControllerInterface = {
+        appName: 'FC_EXPLOITATION',
+        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
@@ -379,6 +430,8 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
+
+      configServiceMock.get.mockReturnValueOnce(configMock);
 
       const result = await rnippController.researchRnipp(
         rectificationRequest,

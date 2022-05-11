@@ -4,6 +4,12 @@ import { RnippInformation } from './rnipp-information.dto';
 import { PersonInformation } from './person-information.dto';
 
 export class PersonFoundDTO {
+  @IsString()
+  public appName: string;
+
+  @IsString()
+  public instanceFor: string;
+
   @ValidateNested()
   @Type(() => PersonInformation)
   public person: PersonInformation;

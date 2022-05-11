@@ -41,8 +41,8 @@ export class CitizenServiceBase {
       family_name: rnippIdentity.familyName,
       birthdate: rnippIdentity.birthdate,
       gender: rnippIdentity.gender,
-      birthplace: rnippIdentity.birthPlace,
       birthcountry: rnippIdentity.birthCountry,
+      birthplace: rnippIdentity.birthPlace,
     };
   }
 

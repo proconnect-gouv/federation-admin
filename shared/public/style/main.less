@@ -5,17 +5,20 @@
 @import './font-styles';
 @import './border';
 
-html, body, .container-fluid {
-    height: 100%;
+html,
+body,
+.container-fluid {
+  height: 100%;
 }
 
-html, body {
-    margin: 0px;
+html,
+body {
+  margin: 0px;
 }
 
 body {
-    background-color: #ffffff;
-    background-image: url("../images/background.svg");
+  background-color: #ffffff;
+  background-image: url('../images/background.svg');
 }
 
 #uppercase-icon,
@@ -26,7 +29,7 @@ body {
   &:before {
     display: inline-block;
     width: 1.2em;
-    content: "\f00d";
+    content: '\f00d';
     color: @red-color;
   }
 
@@ -34,7 +37,7 @@ body {
     &:before {
       display: inline-block;
       width: 1.2em;
-      content: "\f00c";
+      content: '\f00c';
       color: @green-color;
     }
   }
@@ -45,6 +48,44 @@ body {
   padding-right: 15px;
 }
 
-.form-check~.invalid-feedback {
+.marg-15 {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.form-check ~ .invalid-feedback {
   display: block;
+}
+
+.right {
+  position: absolute;
+  right: 3em;
+}
+
+.btn-idp-preferences {
+  border-radius: 0.25rem;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.2),
+    inset 0px -2px 5px 0px rgba(0, 0, 0, 0.2);
+  border: none;
+  cursor: pointer;
+  text-shadow: 0px 1px #343434;
+  color: @white-color;
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.2em 0.5em;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 900;
+  display: inline-block;
+}
+
+.label-idp-preferences-danger {
+  color: @red-color;
+  font-weight: 900;
+}
+
+.label-idp-preferences-success {
+  color: @green-color;
+  font-weight: 900;
 }

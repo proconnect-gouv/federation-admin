@@ -8,6 +8,7 @@ import {
   ValidationPipe,
   Req,
 } from '@nestjs/common';
+import { ConfigService } from 'nestjs-config';
 
 import * as beautify from 'xml-beautifier';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
@@ -28,6 +29,7 @@ export class RnippController {
   public constructor(
     private readonly rnippService: RnippService,
     private readonly logger: LoggerService,
+    private readonly config: ConfigService,
   ) {}
 
   private track(log: IRnippTrack) {
@@ -52,7 +54,7 @@ export class RnippController {
     @Req() req,
   ): Promise<PersonFoundDTO | ErrorControllerInterface> {
     const csrfToken = req.csrfToken();
-
+    const { appName, instanceFor } = this.config.get('app');
     this.track({
       action: RnippActions.SUPPORT_RNIPP_CALL,
       state: RnippStates.INITIATED,
@@ -77,6 +79,8 @@ export class RnippController {
       });
 
       return {
+        appName,
+        instanceFor,
         person: {
           requestedIdentity,
           rectifiedIdentity: responseRNIPP.rectifiedIdentity,
@@ -100,6 +104,8 @@ export class RnippController {
       });
       const { rnippDead = false } = responseRNIPP || {};
       return this.handleError(
+        appName,
+        instanceFor,
         error,
         rectificationRequest.supportId,
         requestedIdentity,
@@ -110,6 +116,8 @@ export class RnippController {
   }
 
   private async handleError(
+    appName,
+    instanceFor,
     error: any,
     supportId: string,
     requestedIdentity: IIdentity,
@@ -134,6 +142,8 @@ export class RnippController {
         };
 
     return {
+      appName,
+      instanceFor,
       person: {
         requestedIdentity,
         dead,

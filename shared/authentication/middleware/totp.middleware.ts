@@ -32,7 +32,6 @@ export class TotpMiddleware implements NestMiddleware {
     } else {
       req.totp = 'valid';
     }
-
     return next();
   }
 

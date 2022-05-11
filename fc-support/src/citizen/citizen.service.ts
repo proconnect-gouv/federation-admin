@@ -41,7 +41,6 @@ export class CitizenService extends CitizenServiceBase {
     } catch (error) {
       this.logger.error('Preferences Broker error: ' + error);
     }
-
     return userIdpSettings;
   }
 }
