@@ -5,6 +5,7 @@ import { IsOptionalExtended } from '../../validators/is-optional-extended.valida
 import { IsValidInputString } from '../../validators/is-valid-input-string';
 import { toBoolean } from '../../transforms/string.transform';
 import { IIdentity } from '../../citizen/interfaces/identity.interface';
+import { IOidcIdentity } from '../../citizen/interfaces/oidc-identity.interface';
 import { FRANCE_COG } from '../rnipp-constants';
 
 export class RectificationRequestDTO {
@@ -51,6 +52,18 @@ export class RectificationRequestDTO {
       birthdate: this.birthdate,
       birthCountry: this.isFrench ? FRANCE_COG : this.cog,
       birthPlace: this.isFrench ? this.cog : '',
+    };
+  }
+
+  public toOidc(): IOidcIdentity {
+    return {
+      gender: this.gender,
+      family_name: this.familyName,
+      preferred_username: this.preferredUsername,
+      given_name: this.givenName,
+      birthdate: this.birthdate,
+      birthcountry: this.isFrench ? FRANCE_COG : this.cog,
+      birthplace: this.isFrench ? this.cog : '',
     };
   }
 }

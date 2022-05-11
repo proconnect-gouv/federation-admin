@@ -16,7 +16,6 @@ import { UserRole } from '@fc/shared/user/roles.enum';
 import { CitizenService } from './citizen.service';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
-import { PatchCitizenActiveDTO } from './dto/patch-citizen-active.dto';
 import { CitizenAccountDTO } from './dto/citizen-account.dto';
 
 @Controller('citizen')
