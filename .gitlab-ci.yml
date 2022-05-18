@@ -18,6 +18,16 @@ global-install:
     - node
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+  cache:
+    key: '${CACHE_KEY}'
+    policy: pull
+    paths:
+      - node_modules
+      - fc-exploitation/node_modules
+      - fc-stats/node_modules
+      - fc-support/node_modules
+      - fc-workers/node_modules
+      - shared/node_modules
   script:
     - yarn install
     - yarn lint
