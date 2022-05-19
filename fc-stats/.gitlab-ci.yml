@@ -8,7 +8,7 @@ test/stats:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
   cache:
-    key: '${CI_PROJECT_ID}'
+    key: '${CACHE_KEY}'
     policy: pull
     paths:
       - node_modules
@@ -34,7 +34,7 @@ test/stats:
 #   variables:
 #     TZ: "Europe/Paris"
 #   cache:
-#     key: '${CI_PROJECT_ID}'
+#     key: '${CACHE_KEY}'
 #     policy: pull
 #     paths:
 #       - node_modules
