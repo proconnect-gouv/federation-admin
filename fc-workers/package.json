@@ -27,6 +27,7 @@
     "@babel/register": "^7.4.4",
     "@babel/runtime": "^7.4.4",
     "babel-jest": "^27.0.0",
+    "commander": "^9.4.0",
     "eslint": "^7.0.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^8.0.0",

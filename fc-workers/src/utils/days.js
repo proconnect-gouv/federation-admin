@@ -1,5 +1,11 @@
 import { Interval } from 'luxon';
 
+/**
+ * Give list of days between 2 dates included
+ * @param {Datetime} start
+ * @param {Datetime} end
+ * @returns {Datetime[]} list of dates.
+ */
 export function getDaysAsIso(start, end) {
   // Interval is not inclusive with "end"
   const stop = end.plus({ days: 1 });
