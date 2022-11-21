@@ -4,8 +4,8 @@ import {
   LIMIT_PAGE,
 } from '../../../../shared/cypress/support/constants';
 
-import { deleteUser } from './account-delete.util';
-import { createUserAccount } from './account-create.util';
+import { deleteUser } from './account-delete.utils';
+import { createUserAccount } from './account-create.utils';
 
 describe('Account', () => {
   before(() => cy.resetEnv('postgres'));

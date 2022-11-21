@@ -10,8 +10,7 @@
     "test:cov": "jest --coverage",
     "test:e2e:exploitation": "cypress run -P fc-exploitation",
     "test:e2e:support": "cypress run -P fc-support",
-    "test:e2e:stats": "cypress run -P fc-stats",
-    "cypress:open": "cypress open -P"
+    "test:e2e:stats": "cypress run -P fc-stats"
   },
   "resolutions": {
     "cookie-signature": "1.1.0"
@@ -21,6 +20,7 @@
     "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
   },
   "devDependencies": {
+    "cypress": "10.7.0",
     "husky": "^4.0.0-beta.5",
     "prettier": "^1.18.2",
     "tslint": "^5.18.0",

@@ -53,11 +53,20 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
 # test coverage
 $ npm run test:cov
+```
+
+## Run Cypress E2E Tests
+
+Run the E2E tests in a terminal
+```
+yarn test:e2e
+```
+
+Open the Cypress UI
+```
+yarn test:e2e:open
 ```
 
 ## Support

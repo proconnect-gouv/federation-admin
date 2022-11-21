@@ -66,7 +66,7 @@ test/stats:
 #     - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-stats.docker.dev-franceconnect.fr/login)" != "200" ]];
 #         do echo "Waiting for fc-stats..." && sleep 10; done' ||
 #         (echo 'Cannot connect to fc-stats' && exit 1)
-#     - npx cypress${CYPRESS_VERSION:=@9.2.0} run -c video=${CYPRESS_VIDEO} -P fc-stats/ || (
+#     - yarn test:e2e:stats -c video=${CYPRESS_VIDEO} || (
 #         (docker cp fc_fc-stats_1:/tmp/.pm2/logs fc-stats/cypress || true) &&
 #         (docker cp fc-rp-all:/var/log/nginx fc-stats/cypress/logs || true) &&
 #         exit 1)
