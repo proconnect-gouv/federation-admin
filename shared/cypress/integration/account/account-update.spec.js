@@ -3,9 +3,9 @@ import {
   USER_PASS,
   LIMIT_PAGE,
 } from '../../../../shared/cypress/support/constants';
-import { createUserAndLogWith } from './account-create.util';
-import { deleteUser } from './account-delete.util';
-import { updatePassword } from './account-update.util';
+import { createUserAndLogWith } from './account-create.utils';
+import { deleteUser } from './account-delete.utils';
+import { updatePassword } from './account-update.utils';
 import { testIsCompliantPasswordUpdate } from '../../support/request';
 
 describe('Update account', () => {

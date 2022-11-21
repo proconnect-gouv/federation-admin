@@ -1,6 +1,6 @@
 import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../support/constants';
-import { createUserAccount, createUserAndLogWith } from './account-create.util';
-import { deleteUser } from './account-delete.util';
+import { createUserAccount, createUserAndLogWith } from './account-create.utils';
+import { deleteUser } from './account-delete.utils';
 import { testIsCompliantPasswordEnrollment } from '../../support/request';
 
 const BASE_URL = Cypress.config('baseUrl');

@@ -149,7 +149,8 @@ export function totp(subject, arg1, arg2) {
     return formType(input, '000000', configuration);
   }
 
-  cy.wrap(getTotp(secret)).as('totp:token');
+  // Retrieve the totp when the totp input is present
+  cy.get(input).then(() => cy.wrap(getTotp(secret)).as('totp:token'));
   cy.get('@totp:token').then(token => formType(input, token, configuration));
   cy.get('@totp:token').should('have.length',6)
 }

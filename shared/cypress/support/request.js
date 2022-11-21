@@ -1,4 +1,4 @@
-import { createUserAndLogWith, deleteUserAndLogout } from '../integration/account/account-create.util'
+import { createUserAndLogWith, deleteUserAndLogout } from '../integration/account/account-create.utils'
 import { USER_ADMIN } from './constants';
 
 export function testIsCompliantPasswordUpdate(basicConfiguration, request) {

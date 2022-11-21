@@ -26,4 +26,18 @@
 ## Variables d'env 
     - (/fc-*/src/config)
     - Utilisation de la lib nest-config ( d'où utilisation de fichier Typescript  cf: https://www.npmjs.com/package/nestjs-config )
-        
+
+## Run Cypress E2E Tests
+
+Run the E2E tests in a terminal
+```
+yarn test:e2e:exploitation
+
+yarn test:e2e:support
+```
+
+Open the Cypress UI
+```
+cd fc-exploitation
+yarn test:e2e:open
+```

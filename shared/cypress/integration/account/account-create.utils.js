@@ -2,7 +2,7 @@ import {
   USER_ADMIN,
   LIMIT_PAGE,
 } from '../../../../shared/cypress/support/constants';
-import { deleteUser } from './account-delete.util';
+import { deleteUser } from './account-delete.utils';
 
 export function createUserAccount(userInfo, basicConfiguration) {
   cy.contains('Comptes utilisateurs').click();
