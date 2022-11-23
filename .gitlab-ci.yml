@@ -10,6 +10,7 @@ stages:
 variables:
   FC_ROOT: "$CI_BUILDS_DIR/france-connect"
   PROXY_EXPLOITATION: "http://$EXPLOITATION_PROXY_HOST:$EXPLOITATION_PROXY_PORT"
+  CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
 
 global-install:
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
@@ -50,6 +51,8 @@ build-cache:
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
+      # Cypress cache
+      - cache/Cypress
   stage: Cache
   script:
     - yarn install
