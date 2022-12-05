@@ -1,7 +1,7 @@
-import { v4 as uuid } from 'uuid';
-import { IPivotIdentity } from './interfaces/pivot-identity.interface';
-import { ILegacyPivotIdentity } from './interfaces/legacy-identity-pivot.interface';
 import { Inject } from '@nestjs/common';
+import { v4 as uuid } from 'uuid';
+import { ILegacyPivotIdentity } from './interfaces/legacy-identity-pivot.interface';
+import { IPivotIdentity } from './interfaces/pivot-identity.interface';
 
 export class CitizenServiceBase {
   // tslint:disable-next-line: no-empty
@@ -52,7 +52,7 @@ export class CitizenServiceBase {
    * @param birthdate a birthdate to format "YYYY" / "YYYY-MM" / "YYYY-MM-DD"
    * @returns a birthdate to format "YYYY-MM-DD"
    */
-  private rectifyIfPartialBirthdate(birthdate: string): string {
+  rectifyIfPartialBirthdate(birthdate: string): string {
     if (birthdate.match(/^[0-9]{4}$/)) {
       return `${birthdate}-01-01`;
     } else if (birthdate.match(/^[0-9]{4}-[0-9]{2}$/)) {

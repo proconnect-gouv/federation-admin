@@ -1,9 +1,9 @@
-import { Buffer } from 'buffer';
-import { Test, TestingModule } from '@nestjs/testing';
-import { CitizenServiceBase } from './citizen-base.service';
-import { ConfigService } from 'nestjs-config';
-import * as crypto from 'crypto';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Buffer } from 'buffer';
+import * as crypto from 'crypto';
+import { ConfigService } from 'nestjs-config';
+import { CitizenServiceBase } from './citizen-base.service';
 
 describe('CitizenService', () => {
   let module: TestingModule;

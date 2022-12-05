@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { CitizenController } from './citizen.controller';
 import { CitizenService } from './citizen.service';
-import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 
 describe('CitizenController', () => {
   let citizenController: CitizenController;

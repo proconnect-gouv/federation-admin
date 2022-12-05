@@ -1,21 +1,17 @@
+import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
+import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
+import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
+import { UserRole } from '@fc/shared/user/roles.enum';
 import {
   Body,
   Controller,
   HttpException,
   HttpStatus,
-  NotFoundException,
-  Patch,
   Post,
-  Req,
-  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
-import { UserRole } from '@fc/shared/user/roles.enum';
 import { CitizenService } from './citizen.service';
-import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
-import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
 import { CitizenAccountDTO } from './dto/citizen-account.dto';
 
 @Controller('citizen')

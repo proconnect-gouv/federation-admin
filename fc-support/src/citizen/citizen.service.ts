@@ -1,14 +1,14 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
-import {
-  UserPreferencesService,
-  IFormattedIdpSettings,
-} from '@fc/shared/user-preferences';
+import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
 import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
 import { LoggerService } from '@fc/shared/logger/logger.service';
+import {
+  IFormattedIdpSettings,
+  UserPreferencesService,
+} from '@fc/shared/user-preferences';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CitizenService extends CitizenServiceBase {
@@ -31,7 +31,15 @@ export class CitizenService extends CitizenServiceBase {
   async findIdpPreferences(
     rnippIdentity: IPivotIdentity,
   ): Promise<IFormattedIdpSettings> {
-    const identity = this.generateOIDCIdentity(rnippIdentity);
+    const rnippIdentityWithNormalizedBirthdateIdentity = {
+      ...rnippIdentity,
+      birthdate: this.rectifyIfPartialBirthdate(rnippIdentity.birthdate),
+    };
+
+    const identity = this.generateOIDCIdentity(
+      rnippIdentityWithNormalizedBirthdateIdentity,
+    );
+
     // get user preferences with the specific broker
     let userIdpSettings;
     try {
@@ -41,6 +49,7 @@ export class CitizenService extends CitizenServiceBase {
     } catch (error) {
       this.logger.error('Preferences Broker error: ' + error);
     }
+
     return userIdpSettings;
   }
 }
