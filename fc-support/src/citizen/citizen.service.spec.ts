@@ -1,12 +1,12 @@
-import { Repository } from 'typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { CitizenService } from './citizen.service';
 import { Citizen } from '@fc/shared/citizen/citizen.mongodb.entity';
-import { ConfigService } from 'nestjs-config';
-import * as crypto from 'crypto';
 import { LoggerService } from '@fc/shared/logger/logger.service';
 import { UserPreferencesService } from '@fc/shared/user-preferences';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import * as crypto from 'crypto';
+import { ConfigService } from 'nestjs-config';
+import { Repository } from 'typeorm';
+import { CitizenService } from './citizen.service';
 
 describe('CitizenService', () => {
   let module: TestingModule;
@@ -101,6 +101,58 @@ describe('CitizenService', () => {
   });
 
   describe('findIdpPreferences', () => {
+    it('should call rectifyIfPartialBirthdate', async () => {
+      // Given
+      const userIdentity = {
+        givenName: 'givenName',
+        familyName: 'familyName',
+        birthdate: 'birthdate',
+        gender: 'gender',
+        preferred_username: 'preferredUsername',
+        birthCountry: 'birthCountry',
+        birthPlace: 'birthPlace',
+      };
+      citizenService.rectifyIfPartialBirthdate = jest.fn();
+
+      // When
+      const result = await citizenService.findIdpPreferences(userIdentity);
+
+      // Then
+      expect(citizenService.rectifyIfPartialBirthdate).toHaveBeenCalledTimes(1);
+      expect(citizenService.rectifyIfPartialBirthdate).toHaveBeenCalledWith(
+        userIdentity.birthdate,
+      );
+    });
+
+    it('should call generateOIDCIdentity', async () => {
+      // Given
+      brokerMock.publish.mockResolvedValue(brokerMockResponse);
+      const userIdentity = {
+        givenName: 'givenName',
+        familyName: 'familyName',
+        birthdate: 'birthdate',
+        gender: 'gender',
+        preferred_username: 'preferredUsername',
+        birthCountry: 'birthCountry',
+        birthPlace: 'birthPlace',
+      };
+      const rectifiedBirthdate = 'return-value-mock';
+      citizenService.rectifyIfPartialBirthdate = jest
+        .fn()
+        .mockReturnValue(rectifiedBirthdate);
+      citizenService.generateOIDCIdentity = jest.fn();
+
+      // When
+      const result = await citizenService.findIdpPreferences(userIdentity);
+
+      // Then
+      expect(citizenService.generateOIDCIdentity).toHaveBeenCalledTimes(1);
+      expect(citizenService.generateOIDCIdentity).toHaveBeenCalledWith({
+        ...userIdentity,
+        birthdate: rectifiedBirthdate,
+      });
+    });
+
     it('should get a user idp setting', async () => {
       // Given
       const expected = {
