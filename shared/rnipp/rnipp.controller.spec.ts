@@ -36,7 +36,7 @@ describe('RnippController', () => {
     birthcountry: '99100',
   };
 
-  const rectificationRequest: RectificationRequestDTO = {
+  const rectificationRequest = ({
     supportId: '1234567891234567',
     gender: 'male',
     familyName: 'Dupont',
@@ -47,7 +47,7 @@ describe('RnippController', () => {
     cog: '75107',
     toIdentity: () => identity,
     toOidc: () => oidcIdentity,
-  };
+  } as unknown) as RectificationRequestDTO;
 
   const req = {
     user: {

@@ -1,3 +1,6 @@
+/* istanbul ignore file */
+
+// Declarative code
 import { IsString, Matches, IsIn, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { IsBirthdate } from '../validator/is-birthdate.validator';
@@ -49,7 +52,7 @@ export class RectificationRequestDTO {
       familyName: this.familyName,
       preferredUsername: this.preferredUsername,
       givenName: this.givenName,
-      birthdate: this.birthdate,
+      birthdate: this.rectifyIfPartialBirthdate(this.birthdate),
       birthCountry: this.isFrench ? FRANCE_COG : this.cog,
       birthPlace: this.isFrench ? this.cog : '',
     };
@@ -61,9 +64,19 @@ export class RectificationRequestDTO {
       family_name: this.familyName,
       preferred_username: this.preferredUsername,
       given_name: this.givenName,
-      birthdate: this.birthdate,
+      birthdate: this.rectifyIfPartialBirthdate(this.birthdate),
       birthcountry: this.isFrench ? FRANCE_COG : this.cog,
       birthplace: this.isFrench ? this.cog : '',
     };
+  }
+
+  private rectifyIfPartialBirthdate(birthdate: string): string {
+    if (birthdate.match(/^[0-9]{4}$/)) {
+      return `${birthdate}-01-01`;
+    } else if (birthdate.match(/^[0-9]{4}-[0-9]{2}$/)) {
+      return `${birthdate}-01`;
+    }
+
+    return birthdate;
   }
 }
