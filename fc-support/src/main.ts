@@ -20,9 +20,7 @@ import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.fi
 import { LoggerService } from '@fc/shared/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: false,
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {});
 
   /**
    * @see https://expressjs.com/fr/api.html#app.set

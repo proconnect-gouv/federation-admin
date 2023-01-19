@@ -18,9 +18,7 @@ import { AllExceptionFilter } from '@fc/shared/exception/filter/all-exception.fi
 import { LoggerService } from '@fc/shared/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: false,
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {});
 
   /**
    * We can't set the query parser to "simple" because we use the complex parsing.
