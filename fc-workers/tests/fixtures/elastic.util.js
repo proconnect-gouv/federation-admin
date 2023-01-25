@@ -1,24 +1,7 @@
 const axios = require('axios');
 const elasticsearch = require('elasticsearch');
 
-const DEFAULT_PORT = 9200;
-const LIST_HOSTS = [
-  {
-    host: 'haproxy_es',
-    protocol: 'http',
-    port: DEFAULT_PORT,
-  },
-  {
-    host: 'fc_haproxy_es_1',
-    protocol: 'http',
-    port: DEFAULT_PORT,
-  },
-  {
-    host: 'localhost',
-    protocol: 'http',
-    port: DEFAULT_PORT,
-  },
-];
+const LIST_HOSTS = ['https://docker-stack:docker-stack@elasticsearch:9200'];
 
 /**
  * function used to find the good elasticsearch host from different context
