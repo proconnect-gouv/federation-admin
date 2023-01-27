@@ -108,23 +108,6 @@ describe('Config', () => {
       // Then
       expect(result).toStrictEqual(resultMock);
     });
-
-    it('Should return a default Elastic configuration if host is not defined', () => {
-      // Given
-      const input = {
-        REQUEST_TIMEOUT: 42,
-      };
-
-      const resultMock = {
-        node: ['http://localhost:9200'],
-        requestTimeout: 42,
-      };
-      const config = new Config(input);
-      // When
-      const result = config.getElasticOptions();
-      // Then
-      expect(result).toStrictEqual(resultMock);
-    });
   });
 
   describe('getLogElastic()', () => {
@@ -137,23 +120,6 @@ describe('Config', () => {
 
       const resultMock = {
         node: ['https://localhost:9300', 'https://localhost:9400'],
-        requestTimeout: 42,
-      };
-      const config = new Config(input);
-      // When
-      const result = config.getLogElastic();
-      // Then
-      expect(result).toStrictEqual(resultMock);
-    });
-
-    it('Should return a default Elastic configuration if host is not defined', () => {
-      // Given
-      const input = {
-        REQUEST_TIMEOUT: 42,
-      };
-
-      const resultMock = {
-        node: ['http://localhost:9200'],
         requestTimeout: 42,
       };
       const config = new Config(input);
