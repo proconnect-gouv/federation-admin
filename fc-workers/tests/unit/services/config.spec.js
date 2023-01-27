@@ -94,12 +94,12 @@ describe('Config', () => {
     it('Should return a Elastic configuration', () => {
       // Given
       const input = {
-        ES_STATS_HOSTS: 'localhost:9300,localhost:9400',
+        ES_STATS_HOSTS: 'https://localhost:9300,https://localhost:9400',
         REQUEST_TIMEOUT: 42,
       };
 
       const resultMock = {
-        node: ['http://localhost:9300', 'http://localhost:9400'],
+        node: ['https://localhost:9300', 'https://localhost:9400'],
         requestTimeout: 42,
       };
       const config = new Config(input);
@@ -131,12 +131,12 @@ describe('Config', () => {
     it('Should return a Elastic configuration', () => {
       // Given
       const input = {
-        ES_LOGS_HOSTS: 'localhost:9300,localhost:9400',
+        ES_LOGS_HOSTS: 'https://localhost:9300,https://localhost:9400',
         REQUEST_TIMEOUT: 42,
       };
 
       const resultMock = {
-        node: ['http://localhost:9300', 'http://localhost:9400'],
+        node: ['https://localhost:9300', 'https://localhost:9400'],
         requestTimeout: 42,
       };
       const config = new Config(input);

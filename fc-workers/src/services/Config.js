@@ -41,22 +41,22 @@ class Config {
 
   getElasticOptions() {
     const {
-      ES_STATS_HOSTS: hosts = 'localhost:9200',
+      ES_STATS_HOSTS: hosts,
       REQUEST_TIMEOUT,
     } = this.config;
     return {
-      node: hosts.split(',').map(host => `http://${host}`),
+      node: hosts.split(','),
       requestTimeout: REQUEST_TIMEOUT,
     };
   }
 
   getLogElastic() {
     const {
-      ES_LOGS_HOSTS: hosts = 'localhost:9200',
+      ES_LOGS_HOSTS: hosts,
       REQUEST_TIMEOUT,
     } = this.config;
     return {
-      node: hosts.split(',').map(host => `http://${host}`),
+      node: hosts.split(','),
       requestTimeout: REQUEST_TIMEOUT,
     };
   }
