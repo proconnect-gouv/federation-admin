@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
@@ -122,7 +124,7 @@ async function indexDocs(list) {
 
 function sendToElastic(bulk) {
   const body = `${bulk.join('\n')}\n`;
-  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'http://haproxy_es:9200/_bulk' --data-binary '${body}'; echo`;
+  const command = `curl -H 'Content-Type: application/json' -s -XPUT 'https://docker-stack:docker-stack@elasticsearch:9200/_bulk' --data-binary '${body}'; echo`;
 
   // eslint-disable-next-line no-console
   return exec(command).catch(console.error);
