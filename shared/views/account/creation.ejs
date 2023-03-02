@@ -38,7 +38,7 @@
               <section class="form-group row">
                 <label class="col-2 col-form-label" for="email">Email</label>
                 <div class="col-10">
-                  <input id="email" type="'text" required
+                  <input id="email" type="text" required
                   class="form-control <%= locals.messages.errors && messages.errors[0].email && 'is-invalid' %>" placeholder="mail@to.com"
                   name="email" value="<%= locals.messages.values && messages.values[0].email %>"
                   pattern="^([a-zA-Z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,10})$">
