@@ -25,6 +25,7 @@ import { LocalsInterceptor } from './meta/locals.interceptor';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { CsurfMiddleware } from '@nest-middlewares/csurf';
 import { LoggerModule } from '@fc/shared/logger/logger.module';
+import { InstanceService } from '@fc/shared/utils';
 import { MongoService } from './config/mongoose-service';
 import { CitizenModule } from './citizen/citizen.module';
 import { CitizenController } from './citizen/citizen.controller';
@@ -58,7 +59,7 @@ const otplibProvider = {
       useClass: MongoService,
     }),
   ],
-  providers: [LocalsInterceptor, otplibProvider],
+  providers: [LocalsInterceptor, otplibProvider, InstanceService],
   controllers: [AppController],
 })
 export class AppModule implements NestModule {

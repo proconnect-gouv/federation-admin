@@ -293,8 +293,8 @@ function initUI() {
     <h3>Statut de l'usager</h3>
     <div id="citizen-status"></div>
     ${
-      __IDP_CORE_INSTANCE__ === 'CL'
-        ? `<h3>Préférences FI</h3>
+      __SHOW_IDP_SETTINGS__ === 'true'
+      ? `<h3>Préférences FI</h3>
     <div id="citizen-idp-preferences"></div>`
         : ''
     }

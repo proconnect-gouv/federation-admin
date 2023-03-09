@@ -11,10 +11,14 @@ import * as queryString from 'query-string';
 import { UserRole } from '@fc/shared/user/roles.enum';
 import { errorCodeTranslations } from './error-code-translations';
 import { VALID_INPUT_STRING_REGEX } from '@fc/shared/validators/is-valid-input-string';
+import { InstanceService } from '@fc/shared/utils/instance.service';
 
 @Injectable()
 export class LocalsInterceptor implements NestInterceptor {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly instanceService: InstanceService,
+  ) {}
 
   async intercept(
     context: ExecutionContext,
@@ -60,6 +64,8 @@ export class LocalsInterceptor implements NestInterceptor {
     res.locals.REQ_QUERY = req.query;
     res.locals.moment = moment;
     res.locals.queryString = queryString;
+
+    res.locals.instanceService = this.instanceService;
 
     return next.handle();
   }

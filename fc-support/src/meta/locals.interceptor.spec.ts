@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { LocalsInterceptor } from './locals.interceptor';
 import { ConfigService } from 'nestjs-config';
+import { InstanceService } from '@fc/shared/utils';
 
 describe('LocalsInterceptor', () => {
   let localsInterceptor;
@@ -8,12 +9,20 @@ describe('LocalsInterceptor', () => {
     get: jest.fn(),
   };
 
+  const instanceServiceMock = {
+    isFcaLow: jest.fn(),
+    isFcpHigh: jest.fn(),
+    isCl: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [LocalsInterceptor, ConfigService],
+      providers: [LocalsInterceptor, ConfigService, InstanceService],
     })
       .overrideProvider(ConfigService)
       .useValue(configService)
+      .overrideProvider(InstanceService)
+      .useValue(instanceServiceMock)
       .compile();
     localsInterceptor = await module.get<LocalsInterceptor>(LocalsInterceptor);
   });
@@ -59,6 +68,7 @@ describe('LocalsInterceptor', () => {
     expect(res.locals.GIT_LATEST_COMMIT_SHORT_HASH).toBe(shortHash);
     expect(res.locals.GIT_LATEST_COMMIT_LONG_HASH).toBe(longHash);
     expect(res.locals.CURRENT_USER).toBe(req.user);
+    expect(res.locals.instanceService).toBe(instanceServiceMock);
     expect(next.handle).toBeCalledTimes(1);
   });
 });

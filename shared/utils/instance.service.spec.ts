@@ -2,7 +2,7 @@ import { ConfigService } from 'nestjs-config';
 import { TestingModule, Test } from '@nestjs/testing';
 import { InstanceService } from './instance.service';
 
-describe('isFca', () => {
+describe('InstanceService', () => {
   let module: TestingModule;
   let service: InstanceService;
 
@@ -22,84 +22,90 @@ describe('isFca', () => {
       .useValue(mockConfigService)
       .compile();
 
-    service = await module.get<InstanceService>(InstanceService);
+    service = module.get<InstanceService>(InstanceService);
   });
 
-  it('Should display true if we are in an AgentConnect instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'FCA',
+  describe('isFcaLow', () => {
+    it('Should return true if we are in an AgentConnect instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'FCA-LOW',
+      });
+
+      // Action
+      const result = service.isFcaLow();
+
+      // Expect
+      expect(result).toBe(true);
     });
 
-    // Action
-    const result = await service.isFca();
+    it('Should return false if we are not in an AgentConnect instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'FCP-HIGH',
+      });
 
-    // Expect
-    expect(result).toBe(true);
+      // Action
+      const result = service.isFcaLow();
+
+      // Expect
+      expect(result).toBe(false);
+    });
   });
 
-  it('Should display false if we are not in an AgentConnect instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'FCP',
+  describe('isCl', () => {
+    it('Should return true if we are in a FranceConnect legacy instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'CL',
+      });
+
+      // Action
+      const result = service.isCl();
+
+      // Expect
+      expect(result).toBe(true);
     });
 
-    // Action
-    const result = await service.isFca();
+    it('Should return false if we are not in a FranceConnect legacy instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'FCA-LOW',
+      });
 
-    // Expect
-    expect(result).toBe(false);
+      // Action
+      const result = service.isCl();
+
+      // Expect
+      expect(result).toBe(false);
+    });
   });
 
-  it('Should display true if we are in an FranceConnect legacy instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'CL',
+  describe('isFcpHigh', () => {
+    it('Should return true if we are in a FranceConnect+ instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'FCP-HIGH',
+      });
+
+      // Action
+      const result = service.isFcpHigh();
+
+      // Expect
+      expect(result).toBe(true);
     });
 
-    // Action
-    const result = await service.isFc();
+    it('Should return false if we are not in a FranceConnect+ instance', () => {
+      // Setup
+      mockConfigService.get.mockReturnValue({
+        instanceFor: 'FCA-LOW',
+      });
 
-    // Expect
-    expect(result).toBe(true);
-  });
+      // Action
+      const result = service.isFcpHigh();
 
-  it('Should display false if we are not in an FranceConnect legacy instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'FCA',
+      // Expect
+      expect(result).toBe(false);
     });
-
-    // Action
-    const result = await service.isFc();
-
-    // Expect
-    expect(result).toBe(false);
-  });
-
-  it('Should display true if we are in an FranceConnect+ instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'FCP',
-    });
-
-    // Action
-    const result = await service.isFcp();
-
-    // Expect
-    expect(result).toBe(true);
-  });
-
-  it('Should display false if we are not in an FranceConnect+ instance', async () => {
-    // Setup
-    mockConfigService.get.mockReturnValue({
-      instanceFor: 'FCA',
-    });
-
-    // Action
-    const result = await service.isFcp();
-
-    // Expect
-    expect(result).toBe(false);
   });
 });
