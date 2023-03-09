@@ -1,3 +1,6 @@
+import { IConfig } from '../interaces';
+import { Platform } from '@fc/shared/utils';
+
 export default {
   appName: process.env.APP_NAME || 'FC_SUPPORT',
   appFqdn: process.env.APP_FQDN || 'fc-support.docker.dev-franceconnect.fr',
@@ -13,5 +16,5 @@ export default {
   appVersion: process.env.APP_VERSION || 'no-version',
   userTokenExpiresIn: 2880,
   userAuthenticationMaxAttempt: 4,
-  instanceFor: process.env.IDP_CORE_INSTANCE || 'CL',
-};
+  instanceFor: process.env.IDP_CORE_INSTANCE || Platform.CL,
+} as IConfig;

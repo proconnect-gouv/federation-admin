@@ -287,7 +287,7 @@
       const __RNIPP_DATA__ = <%- locals.person.rectifiedIdentity ? JSON.stringify(locals.person.rectifiedIdentity) : 'undefined' %>;
       const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
       const __APP_NAME__ = "<%= locals.appName %>"
-      const __IDP_CORE_INSTANCE__ = "<%= locals.instanceFor %>"
+      const __SHOW_IDP_SETTINGS__ = "<%= locals.instanceService.isCl() %>"
     </script>
     <% } %>
   </section>

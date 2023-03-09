@@ -64,7 +64,6 @@ describe('RnippController', () => {
 
   const configMock = {
     defaultValues: {},
-    instanceFor: 'FCP',
     appName: 'FC_EXPLOITATION',
   };
 
@@ -90,7 +89,6 @@ describe('RnippController', () => {
   });
 
   describe('researchRnipp', () => {
-    const instanceFor = 'FCP';
     it('should return an object of person', async () => {
       const mockedRnippService: IResponseFromRnipp = {
         rectifiedIdentity: {
@@ -110,7 +108,6 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           requestedIdentity: {
             gender: 'male',
@@ -173,7 +170,6 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           requestedIdentity: {
             gender: 'male',
@@ -236,7 +232,6 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           dead: false,
           requestedIdentity: {
@@ -293,7 +288,6 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         csrfToken: 'mygreatcsrftoken',
         person: {
           dead: false,
@@ -337,7 +331,6 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
@@ -373,7 +366,6 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
@@ -412,7 +404,6 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        instanceFor,
         person: {
           requestedIdentity: identity,
           dead: false,
