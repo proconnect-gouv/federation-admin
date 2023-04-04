@@ -68,4 +68,3 @@ include:
   - '/fc-workers/.gitlab-ci.yml'
   - '/fc-support/.gitlab-ci.yml'
   - '/.gitlab-build.yml'
-  - '/.gitlab-checkmarx.yml'
