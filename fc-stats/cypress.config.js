@@ -23,7 +23,7 @@ module.exports = defineConfig({
       'https://fc-stats.docker.dev-franceconnect.fr/account',
     APP_FORBIDDEN_PAGE: 'https://fc-stats.docker.dev-franceconnect.fr/events',
     TOTP_WINDOW: 'loose',
-    LOG_FILE_PATH: '../../fc-docker/volumes/log/fcstats.log',
+    LOG_FILE_PATH: '../../fc/docker/volumes/log/fcstats.log',
   },
   chromeWebSecurity: false,
   videoUploadOnPasses: false,

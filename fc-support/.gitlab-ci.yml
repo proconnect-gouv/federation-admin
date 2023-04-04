@@ -13,7 +13,6 @@ test/support:
     paths:
       - node_modules
       - fc-exploitation/node_modules
-      - fc-stats/node_modules
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
@@ -37,7 +36,6 @@ cypress/support:
     paths:
       - node_modules
       - fc-exploitation/node_modules
-      - fc-stats/node_modules
       - fc-support/node_modules
       - fc-workers/node_modules
       - shared/node_modules
@@ -56,12 +54,9 @@ cypress/support:
     - cd $CI_PROJECT_DIR
     - yarn install
   script:
-    - docker-stack up fc-support rnipp
-    - docker-stack fixtures fc-support
-    - docker-stack start fc-support rnipp
-    - timeout 100 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' https://fc-support.docker.dev-franceconnect.fr/login)" != "200" ]];
-      do echo "Waiting for fc-support..." && sleep 10; done' ||
-      (echo 'Cannot connect to fc-support' && exit 1)
+    - VERBOSE=1 docker-stack up fc-support
+    - docker-stack start-all
+    - docker-stack wait "fc-support" "https://fc-support.docker.dev-franceconnect.fr/login" "90"
     - yarn test:e2e:support -c video=${CYPRESS_VIDEO} || (
       (docker cp fc_fc-support_1:/tmp/.pm2/logs fc-support/cypress || true) &&
       (docker cp fc-rp-all:/var/log/nginx fc-support/cypress/logs || true) &&
