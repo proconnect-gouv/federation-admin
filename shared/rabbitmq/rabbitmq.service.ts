@@ -11,15 +11,15 @@ export class RabbitmqService {
     @Inject('cryptography-broker') private broker: ClientProxy,
   ) {}
 
-  onModuleInit() {
-    this.broker.connect();
+  async onModuleInit() {
+    await this.broker.connect();
   }
 
   onModuleDestroy() {
     this.broker.close();
   }
 
-  publish(command: string, payload): Promise<string> {
+  async publish(command: string, payload): Promise<string> {
     const { requestTimeout } = this.config.get('cryptography-broker');
 
     return new Promise((resolve, reject) => {

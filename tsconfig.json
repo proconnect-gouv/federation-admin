@@ -11,7 +11,8 @@
     "baseUrl": "./",
     "incremental": true,
     "preserveSymlinks": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowJs": true,
   },
   "exclude": ["node_modules"]
 }

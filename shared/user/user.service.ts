@@ -170,7 +170,7 @@ export class UserService implements IUserService {
         tokenExpiresAt,
       } = this.setAuthenticationTokenExpirationDate();
 
-      const enrolledUser = this.userRepository.save({
+      const enrolledUser = await this.userRepository.save({
         passwordHash,
         username,
         email,

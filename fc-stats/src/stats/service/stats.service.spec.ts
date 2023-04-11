@@ -1,13 +1,11 @@
 import { Stream } from 'stream';
 import { Test } from '@nestjs/testing';
-import {
-  ElasticsearchModule,
-  ElasticsearchService,
-} from '@nestjs/elasticsearch';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { StatsService } from './stats.service';
 import { StatsQueries } from '../stats.queries';
 import { aggregations } from '../../../fixtures/aggregation';
 import { MetricDTO } from '../dto/metric.dto';
+import { SearchResponse } from 'elasticsearch';
 
 describe('StatsService', () => {
   let statsService: StatsService;
@@ -272,7 +270,7 @@ describe('StatsService', () => {
         stop: new Date('2019-01-01'),
         columns: ['fs', 'fi', 'action', 'typeAction'],
       };
-      const aggs = aggregations;
+      const aggs = (aggregations as unknown) as SearchResponse<any>;
       // When
       const result = StatsService.aggregationsToDocuments(params, aggs);
       // Then

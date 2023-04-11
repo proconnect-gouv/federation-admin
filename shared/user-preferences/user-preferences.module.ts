@@ -1,6 +1,7 @@
 import { ConfigService } from 'nestjs-config';
 import { Module, DynamicModule } from '@nestjs/common';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { InstanceService } from '@fc/shared/utils';
 import { UserPreferencesService } from './user-preferences.service';
 
 @Module({})
@@ -25,8 +26,8 @@ export class UserPreferencesModule {
 
     return {
       module: UserPreferencesModule,
-      providers: [BrokerProvider, UserPreferencesService],
-      exports: [BrokerProvider, UserPreferencesService],
+      providers: [BrokerProvider, UserPreferencesService, InstanceService],
+      exports: [BrokerProvider, UserPreferencesService, InstanceService],
     };
   }
 }
