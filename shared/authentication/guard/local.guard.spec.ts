@@ -4,6 +4,7 @@ describe('LocalGuard', () => {
   let guard;
 
   const reqMock = {
+    logIn: jest.fn(),
     session: {
       regenerate: jest.fn(),
       destroy: jest.fn(),
@@ -48,6 +49,7 @@ describe('LocalGuard', () => {
       expect(reqMock.session.regenerate).toHaveBeenCalledTimes(1);
     });
   });
+
   it('should not regenerate session', async () => {
     const canActivateResult = false;
     guard.wrappedSuperCanActivate = jest

@@ -1,5 +1,6 @@
 import { ConfigService } from 'nestjs-config';
 import { timeout } from 'rxjs/operators';
+import { InstanceService } from '@fc/shared/utils';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { UserPreferencesFailureException } from './user-preferences.failure.exception';
@@ -10,17 +11,22 @@ export class UserPreferencesService {
   constructor(
     private readonly config: ConfigService,
     @Inject('preferences-broker') private readonly broker: ClientProxy,
+    private readonly instanceService: InstanceService,
   ) {}
 
-  onModuleInit() {
-    this.broker.connect();
+  async onModuleInit() {
+    if (this.instanceService.isCl()) {
+      await this.broker.connect();
+    }
   }
 
   onModuleDestroy() {
-    this.broker.close();
+    if (this.instanceService.isCl()) {
+      this.broker.close();
+    }
   }
 
-  publish(command: string, payload): Promise<IFormattedIdpSettings> {
+  async publish(command: string, payload): Promise<IFormattedIdpSettings> {
     const { requestTimeout } = this.config.get('preferences-broker');
 
     return new Promise((resolve, reject) => {

@@ -60,16 +60,16 @@ describe('RabbitmqService', () => {
   });
 
   describe('onModuleInit', () => {
-    it('should connect to broker', () => {
+    it('should connect to broker', async () => {
       // When
-      service.onModuleInit();
+      await service.onModuleInit();
       // Then
       expect(brokerMock.connect).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('onModuleClose', () => {
-    it('should close connection to borker', () => {
+    it('should close connection to broker', () => {
       // When
       service.onModuleDestroy();
       // Then

@@ -1,6 +1,7 @@
 import { ConfigService } from 'nestjs-config';
 import * as rxjs from 'rxjs/operators';
 import { Test, TestingModule } from '@nestjs/testing';
+import { InstanceService } from '@fc/shared/utils';
 import { UserPreferencesService } from './user-preferences.service';
 import { UserPreferencesFailureException } from './user-preferences.failure.exception';
 
@@ -26,6 +27,10 @@ describe('UserPreferencesService', () => {
   const command = 'foo';
   const payload = {};
 
+  const instanceServiceMock = {
+    isCl: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
@@ -38,10 +43,13 @@ describe('UserPreferencesService', () => {
           provide: 'preferences-broker',
           useValue: brokerMock,
         },
+        InstanceService,
       ],
     })
       .overrideProvider(ConfigService)
       .useValue(configMock)
+      .overrideProvider(InstanceService)
+      .useValue(instanceServiceMock)
       .compile();
 
     service = module.get<UserPreferencesService>(UserPreferencesService);
@@ -55,23 +63,45 @@ describe('UserPreferencesService', () => {
     });
     const rxjsTimeoutMock = jest.spyOn(rxjs, 'timeout');
     rxjsTimeoutMock.mockReturnValue(timeoutReturnMock);
+
+    instanceServiceMock.isCl.mockReturnValue(true);
   });
 
   describe('onModuleInit', () => {
-    it('should connect to broker', () => {
+    it('should connect to broker', async () => {
       // When
-      service.onModuleInit();
+      await service.onModuleInit();
       // Then
       expect(brokerMock.connect).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not connect to broker if instance is not CL', async () => {
+      // given
+      instanceServiceMock.isCl.mockReturnValue(false);
+
+      // When
+      await service.onModuleInit();
+      // Then
+      expect(brokerMock.connect).not.toHaveBeenCalled();
     });
   });
 
   describe('onModuleClose', () => {
-    it('should close connection to borker', () => {
+    it('should close connection to broker', () => {
       // When
       service.onModuleDestroy();
       // Then
       expect(brokerMock.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not close connection to broker if instance is not CL', () => {
+      // given
+      instanceServiceMock.isCl.mockReturnValue(false);
+
+      // When
+      service.onModuleDestroy();
+      // Then
+      expect(brokerMock.close).not.toHaveBeenCalled();
     });
   });
 
