@@ -56,7 +56,7 @@ cypress/support:
   script:
     - VERBOSE=1 docker-stack up fc-support
     - docker-stack start-all
-    - docker-stack wait "fc-support" "https://fc-support.docker.dev-franceconnect.fr/login" "90"
+    - docker-stack wait "fc-support" "https://fc-support.docker.dev-franceconnect.fr/login" "240"
     - yarn test:e2e:support -c video=${CYPRESS_VIDEO} || (
       (docker cp fc_fc-support_1:/tmp/.pm2/logs fc-support/cypress || true) &&
       (docker cp fc-rp-all:/var/log/nginx fc-support/cypress/logs || true) &&
