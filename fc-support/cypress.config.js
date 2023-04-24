@@ -24,7 +24,7 @@ module.exports = defineConfig({
       'https://fc-support.docker.dev-franceconnect.fr/account',
     APP_FORBIDDEN_PAGE: 'https://fc-support.docker.dev-franceconnect.fr/rnipp',
     TOTP_WINDOW: 'loose',
-    LOG_FILE_PATH: '../../fc-docker/volumes/log/fcsupport.log',
+    LOG_FILE_PATH: '../../fc/docker/volumes/log/fcsupport.log',
   },
   chromeWebSecurity: false,
   videoUploadOnPasses: false,

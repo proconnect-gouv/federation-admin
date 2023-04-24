@@ -11,17 +11,17 @@
   variables:
     GIT_STRATEGY: none
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_CERTDIR: ''
     RELEASE_VERSION: ${CI_COMMIT_REF_NAME}
   services:
     - name: docker:19.03.12-dind
-      command: ["--experimental"]
+      command: ['--experimental']
   before_script:
     - echo "$INFRA_REGISTRY_PASS" | docker login $INFRA_REGISTRY --username $INFRA_REGISTRY_USER --password-stdin
-    - rm -rf $FC_ROOT/fc-docker
-    - git clone -b $FC_DOCKER_VERSION --single-branch https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc-docker.git $FC_ROOT/fc-docker
+    - rm -rf $FC_ROOT/fc
+    - git clone -b $FC_DOCKER_VERSION --single-branch https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc.git $FC_ROOT/fc
   script:
-    - cd $FC_ROOT/fc-docker
+    - cd $FC_ROOT/fc/docker
     - ./build.sh $APP $RELEASE_VERSION
     - echo -e "\e[1;34m$MSG $RELEASE_VERSION\e[0m"
 
@@ -37,13 +37,13 @@
   variables:
     GIT_STRATEGY: none
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_CERTDIR: ''
     PATCH_VERSION: 0
     RELEASE_VERSION: $CI_COMMIT_REF_NAME
     DOCKER_CLI_EXPERIMENTAL: enabled
   services:
     - name: docker:19.03.12-dind
-      command: ["--experimental"]
+      command: ['--experimental']
   before_script:
     - echo "$INFRA_REGISTRY_PASS" | docker login $INFRA_REGISTRY --username $INFRA_REGISTRY_USER --password-stdin
     - PROD_RELEASE_VERSION=${RELEASE_VERSION::-3}.${PATCH_VERSION}
