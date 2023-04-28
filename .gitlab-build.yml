@@ -18,10 +18,10 @@
       command: ['--experimental']
   before_script:
     - echo "$INFRA_REGISTRY_PASS" | docker login $INFRA_REGISTRY --username $INFRA_REGISTRY_USER --password-stdin
-    - rm -rf $FC_ROOT/fc
-    - git clone -b $FC_DOCKER_VERSION --single-branch https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc.git $FC_ROOT/fc
+    - rm -rf $FC_ROOT/fc-docker
+    - git clone -b $FC_DOCKER_VERSION --single-branch https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.dev-franceconnect.fr/france-connect/fc-docker.git $FC_ROOT/fc-docker
   script:
-    - cd $FC_ROOT/fc/docker
+    - cd $FC_ROOT/fc-docker
     - ./build.sh $APP $RELEASE_VERSION
     - echo -e "\e[1;34m$MSG $RELEASE_VERSION\e[0m"
 
