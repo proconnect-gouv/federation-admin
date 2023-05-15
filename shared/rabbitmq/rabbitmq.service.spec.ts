@@ -55,6 +55,7 @@ describe('RabbitmqService', () => {
     configMock.get.mockReturnValue({
       payloadEncoding: 'base64',
       requestTimeout: 200,
+      useHsm: true,
     });
     rxjsTimeoutMock.mockReturnValue(timeoutReturnMock);
   });
@@ -66,6 +67,16 @@ describe('RabbitmqService', () => {
       // Then
       expect(brokerMock.connect).toHaveBeenCalledTimes(1);
     });
+
+    it('should not connect to broker if instance is not CL', async () => {
+      // given
+      configMock.get.mockReturnValue({ useHsm: false });
+
+      // When
+      await service.onModuleInit();
+      // Then
+      expect(brokerMock.connect).not.toHaveBeenCalled();
+    });
   });
 
   describe('onModuleClose', () => {
@@ -74,6 +85,16 @@ describe('RabbitmqService', () => {
       service.onModuleDestroy();
       // Then
       expect(brokerMock.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not close connection to broker if instance is not CL', () => {
+      // given
+      configMock.get.mockReturnValue({ useHsm: false });
+
+      // When
+      service.onModuleDestroy();
+      // Then
+      expect(brokerMock.close).not.toHaveBeenCalled();
     });
   });
 

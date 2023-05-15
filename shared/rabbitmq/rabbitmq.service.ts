@@ -2,6 +2,7 @@ import { ConfigService } from 'nestjs-config';
 import { timeout } from 'rxjs/operators';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { InstanceService } from '@fc/shared/utils';
 import { RabbitmqFailureException } from './rabbitmq.failure.exception';
 
 @Injectable()
@@ -12,11 +13,19 @@ export class RabbitmqService {
   ) {}
 
   async onModuleInit() {
-    await this.broker.connect();
+    const { useHsm } = this.config.get('cryptography-broker');
+
+    if (useHsm) {
+      await this.broker.connect();
+    }
   }
 
   onModuleDestroy() {
-    this.broker.close();
+    const { useHsm } = this.config.get('cryptography-broker');
+
+    if (useHsm) {
+      this.broker.close();
+    }
   }
 
   async publish(command: string, payload): Promise<string> {
