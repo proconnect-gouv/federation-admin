@@ -11,17 +11,18 @@ export class UserPreferencesService {
   constructor(
     private readonly config: ConfigService,
     @Inject('preferences-broker') private readonly broker: ClientProxy,
-    private readonly instanceService: InstanceService,
   ) {}
 
   async onModuleInit() {
-    if (this.instanceService.isCl()) {
+    const { enabled } = this.config.get('preferences-broker');
+    if (enabled) {
       await this.broker.connect();
     }
   }
 
   onModuleDestroy() {
-    if (this.instanceService.isCl()) {
+    const { enabled } = this.config.get('preferences-broker');
+    if (enabled) {
       this.broker.close();
     }
   }
