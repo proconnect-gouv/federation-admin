@@ -22,7 +22,13 @@ export class CreateUserDto {
   readonly username: string;
 
   @IsNotEmpty({ message: "L'email doit être renseigné" })
-  @IsEmail({}, { message: "L'email renseigné n'est pas valide" })
+  @IsEmail(
+    {},
+    {
+      message:
+        'Veuillez mettre une adresse email valide ( Ex: email@email.com )',
+    },
+  )
   readonly email: string;
 
   @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
