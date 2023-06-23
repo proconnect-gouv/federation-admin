@@ -228,7 +228,7 @@ describe('Account', () => {
         };
 
         const configuration = Object.assign({}, basicConfiguration, {
-          totpNotFilled: true,
+          totpNotFilled: false,
         });
 
         createUserAccount(userInfo, configuration);
