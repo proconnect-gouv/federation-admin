@@ -13,7 +13,8 @@
     "test:e2e:stats": "cypress run -P fc-stats"
   },
   "resolutions": {
-    "cookie-signature": "1.1.0"
+    "cookie-signature": "1.1.0",
+    "deasync": "0.1.28"
   },
   "repository": {
     "type": "git",
