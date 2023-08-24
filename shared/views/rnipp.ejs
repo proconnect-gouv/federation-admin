@@ -24,7 +24,7 @@
               </button>
               <%=message%><br>
               <% if (locals.rawResponse) { %>
-              <%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippCode, rnippRawResponse: rawResponse}); -%>
+              <%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippCode, rnippRawResponse: rawResponse, index: 0}); -%>
               <% } %>
             </div>
           <% } %>
@@ -62,7 +62,7 @@
                       name="gender"
                       value="female"
                       required
-                      <% if(locals.person && locals.person.requestedIdentity.gender === 'female'){ %> checked <%} %>
+                      <% if(locals.requestedIdentity && locals.requestedIdentity.gender === 'female'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="female">Féminin</label>
                   </div>
@@ -74,7 +74,7 @@
                       name="gender"
                       value="male"
                       required
-                      <% if(locals.person && locals.person.requestedIdentity.gender === 'male'){ %> checked <%} %>
+                      <% if(locals.requestedIdentity && locals.requestedIdentity.gender === 'male'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="male">Masculin</label>
                     <div class="invalid-feedback" style="margin: 0.15rem 0 0 1rem">
@@ -90,7 +90,7 @@
                     class="form-control"
                     id="family-name"
                     name="familyName"
-                    value="<%= (locals.person && locals.person.requestedIdentity.familyName) ? locals.person.requestedIdentity.familyName : '' %>"
+                    value="<%= (locals.requestedIdentity && locals.requestedIdentity.familyName) ? locals.requestedIdentity.familyName : '' %>"
                     pattern="<%= VALID_INPUT_STRING_REGEX %>"
                     required
                   >
@@ -105,7 +105,7 @@
                     class="form-control"
                     id="preferred-username"
                     name="preferredUsername"
-                    value="<%= (locals.person && locals.person.requestedIdentity.preferredUsername) ? locals.person.requestedIdentity.preferredUsername : '' %>"
+                    value="<%= (locals.requestedIdentity && locals.requestedIdentity.preferredUsername) ? locals.requestedIdentity.preferredUsername : '' %>"
                     pattern="<%= VALID_INPUT_STRING_REGEX %>"
                   >
                   <div class="invalid-feedback">
@@ -120,7 +120,7 @@
                     id="given-name"
                     name="givenName"
                     placeholder="exemple : Jean Michel Pierre Marie"
-                    value="<%= (locals.person && locals.person.requestedIdentity.givenName) ? locals.person.requestedIdentity.givenName : '' %>"
+                    value="<%= (locals.requestedIdentity && locals.requestedIdentity.givenName) ? locals.requestedIdentity.givenName : '' %>"
                     pattern="<%= VALID_INPUT_STRING_REGEX %>"
                     required
                   >
@@ -137,7 +137,7 @@
                       id="birthdate"
                       name="birthdate"
                       placeholder="exemple : 1987-02-21"
-                      value="<%= (locals.person && locals.person.requestedIdentity.birthdate) ? locals.person.requestedIdentity.birthdate : '' %>"
+                      value="<%= (locals.requestedIdentity && locals.requestedIdentity.birthdate) ? locals.requestedIdentity.birthdate : '' %>"
                       required
                       autocomplete="off"
                       pattern="^\d{4}-\d{2}-\d{2}$"
@@ -158,7 +158,7 @@
                       name="isFrench"
                       value="true"
                       required
-                      <% if (!locals.person || locals.person.requestedIdentity.birthCountry === '99100'){ %> checked <%} %>
+                      <% if (!locals.requestedIdentity || (locals.requestedIdentity && locals.requestedIdentity.birthCountry === '99100')){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="french">Oui</label>
                   </div>
@@ -170,28 +170,28 @@
                       name="isFrench"
                       value="false"
                       required
-                      <% if (locals.person && locals.person.requestedIdentity.birthCountry !== '99100'){ %> checked <%} %>
+                      <% if (locals.requestedIdentity && locals.requestedIdentity.birthCountry !== '99100'){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="no-french">Non</label>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="cog" class="control-label">Code lieu de naissance (commune ou pays)</label>
+                  <label for="birthLocation" class="control-label">Code lieu de naissance (commune ou pays)</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="cog"
-                    name="cog"
+                    id="birthLocation"
+                    name="birthLocation"
                     placeholder="exemple : 92012 pour Boulogne-Billancourt"
-                    value="<%= locals.person
-                      ? locals.person.requestedIdentity.birthPlace || locals.person.requestedIdentity.birthCountry
+                    value="<%= locals.requestedIdentity && locals.requestedIdentity.birthLocation
+                      ? locals.requestedIdentity.birthLocation
                       : '' %>"
-                    pattern="^(?:2[AB]|[0-9]{2})[0-9]{3}$"
-                    title="Vous devez renseigner 5 chiffres ou 2, A ou B, et 3 chiffres pour les identités corses"
+                    pattern="^(?:(?:2[AB]|[0-9]{2})[0-9]{3}|[\p{Letter} -._]+)$"
+                    title="Veuillez renseigner le COG ou le nom du pays / de la commune du lieu de naissance"
                     required
                   >
                   <div class="invalid-feedback">
-                    Veuillez renseigner le COG du lieu de naissance
+                    Veuillez renseigner le COG ou le nom du pays / de la commune du lieu de naissance
                   </div>
                 </div>
                 <div class="form-group text-center">
@@ -202,92 +202,20 @@
             <input type="hidden" name="_csrf" value="<%= locals.csrfToken  %>">
           </form>
         </div>
-        <div id="result" class="col-md-6 col-sm-12" >
-          <% if (locals.person && locals.person.rectifiedIdentity) { %>
-            <h3>Résultat du redressement RNIPP</h3>
-            <% if (locals.person && locals.person.dead) { %>
-              <div id="dead" class="alert alert-dark" role="alert">
-                <% if (locals.person.rectifiedIdentity.gender === 'female') { %>
-                <p>L'utilisatrice est déclarée décédée. Aucune autre information n'est disponible.</p>
-                <% } else { %>
-                  <p>L'utilisateur est déclaré décédé. Aucune autre information n'est disponible.</p>
-                <% } %>
-              </div>
-            <% } %>
-            <div class="card my-3">
-              <div class="card-body">
-                <div class="mb-2">
-                  <div class="label">Numéro de ticket support</div>
-                  <div class="font-weight-bold">
-                    <%= locals.supportId || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">Genre</div>
-                  <% if (locals.person.rectifiedIdentity.gender === 'male') { %>
-                    <div class="font-weight-bold">
-                      Masculin
-                    </div>
-                  <% } %>
-                  <% if (locals.person.rectifiedIdentity.gender === 'female') { %>
-                    <div class="font-weight-bold">
-                      Féminin
-                    </div>
-                  <% } %>
-                </div>
-                <div class="mb-2">
-                  <div class="label">Nom</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.familyName || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">Nom d'usage</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.preferredUsername || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">Prénoms</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.givenName || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">Date de naissance</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.birthdate || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">COG du lieu de naissance</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.birthPlace || '' %>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <div class="label">COG du pays de naissance</div>
-                  <div class="font-weight-bold">
-                    <%= locals.person.rectifiedIdentity.birthCountry || '' %>
-                  </div>
-                </div>
-                <hr/>
-                <div class="mb-2">
-                  <%- include('partials/rnippRawResponse.ejs', {rnippCode: rnippResponse.code, rnippRawResponse: rnippResponse.raw}); -%>
-                </div>
-              </div>
-            </div>
-          <% } %>
-        </div>
+        <% if (locals.searchResults) { %>
+          <%- include('partials/rnipp-search/results.ejs') -%>
+        <% } %>
       </div>
     </div>
     <%/** Make RNIPP response data easily available for ajax requests (fc-exploitation) */%>
-    <% if (locals.person) { %>
+    <% if (locals.searchResults) { %>
     <script type="text/javascript">
-      const __RNIPP_DATA__ = <%- locals.person.rectifiedIdentity ? JSON.stringify(locals.person.rectifiedIdentity) : 'undefined' %>;
+      const __RNIPP_DATA_RESULTS__ = <%- locals.searchResults
+        ? JSON.stringify( locals.searchResults)
+        : 'undefined';
+        %>
       const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
       const __APP_NAME__ = "<%= locals.appName %>"
-      const __SHOW_IDP_SETTINGS__ = "<%= locals.instanceService.isCl() %>"
     </script>
     <% } %>
   </section>

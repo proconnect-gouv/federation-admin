@@ -1,19 +1,20 @@
 import { Type } from 'class-transformer';
-import { ValidateNested, IsString, Matches } from 'class-validator';
-import { RnippInformation } from './rnipp-information.dto';
-import { PersonInformation } from './person-information.dto';
+import { IsString, Matches, ValidateNested } from 'class-validator';
+import { PersonGenericDTO } from './person-generic.dto';
+import { RnippResponseDTO } from './rnipp-response.dto';
+import { RectificationRequestDTO } from './rectification-request.dto';
 
 export class PersonFoundDTO {
   @IsString()
   public appName: string;
 
   @ValidateNested()
-  @Type(() => PersonInformation)
-  public person: PersonInformation;
+  @Type(() => PersonGenericDTO)
+  public searchResults: RnippResponseDTO[];
 
   @ValidateNested()
-  @Type(() => RnippInformation)
-  public rnippResponse: RnippInformation;
+  @Type(() => RectificationRequestDTO)
+  public requestedIdentity: RectificationRequestDTO;
 
   @IsString()
   public csrfToken: string;

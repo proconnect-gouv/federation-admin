@@ -12,3 +12,5 @@ export * from './response-from-rnipp.interface';
 export * from './rnipp-data.interface';
 export * from './rnipp-information.interface';
 export * from './rnipp-options.interface';
+export * from './insee-country-db.interface';
+export * from './insee-city-db.interface';

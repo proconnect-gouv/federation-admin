@@ -1,7 +1,11 @@
 import $ from 'jquery';
 import moment from 'moment';
-import { confirmDialogWithTotp } from './modals/confirm-dialog';
 import { lazyInit } from './lazy-init';
+import { confirmDialogWithTotp } from './modals/confirm-dialog';
+
+let INDEX = 0;
+let CITIZEN_STATUS_TARGET = '#citizen-status';
+let CITIZEN_IDP_PREFERENCE_TARGET = '#citizen-idp-preferences';
 
 const API = {
   checkUser: `${window.APP_ROOT || ''}/citizen`,
@@ -11,15 +15,15 @@ const API = {
 
 const ajaxCalls = {
   citizenStatus: {
-    target: '#citizen-status',
-    done: updateUISuccess,
-    fail: updateUIError.bind(null, '#citizen-status'),
+    target: CITIZEN_STATUS_TARGET,
+    done: updateUISuccessPost,
+    fail: updateUIError.bind(null, CITIZEN_STATUS_TARGET),
     always: initUIActiveButton,
   },
   idpPreferences: {
-    target: '#citizen-idp-preferences',
-    done: updateUIPreferences,
-    fail: updateUIError.bind(null, '#citizen-idp-preferences'),
+    target: CITIZEN_IDP_PREFERENCE_TARGET,
+    done: updateUIPreferencesPost,
+    fail: updateUIError.bind(null, CITIZEN_IDP_PREFERENCE_TARGET),
     always: (...args) => {
       createUserIdpList(...args);
       createFuturesIdpPreferences(...args);
@@ -38,27 +42,7 @@ function reloadSearch(element) {
 function toggleCitizenActive(element) {
   const elmId = element.getAttribute('data-element-id');
   const elmAction = element.getAttribute('data-element-action');
-
-  element.addEventListener(
-    'submit',
-    function(event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      confirmDialogWithTotp(`${elmAction}`, (confirm, totp) => {
-        if (confirm) {
-          $(`#delete-${elmId} input[name="_totp"]`).val(totp);
-          postAjaxForm($(`#delete-${elmId}`), ajaxCalls.citizenStatus);
-        }
-      });
-    },
-    false,
-  );
-}
-
-function toogleIdpPreferences(element) {
-  const elmId = element.getAttribute('data-element-id');
-  const elmAction = element.getAttribute('data-element-action');
+  const elmIndex = element.getAttribute('data-element-index');
 
   element.addEventListener(
     'submit',
@@ -69,7 +53,7 @@ function toogleIdpPreferences(element) {
       confirmDialogWithTotp(`${elmAction}`, (confirm, totp) => {
         if (confirm) {
           $(`#${elmId} input[name="_totp"]`).val(totp);
-          postAjaxForm($(`#${elmId}`), ajaxCalls.idpPreferences);
+          postAjaxForm($(`#${elmId}`), elmIndex, ajaxCalls.citizenStatus);
         }
       });
     },
@@ -77,13 +61,35 @@ function toogleIdpPreferences(element) {
   );
 }
 
-function checkUser(httpOptions, callback = () => {}) {
+function toggleIdpPreferences(element) {
+  const elmId = element.getAttribute('data-element-id');
+  const elmAction = element.getAttribute('data-element-action');
+  const elmIndex = element.getAttribute('data-element-index');
+
+  element.addEventListener(
+    'submit',
+    function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      confirmDialogWithTotp(`${elmAction}`, (confirm, totp) => {
+        if (confirm) {
+          $(`#${elmId} input[name="_totp"]`).val(totp);
+          postAjaxForm($(`#${elmId}`), elmIndex, ajaxCalls.idpPreferences);
+        }
+      });
+    },
+    false,
+  );
+}
+
+function checkUser(httpOptions, index, callback = () => {}) {
   $.ajax(API.checkUser, httpOptions)
     .done((...args) => {
-      updateUISuccess(...args);
-      updateUIPreferences(...args);
+      updateUISuccess(index, ...args);
+      updateUIPreferencesInit(index, ...args);
     })
-    .fail(updateUIError.bind(null, '#citizen-status'))
+    .fail(updateUIError.bind(null, `${CITIZEN_STATUS_TARGET}-${index}`))
     .always(callback);
 }
 
@@ -98,6 +104,7 @@ function updateUIError(target, data) {
 }
 
 function createUserIdpList(list) {
+  console.log('createUserIdpList', { list });
   let li = '';
   let myList;
 
@@ -123,21 +130,22 @@ function createUserIdpList(list) {
       birthPlace,
       birthCountry,
       gender,
-    } = __RNIPP_DATA__;
+    } = __RNIPP_DATA_RESULTS__[INDEX].person.rectifiedIdentity;
 
     const action = idp.isChecked === false ? 'Autoriser' : 'Bloquer';
 
     li += `
       <li class="pad-15 marg-15" data-testid="${idp.name}">
           <form name="idpPreferencesForm${idp.uid}"
-          method="POST" id="idpPreferencesToogle-${idp.uid}"
+          method="POST" id="idpPreferencesToogle-${idp.uid}-${INDEX}"
             class="d-flex align-items-center"
             action="${API.setPreferences}?_method=PATCH"
-            data-init="toogleIdpPreferences"
+            data-element-index="${INDEX}"
+            data-init="toggleIdpPreferences"
             data-element-type="l'accès à FranceConnect pour cet usager"
             data-element-title="${givenName} ${familyName}" data-element-id="idpPreferencesToogle-${
       idp.uid
-    }"
+    }-${INDEX}"
             data-element-action="Voulez vous ${action.toLowerCase()} ${
       idp.title
     } ?"
@@ -152,7 +160,7 @@ function createUserIdpList(list) {
             <input type="hidden" name="birthdate" value="${birthdate}" />
             <input type="hidden" name="isFrench" value="${birthCountry ===
               '99100'}" />
-            <input type="hidden" name="cog" value="${birthPlace ||
+            <input type="hidden" name="birthLocation" value="${birthPlace ||
               birthCountry}" />
             <input type="hidden" name="gender" value="${gender}" />
             <input type="hidden" name="supportId" value="${__SUPPORT_ID__}" />
@@ -173,6 +181,7 @@ function createUserIdpList(list) {
 }
 
 function createFuturesIdpPreferences(allowFutureIdp) {
+  console.log('createFuturesIdpPreferences', { allowFutureIdp });
   const futurIdpBadge = allowFutureIdp
     ? 'label-idp-preferences-success'
     : 'label-idp-preferences-danger';
@@ -190,15 +199,16 @@ function createFuturesIdpPreferences(allowFutureIdp) {
     birthPlace,
     birthCountry,
     gender,
-  } = __RNIPP_DATA__;
+  } = __RNIPP_DATA_RESULTS__[INDEX].person.rectifiedIdentity;
 
   return `
-    <form name="allowFutureIdpToogleForm" method="POST" id="allowFutureIdpToogle"
+    <form name="allowFutureIdpToogleForm" method="POST" id="allowFutureIdpToogle-${INDEX}"
       class="d-flex align-items-center"
       action="${API.setFuturIdp}?_method=PATCH"
-      data-init="toogleIdpPreferences"
+      data-init="toggleIdpPreferences"
+      data-element-index="${INDEX}"
       data-element-type="l'accès à FranceConnect pour cet usager"
-      data-element-title="${givenName} ${familyName}" data-element-id="allowFutureIdpToogle"
+      data-element-title="${givenName} ${familyName}" data-element-id="allowFutureIdpToogle-${INDEX}"
       data-element-action="Voulez vous ${action.toLowerCase()} les Futurs fournisseurs d'identités ?"
       novalidate>
       <b>Les futurs fournisseurs d'identité sont : </b><span data-testid="future-idp-status-label" class="${futurIdpBadge}">${futurIdpLabel}</span>
@@ -209,7 +219,8 @@ function createFuturesIdpPreferences(allowFutureIdp) {
       <input type="hidden" name="birthdate" value="${birthdate}" />
       <input type="hidden" name="isFrench" value="${birthCountry ===
         '99100'}" />
-      <input type="hidden" name="cog" value="${birthPlace || birthCountry}" />
+      <input type="hidden" name="birthLocation" value="${birthPlace ||
+        birthCountry}" />
       <input type="hidden" name="gender" value="${gender}" />
       <input type="hidden" name="supportId" value="${__SUPPORT_ID__}" />
       <input type="hidden" name="_csrf" value="${getCSRFToken()}">
@@ -224,7 +235,18 @@ function createFuturesIdpPreferences(allowFutureIdp) {
   `;
 }
 
-function updateUIPreferences(data) {
+function updateUIPreferencesPost(data) {
+  console.log('updateUIPreferencesPost', { data, INDEX });
+  updateUIPreferences(INDEX, data);
+}
+
+function updateUIPreferencesInit(index, data) {
+  console.log('updateUIPreferencesInit', { data, index });
+  updateUIPreferences(index, data);
+}
+
+function updateUIPreferences(index, data) {
+  console.log('updateUIPreferences', { data, index });
   let userIdpList;
   let futuresIdpPreferences;
   if (data.havePreferencesSettings && data.userIdpSettings) {
@@ -235,8 +257,8 @@ function updateUIPreferences(data) {
       );
     }
 
-    $('#citizen-idp-preferences').html(`
-      
+    $(`${CITIZEN_IDP_PREFERENCE_TARGET}-${index}`).html(`
+
       ${
         userIdpList
           ? `<p>${futuresIdpPreferences}</p> <ul>${userIdpList}</ul>`
@@ -245,10 +267,23 @@ function updateUIPreferences(data) {
     `);
   }
 
-  lazyInit({ toogleIdpPreferences }, '#citizen-idp-preferences');
+  lazyInit(
+    { toggleIdpPreferences },
+    `${CITIZEN_IDP_PREFERENCE_TARGET}-${index}`,
+  );
 }
 
-function updateUISuccess(data) {
+function updateUISuccessPost(data) {
+  createCitizenStatusUi(INDEX, data);
+}
+
+function updateUISuccess(index, data) {
+  createCitizenStatusUi(index, data);
+
+  INDEX = index;
+}
+
+function createCitizenStatusUi(index, data) {
   const lastConnection = data.lastConnection
     ? `le ${moment(data.lastConnection).format('DD/MM/YYYY à HH:mm:ss')}`
     : 'Jamais';
@@ -258,7 +293,7 @@ function updateUISuccess(data) {
     accountIdHTML = `<li><b>AccountId : </b>${data.accountId}</li>`;
   }
 
-  $('#citizen-status').html(`
+  $(`${CITIZEN_STATUS_TARGET}-${index}`).html(`
     <ul>
       <li><b>Actif :</b> ${
         data.active
@@ -275,8 +310,10 @@ function setLoadingUI(selector) {
   $(selector).html('<div class="spinner"><i></i></div> Chargement...');
 }
 
-function postAjaxForm(form, options) {
-  setLoadingUI(options.target);
+function postAjaxForm(form, index, options) {
+  setLoadingUI(`${options.target}-${index}`);
+
+  INDEX = index;
 
   $.ajax({
     method: 'POST',
@@ -288,47 +325,36 @@ function postAjaxForm(form, options) {
     .always(options.always);
 }
 
-function initUI() {
-  $('#result').append(`
-    <h3>Statut de l'usager</h3>
-    <div id="citizen-status"></div>
-    ${
-      __SHOW_IDP_SETTINGS__ === 'true'
-      ? `<h3>Préférences FI</h3>
-    <div id="citizen-idp-preferences"></div>`
-        : ''
-    }
-  `);
-}
-
 export function checkUserStatus(callback) {
-  if (typeof __RNIPP_DATA__ === 'undefined') {
+  if (typeof __RNIPP_DATA_RESULTS__ === 'undefined') {
     return;
   }
 
-  initUI();
-
   const csrfToken = getCSRFToken();
 
-  const httpOptions = {
-    method: 'POST',
-    data: __RNIPP_DATA__,
-    headers: { 'CSRF-Token': csrfToken },
-  };
+  __RNIPP_DATA_RESULTS__.forEach(({ person: { rectifiedIdentity } }, index) => {
+    const httpOptions = {
+      method: 'POST',
+      data: rectifiedIdentity,
+      headers: { 'CSRF-Token': csrfToken },
+    };
 
-  checkUser(httpOptions, callback);
+    checkUser(httpOptions, index, callback);
+  });
 }
 
 export function initUIActiveButton(data) {
+  console.log('initUIActiveButton', { data, INDEX });
+
   // Errors handling
   if (data.status && data.status !== 404) {
-    $('#citizen-status').html(`
+    $(`${CITIZEN_STATUS_TARGET}-${INDEX}`).html(`
       Une erreur est survenue : ${data.responseText}.
       <br />
       <button class="btn btn-primary" data-init="reloadSearch">Relancer la recherche</button>
     `);
 
-    return lazyInit({ reloadSearch }, '#citizen-status');
+    return lazyInit({ reloadSearch }, `${CITIZEN_STATUS_TARGET}-${INDEX}`);
   }
 
   const action = data.active === false ? 'Activer' : 'Désactiver';
@@ -341,15 +367,16 @@ export function initUIActiveButton(data) {
     birthPlace,
     birthCountry,
     gender,
-  } = __RNIPP_DATA__;
+  } = __RNIPP_DATA_RESULTS__[INDEX].person.rectifiedIdentity;
 
   const html = `
-  <form name="deleteForm" method="POST" id="delete-activationToogle"
+  <form name="deleteForm" method="POST" id="delete-activationToogle-${INDEX}"
     action="${API.checkUser}?_method=PATCH"
     class="d-flex align-items-center"
     data-init="toggleCitizenActive"
+    data-element-index="${INDEX}"
     data-element-type="l'accès à FranceConnect pour cet usager"
-    data-element-title="${givenName} ${familyName}" data-element-id="activationToogle"
+    data-element-title="${givenName} ${familyName}" data-element-id="delete-activationToogle-${INDEX}"
     data-element-action="Voulez vous ${action.toLowerCase()} ${givenName} ${familyName} ?"
     novalidate
   >
@@ -359,7 +386,8 @@ export function initUIActiveButton(data) {
     <input type="hidden" name="givenName" value="${givenName}" />
     <input type="hidden" name="birthdate" value="${birthdate}" />
     <input type="hidden" name="isFrench" value="${birthCountry === '99100'}" />
-    <input type="hidden" name="cog" value="${birthPlace || birthCountry}" />
+    <input type="hidden" name="birthLocation" value="${birthPlace ||
+      birthCountry}" />
     <input type="hidden" name="gender" value="${gender}" />
     <input type="hidden" name="supportId" value="${__SUPPORT_ID__}" />
     <input type="hidden" name="active" value="${
@@ -383,7 +411,7 @@ export function initUIActiveButton(data) {
   </form>
   `;
 
-  $('#citizen-status').append(html);
+  $(`${CITIZEN_STATUS_TARGET}-${INDEX}`).append(html);
 
-  lazyInit({ toggleCitizenActive }, '#citizen-status');
+  lazyInit({ toggleCitizenActive }, `${CITIZEN_STATUS_TARGET}-${INDEX}`);
 }

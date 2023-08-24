@@ -11,6 +11,8 @@ import { IIdentity } from '../../citizen/interfaces/identity.interface';
 import { IOidcIdentity } from '../../citizen/interfaces/oidc-identity.interface';
 import { FRANCE_COG } from '../rnipp-constants';
 
+const BIRTH_LOCATION_REGEX = /^(?:(?:2[AB]|[0-9]{2})[0-9]{3}|[\p{Letter} -._]+)$/u;
+
 export class RectificationRequestDTO {
   @Matches(/^[0-9]{16}$/)
   @IsString()
@@ -42,9 +44,16 @@ export class RectificationRequestDTO {
   @Transform(toBoolean)
   readonly isFrench: boolean;
 
-  @Matches(/^(?:2[AB]|[0-9]{2})[0-9]{3}$/)
+  @Matches(BIRTH_LOCATION_REGEX)
   @IsString()
-  readonly cog: string;
+  @Transform(value =>
+    value
+      .trim() // removes whitespace from both ends
+      .normalize('NFD') // Breaks down accented characters into base characters and diacritics
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .toUpperCase(),
+  )
+  readonly birthLocation: string;
 
   public toIdentity(): IIdentity {
     return {
@@ -53,8 +62,8 @@ export class RectificationRequestDTO {
       preferredUsername: this.preferredUsername,
       givenName: this.givenName,
       birthdate: this.rectifyIfPartialBirthdate(this.birthdate),
-      birthCountry: this.isFrench ? FRANCE_COG : this.cog,
-      birthPlace: this.isFrench ? this.cog : '',
+      birthCountry: this.isFrench ? FRANCE_COG : this.birthLocation,
+      birthPlace: this.isFrench ? this.birthLocation : '',
     };
   }
 
@@ -65,8 +74,8 @@ export class RectificationRequestDTO {
       preferred_username: this.preferredUsername,
       given_name: this.givenName,
       birthdate: this.rectifyIfPartialBirthdate(this.birthdate),
-      birthcountry: this.isFrench ? FRANCE_COG : this.cog,
-      birthplace: this.isFrench ? this.cog : '',
+      birthcountry: this.isFrench ? FRANCE_COG : this.birthLocation,
+      birthplace: this.isFrench ? this.birthLocation : '',
     };
   }
 
