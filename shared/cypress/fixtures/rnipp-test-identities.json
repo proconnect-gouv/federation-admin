@@ -1,11 +1,11 @@
 {
-  "utilisateur_français_actif_à_désactiver": {
+  "utilisateur_japonais_actif_à_désactiver": {
     "gender": "male",
     "familyName": "SAITAMA",
     "givenName": "Makoto",
     "birthdate": "0001-01-01",
     "isFrench": "false",
-    "cog": "99217"
+    "birthLocation": "99217"
   },
   "utilisateur_français_actif": {
     "gender": "male",
@@ -13,7 +13,23 @@
     "givenName": "Chuck",
     "birthdate": "0001-01-01",
     "isFrench": "true",
-    "cog": "00000"
+    "birthLocation": "01006"
+  },
+  "utilisateur_français_actif_homonyme_1": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "Chuck",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "Cormeilles en"
+  },
+  "utilisateur_français_actif_desactive_homonyme_2": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "Chuck",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "Cormeilles en"
   },
   "utilisateur_français_actif_caractère_spéciaux": {
     "gender": "male",
@@ -21,7 +37,7 @@
     "givenName": "François",
     "birthdate": "0001-01-01",
     "isFrench": "true",
-    "cog": "00000"
+    "birthLocation": "01007"
   },
   "utilisateur_français_actif_à_redresser": {
     "gender": "male",
@@ -29,7 +45,7 @@
     "givenName": "Chuck",
     "birthdate": "0001-01-01",
     "isFrench": "true",
-    "cog": "00000"
+    "birthLocation": "01006"
   },
   "utilisateur_étranger_actif": {
     "gender": "male",
@@ -37,7 +53,7 @@
     "givenName": "Jean",
     "birthdate": "2019-11-15",
     "isFrench": "false",
-    "cog": "99217"
+    "birthLocation": "99217"
   },
   "utilisateur_jamais_connecté": {
     "gender": "male",
@@ -45,7 +61,7 @@
     "givenName": "Jean",
     "birthdate": "2019-10-15",
     "isFrench": "true",
-    "cog": "75007"
+    "birthLocation": "75107"
   },
   "utilisateur_étranger_désactivé_jamais_connecté": {
     "gender": "male",
@@ -53,7 +69,7 @@
     "givenName": "Jean",
     "birthdate": "2019-11-15",
     "isFrench": "false",
-    "cog": "99217"
+    "birthLocation": "99217"
   },
   "utilisateur_dont_on_ne_connaît_pas_le_mois_et_le_jour_de_naissance": {
     "gender": "male",
@@ -61,7 +77,7 @@
     "givenName": "Jean",
     "birthdate": "1992-00-00",
     "isFrench": "false",
-    "cog": "99217"
+    "birthLocation": "99217"
   },
   "utilisateur_dont_on_ne_connaît_pas_le_jour_de_naissance": {
     "gender": "male",
@@ -69,7 +85,7 @@
     "givenName": "Jean",
     "birthdate": "1992-11-00",
     "isFrench": "false",
-    "cog": "99217"
+    "birthLocation": "99217"
   },
   "utilisateur_masculin_décédé": {
     "gender": "male",
@@ -77,7 +93,7 @@
     "givenName": "E010015",
     "birthdate": "1925-12-23",
     "isFrench": "true",
-    "cog": "76216"
+    "birthLocation": "76216"
   },
   "utilisateur_féminin_décédée": {
     "gender": "female",
@@ -85,7 +101,7 @@
     "givenName": "E010016",
     "birthdate": "1927-07-13",
     "isFrench": "false",
-    "cog": "06000"
+    "birthLocation": "99139"
   },
   "utilisateur_divergent": {
     "gender": "male",
@@ -93,7 +109,7 @@
     "givenName": "E010008",
     "birthdate": "0001-01-01",
     "isFrench": "true",
-    "cog": "00000"
+    "birthLocation": "Ambleon"
   },
   "utilisateur_mauvais_format": {
     "gender": "male",
@@ -101,7 +117,7 @@
     "givenName": "E010012",
     "birthdate": "0001-01-01",
     "isFrench": "true",
-    "cog": "00000"
+    "birthLocation": "Ambleon"
   },
   "utilisateur_corse": {
     "gender": "male",
@@ -109,7 +125,7 @@
     "givenName": "CLEMENT",
     "birthdate": "1991-02-12",
     "isFrench": "true",
-    "cog": "2A115"
+    "birthLocation": "2A115"
   },
   "TRACE_USER": {
     "gender": "male",
@@ -117,6 +133,6 @@
     "givenName": "utilisateur traces",
     "birthdate": "1985-01-01",
     "isFrench": "true",
-    "cog": "75107"
+    "birthLocation": "75107"
   }
 }

@@ -1,27 +1,27 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
   Render,
-  Body,
+  Req,
   UsePipes,
   ValidationPipe,
-  Req,
 } from '@nestjs/common';
 import { ConfigService } from 'nestjs-config';
 
-import * as beautify from 'xml-beautifier';
 import { Roles } from '@fc/shared/authentication/decorator/roles.decorator';
-import { UserRole } from '@fc/shared/user/roles.enum';
-import { RnippService } from './rnipp.service';
-import { ErrorControllerInterface } from './interface/error-controller.interface';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
-import { RectificationRequestDTO } from './dto/rectification-request.dto';
-import { PersonFoundDTO } from './dto/person-found-output.dto';
-import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { LoggerService } from '@fc/shared/logger/logger.service';
 import { RnippActions, RnippStates } from '@fc/shared/rnipp/rnipp-actions.enum';
 import { IRnippTrack } from '@fc/shared/rnipp/rnipp-track.interface';
+import { UserRole } from '@fc/shared/user/roles.enum';
+import * as beautify from 'xml-beautifier';
+import { PersonFoundDTO } from './dto/person-found-output.dto';
+import { RectificationRequestDTO } from './dto/rectification-request.dto';
+import { ErrorControllerInterface } from './interface/error-controller.interface';
+import { RnippService } from './rnipp.service';
+import { IResponseFromRnipp } from './interface';
 
 @Controller()
 export class RnippController {
@@ -62,33 +62,49 @@ export class RnippController {
       reason: `ticket support : ${rectificationRequest.supportId}`,
     });
 
-    const requestedIdentity = rectificationRequest.toIdentity();
-    let responseRNIPP: IResponseFromRnipp;
+    const requestedIdentities = await this.rnippService.buildIdentitiestoRectify(
+      rectificationRequest,
+    );
+
+    let responseRNIPPArray: IResponseFromRnipp[];
     try {
-      responseRNIPP = await this.rnippService.requestIdentityRectification(
-        requestedIdentity,
+      const responseRNIPPromises = requestedIdentities.map(
+        async requestedIdentity => {
+          return this.rnippService.requestIdentityRectification(
+            requestedIdentity,
+          );
+        },
       );
 
-      this.track({
-        action: RnippActions.SUPPORT_RNIPP_CALL,
-        state: RnippStates.SUCCESS,
-        code: responseRNIPP.rnippCode,
-        user: req.user.username,
-        reason: `ticket support : ${rectificationRequest.supportId}`,
-        identityHash: responseRNIPP.identityHash,
-      });
+      responseRNIPPArray = await Promise.all(responseRNIPPromises);
+      const searchResults = responseRNIPPArray.map(
+        ({
+          rectifiedIdentity,
+          rnippDead,
+          rnippCode,
+          rawResponse,
+          identityHash,
+        }) => {
+          this.track({
+            action: RnippActions.SUPPORT_RNIPP_CALL,
+            state: RnippStates.SUCCESS,
+            code: rnippCode,
+            user: req.user.username,
+            reason: `ticket support : ${rectificationRequest.supportId}`,
+            identityHash,
+          });
+
+          return {
+            person: { rectifiedIdentity, dead: rnippDead },
+            rnippResponse: { code: rnippCode, raw: beautify(rawResponse) },
+          };
+        },
+      );
 
       return {
         appName,
-        person: {
-          requestedIdentity,
-          rectifiedIdentity: responseRNIPP.rectifiedIdentity,
-          dead: responseRNIPP.rnippDead,
-        },
-        rnippResponse: {
-          code: responseRNIPP.rnippCode,
-          raw: beautify(responseRNIPP.rawResponse),
-        },
+        searchResults,
+        requestedIdentity: rectificationRequest,
         supportId: rectificationRequest.supportId,
         csrfToken,
       };
@@ -101,13 +117,12 @@ export class RnippController {
         reason: `ticket support : ${rectificationRequest.supportId}`,
         identityHash: error.identityHash,
       });
-      const { rnippDead = false } = responseRNIPP || {};
       return this.handleError(
         appName,
         error,
         rectificationRequest.supportId,
-        requestedIdentity,
-        rnippDead,
+        requestedIdentities,
+        responseRNIPPArray,
         csrfToken,
       );
     }
@@ -117,8 +132,8 @@ export class RnippController {
     appName,
     error: any,
     supportId: string,
-    requestedIdentity: IIdentity,
-    dead: boolean,
+    requestedIdentities: IIdentity[],
+    responseRNIPPArray: IResponseFromRnipp[],
     csrfToken: string,
   ): Promise<ErrorControllerInterface> {
     const {
@@ -138,12 +153,16 @@ export class RnippController {
           message,
         };
 
+    const persons = requestedIdentities.map((rectifiedIdentity, index) => {
+      return {
+        rectifiedIdentity,
+        dead: !!(responseRNIPPArray && responseRNIPPArray[index].rnippDead),
+      };
+    });
+
     return {
       appName,
-      person: {
-        requestedIdentity,
-        dead,
-      },
+      persons,
       supportId,
       csrfToken,
       ...data,

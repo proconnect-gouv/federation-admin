@@ -1,3 +1,6 @@
+import { createReadStream } from 'fs';
+import * as csvParser from 'csv-parser';
+import { cloneDeep } from 'lodash';
 import { Injectable, HttpService } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
@@ -10,9 +13,14 @@ import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { LoggerService } from '@fc/shared/logger/logger.service';
 import { PersonGenericDTO } from './dto/person-generic.dto';
 import { ValidationError, validateSync } from 'class-validator';
+import { RectificationRequestDTO } from './dto';
+import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
 
 @Injectable()
 export class RnippService {
+  cityCSVparsed: InseeCityDBInterface[];
+  countryCSVparsed: InseeCountryDBInterface[];
+
   public constructor(
     @InjectConfig() private readonly config,
     private readonly http: HttpService,
@@ -21,10 +29,26 @@ export class RnippService {
     private readonly logger: LoggerService,
   ) {}
 
+  async onModuleInit() {
+    const { cityCSVPath } = this.config.get('insee-city-database');
+    const { countryCSVPath } = this.config.get('insee-country-database');
+
+    try {
+      this.cityCSVparsed = await this.csvParse(cityCSVPath);
+      this.cityCSVparsed = cloneDeep(this.cityCSVparsed);
+
+      this.countryCSVparsed = await this.csvParse(countryCSVPath);
+      this.countryCSVparsed = cloneDeep(this.countryCSVparsed);
+    } catch (err) {
+      this.logger.error('Error reading the CSV file:', err);
+      return null;
+    }
+  }
+
   public async requestIdentityRectification(
     identityData: IIdentity,
   ): Promise<IResponseFromRnipp | any> {
-    const idpIdentityHash = await this.citizen.getPivotIdentityHash(
+    const idpIdentityHash = this.citizen.getPivotIdentityHash(
       identityData as IPivotIdentity,
     );
 
@@ -91,7 +115,7 @@ export class RnippService {
       throw { errors: failures };
     }
 
-    const rnippIdentityHash = await this.citizen.getPivotIdentityHash(
+    const rnippIdentityHash = this.citizen.getPivotIdentityHash(
       identity as IPivotIdentity,
     );
 
@@ -134,5 +158,101 @@ export class RnippService {
     );
 
     return `${protocol}://${hostname}${baseUrl}&${query}`;
+  }
+
+  async buildIdentitiestoRectify(
+    rectificationRequest: RectificationRequestDTO,
+  ): Promise<IIdentity[]> {
+    const { birthLocation, isFrench } = rectificationRequest;
+
+    const cogByLocationNameList = await this.findCogByLocationName(
+      birthLocation,
+      isFrench,
+    );
+
+    const identitiesToRectify: IIdentity[] = [];
+    cogByLocationNameList.forEach(({ cog }) => {
+      const rectificationRequestCopy = cloneDeep(rectificationRequest);
+      rectificationRequestCopy.birthLocation = cog;
+
+      identitiesToRectify.push(
+        rectificationRequestCopy.toIdentity() as IIdentity,
+      );
+    });
+
+    return identitiesToRectify;
+  }
+
+  private async findCogByLocationName(
+    birthLocation: string,
+    isFrench: boolean,
+  ): Promise<InseeCityDBInterface[] | InseeCountryDBInterface[]> {
+    const {
+      limit: limitCityDisplaying,
+      fieldsToSearch: fieldsToSearchInCity,
+    } = this.config.get('insee-city-database');
+    const {
+      limit: limitCountryDisplaying,
+      fieldsToSearch: fieldsToSearchInCountry,
+    } = this.config.get('insee-country-database');
+
+    let data = [];
+    const searchType = isFrench ? 'commune' : 'pays';
+    const limit = isFrench ? limitCityDisplaying : limitCountryDisplaying;
+
+    if (isFrench) {
+      data = await this.findAllCog(
+        this.cityCSVparsed,
+        birthLocation,
+        fieldsToSearchInCity,
+      );
+    } else {
+      data = await this.findAllCog(
+        this.countryCSVparsed,
+        birthLocation,
+        fieldsToSearchInCountry,
+      );
+    }
+
+    this.logger.log({
+      searchType,
+      birthLocation,
+      totalFound: data.length,
+    });
+
+    return data.slice(0, limit);
+  }
+
+  private async csvParse(csvFilePath: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const results = [];
+
+      // Read the CSV file and parse it
+      createReadStream(csvFilePath)
+        .pipe(csvParser())
+        .on('data', row => {
+          results.push(row);
+        })
+        .on('end', () => {
+          resolve(results);
+        })
+        .on('error', err => {
+          reject(err);
+        });
+    });
+  }
+
+  private async findAllCog(
+    data: any[],
+    searchTerm: string,
+    fieldsToSearch: string[],
+  ): Promise<InseeCityDBInterface[] | InseeCountryDBInterface[]> {
+    const matchingObjects = data.filter(item => {
+      return fieldsToSearch.some(
+        key => item[key] && item[key].toString().includes(searchTerm),
+      );
+    });
+
+    return matchingObjects;
   }
 }

@@ -6,7 +6,7 @@ export interface ErrorControllerInterface<T = any> {
   statusCode?: number;
   rnippCode?: string;
   csrfToken: string;
-  person: PersonInformation;
+  persons: PersonInformation[];
   message: string | string[];
   supportId: string;
 }

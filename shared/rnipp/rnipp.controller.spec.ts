@@ -1,19 +1,20 @@
+import { LoggerService } from '@fc/shared/logger/logger.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from 'nestjs-config';
+import { formattedXml, rawXml } from '../fixtures/xmlMockedString';
+import { PersonFoundDTO } from './dto/person-found-output.dto';
+import { RectificationRequestDTO } from './dto/rectification-request.dto';
+import { ErrorControllerInterface } from './interface/error-controller.interface';
+import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { RnippController } from './rnipp.controller';
 import { RnippService } from './rnipp.service';
-import { formattedXml, rawXml } from '../fixtures/xmlMockedString';
-import { RectificationRequestDTO } from './dto/rectification-request.dto';
-import { PersonFoundDTO } from './dto/person-found-output.dto';
-import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
-import { ErrorControllerInterface } from './interface/error-controller.interface';
-import { LoggerService } from '@fc/shared/logger/logger.service';
 
 describe('RnippController', () => {
   let rnippController: RnippController;
 
   const rnippService = {
     requestIdentityRectification: jest.fn(),
+    buildIdentitiestoRectify: jest.fn(),
   };
 
   const identity = {
@@ -44,7 +45,7 @@ describe('RnippController', () => {
     givenName: 'Pierr',
     birthdate: '1992-03-03',
     isFrench: true,
-    cog: '75107',
+    birthLocation: '75107',
     toIdentity: () => identity,
     toOidc: () => oidcIdentity,
   } as unknown) as RectificationRequestDTO;
@@ -89,7 +90,20 @@ describe('RnippController', () => {
   });
 
   describe('researchRnipp', () => {
-    it('should return an object of person', async () => {
+    const identitiesToRectifyMock = [
+      {
+        gender: 'male',
+        familyName: 'Dupont',
+        preferredUsername: 'Henri',
+        givenName: 'Pierr',
+        birthdate: '1992-03-03',
+        birthPlace: '75107',
+        birthCountry: '99100',
+      },
+    ];
+
+    it('should return an array of object of person and formatted XML from formatted XML', async () => {
+      // Given
       const mockedRnippService: IResponseFromRnipp = {
         rectifiedIdentity: {
           gender: 'male',
@@ -108,170 +122,47 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
-        person: {
-          requestedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
+        searchResults: [
+          {
+            person: {
+              rectifiedIdentity: {
+                gender: 'male',
+                familyName: 'Dupont',
+                preferredUsername: 'Henri',
+                givenName: 'Pierr',
+                birthdate: '1992-03-03',
+                birthPlace: '75107',
+                birthCountry: '99100',
+              },
+              dead: false,
+            },
+            rnippResponse: {
+              code: 2,
+              raw: formattedXml.xmlString,
+            },
           },
-          rectifiedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
-          },
-          dead: false,
-        },
-        rnippResponse: {
-          code: 2,
-          raw: formattedXml.xmlString,
-        },
+        ],
+        requestedIdentity: rectificationRequest,
         supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
       };
 
+      rnippService.buildIdentitiestoRectify.mockResolvedValue(
+        identitiesToRectifyMock,
+      );
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
 
       configServiceMock.get.mockReturnValueOnce(configMock);
 
+      // When
       const result = await rnippController.researchRnipp(
         rectificationRequest,
         req,
       );
 
-      expect(result).toEqual(expectedResult);
-    });
-
-    it('should return information with formatted XML from formatted XML', async () => {
-      const mockedRnippService: IResponseFromRnipp = {
-        rectifiedIdentity: {
-          gender: 'male',
-          familyName: 'Dupont',
-          preferredUsername: 'Henri',
-          givenName: 'Pierr',
-          birthdate: '1992-03-03',
-          birthPlace: '75107',
-          birthCountry: '99100',
-        },
-        rawResponse: formattedXml.xmlString,
-        rnippCode: 2,
-        rnippDead: false,
-        statusCode: 200,
-      };
-
-      const expectedResult: PersonFoundDTO = {
-        appName: 'FC_EXPLOITATION',
-        person: {
-          requestedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
-          },
-          rectifiedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
-          },
-          dead: false,
-        },
-        rnippResponse: {
-          code: 2,
-          raw: formattedXml.xmlString,
-        },
-        supportId: '1234567891234567',
-        csrfToken: 'mygreatcsrftoken',
-      };
-
-      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
-        return mockedRnippService;
-      });
-
-      configServiceMock.get.mockReturnValueOnce(configMock);
-
-      const result = await rnippController.researchRnipp(
-        rectificationRequest,
-        req,
-      );
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    it('should return information with formatted XML from raw XML', async () => {
-      const mockedRnippService: IResponseFromRnipp = {
-        rectifiedIdentity: {
-          gender: 'male',
-          familyName: 'Dupont',
-          preferredUsername: 'Henri',
-          givenName: 'Pierr',
-          birthdate: '1992-03-03',
-          birthPlace: '75107',
-          birthCountry: '99100',
-        },
-        rawResponse: rawXml.xmlString,
-        rnippCode: 2,
-        rnippDead: false,
-        statusCode: 200,
-      };
-
-      const expectedResult: PersonFoundDTO = {
-        appName: 'FC_EXPLOITATION',
-        person: {
-          dead: false,
-          requestedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
-          },
-          rectifiedIdentity: {
-            gender: 'male',
-            familyName: 'Dupont',
-            preferredUsername: 'Henri',
-            givenName: 'Pierr',
-            birthdate: '1992-03-03',
-            birthPlace: '75107',
-            birthCountry: '99100',
-          },
-        },
-        rnippResponse: {
-          code: 2,
-          raw: formattedXml.xmlString,
-        },
-        supportId: '1234567891234567',
-        csrfToken: 'mygreatcsrftoken',
-      };
-
-      rnippService.requestIdentityRectification.mockImplementationOnce(() => {
-        return mockedRnippService;
-      });
-
-      configServiceMock.get.mockReturnValueOnce(configMock);
-
-      const result = await rnippController.researchRnipp(
-        rectificationRequest,
-        req,
-      );
-
+      // Then
       expect(result).toEqual(expectedResult);
     });
 
@@ -289,18 +180,12 @@ describe('RnippController', () => {
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
         csrfToken: 'mygreatcsrftoken',
-        person: {
-          dead: false,
-          requestedIdentity: {
-            birthCountry: '99100',
-            birthPlace: '75107',
-            birthdate: '1992-03-03',
-            familyName: 'Dupont',
-            gender: 'male',
-            givenName: 'Pierr',
-            preferredUsername: 'Henri',
+        persons: [
+          {
+            rectifiedIdentity: identity,
+            dead: false,
           },
-        },
+        ],
         rawResponse: formattedXml.xmlString,
         rnippCode: '2',
         statusCode: 404,
@@ -308,6 +193,9 @@ describe('RnippController', () => {
         message: "Une erreur s'est produite lors de l'appel au RNIPP.",
       };
 
+      rnippService.buildIdentitiestoRectify.mockResolvedValue(
+        identitiesToRectifyMock,
+      );
       rnippService.requestIdentityRectification.mockRejectedValue(
         mockedRnippService,
       );
@@ -331,10 +219,12 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        person: {
-          requestedIdentity: identity,
-          dead: false,
-        },
+        persons: [
+          {
+            rectifiedIdentity: identity,
+            dead: false,
+          },
+        ],
         rawResponse: 'No Data from rnipp',
         statusCode: 500,
         message: '',
@@ -343,6 +233,9 @@ describe('RnippController', () => {
         rnippCode: '',
       };
 
+      rnippService.buildIdentitiestoRectify.mockResolvedValue(
+        identitiesToRectifyMock,
+      );
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
@@ -366,10 +259,12 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        person: {
-          requestedIdentity: identity,
-          dead: false,
-        },
+        persons: [
+          {
+            rectifiedIdentity: identity,
+            dead: false,
+          },
+        ],
         rawResponse: 'component',
         statusCode: 403,
         message: 'message',
@@ -378,6 +273,9 @@ describe('RnippController', () => {
         rnippCode: '',
       };
 
+      rnippService.buildIdentitiestoRectify.mockResolvedValue(
+        identitiesToRectifyMock,
+      );
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });
@@ -404,10 +302,12 @@ describe('RnippController', () => {
 
       const expectedResult: ErrorControllerInterface = {
         appName: 'FC_EXPLOITATION',
-        person: {
-          requestedIdentity: identity,
-          dead: false,
-        },
+        persons: [
+          {
+            rectifiedIdentity: identity,
+            dead: false,
+          },
+        ],
         supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
         message: [
@@ -418,6 +318,9 @@ describe('RnippController', () => {
         ],
       };
 
+      rnippService.buildIdentitiestoRectify.mockResolvedValue(
+        identitiesToRectifyMock,
+      );
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         throw mockedRnippService;
       });

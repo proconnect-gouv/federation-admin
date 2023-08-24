@@ -33,7 +33,7 @@ describe('Citizen Management', () => {
     cy.url().should('equal', `${BASE_URL}/research`);
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get(
-      '#result > .card > .card-body > div.mb-2 > div.font-weight-bold',
+      '#results-accordion > .card > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
     ).should($divs => {
       // Expect
       expect($divs).to.have.length(8);
@@ -43,19 +43,19 @@ describe('Citizen Management', () => {
       expect($divs.eq(3)).to.contain('');
       expect($divs.eq(4)).to.contain('Chuck');
       expect($divs.eq(5)).to.contain('0001-01-01');
-      expect($divs.eq(6)).to.contain('00000');
+      expect($divs.eq(6)).to.contain('01006');
       expect($divs.eq(7)).to.contain('99100');
     });
 
     cy.formControl({ ...person, familyName: 'NORRIS' });
 
     // Wait for the status to be fetched from database
-    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should(
+    cy.get('#citizen-status-0 ul li:first span', { timeout: 2000 }).should(
       'have.class',
       'badge-success',
     );
     cy.contains('Dernière connexion : le 08/01/2020 à 15:33:26');
-    cy.get('#citizen-status', { timeout: 2000 }).should(
+    cy.get('#citizen-status-0', { timeout: 2000 }).should(
       'not.contain',
       'Identity Hash :',
     );
@@ -77,7 +77,7 @@ describe('Citizen Management', () => {
     cy.url().should('equal', `${BASE_URL}/research`);
     cy.get('#result').contains('Résultat du redressement RNIPP');
     cy.get(
-      '#result > .card > .card-body > div.mb-2 > div.font-weight-bold',
+      '#results-accordion > .card > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
     ).should($divs => {
       // Expect
       expect($divs).to.have.length(8);
@@ -94,12 +94,12 @@ describe('Citizen Management', () => {
     cy.formControl({ ...person });
 
     // Wait for the status to be fetched from database
-    cy.get('#citizen-status ul li:first span', { timeout: 2000 }).should(
+    cy.get('#citizen-status-0 ul li:first span', { timeout: 2000 }).should(
       'have.class',
       'badge-danger',
     );
     cy.contains('Dernière connexion : Jamais');
-    cy.get('#citizen-status', { timeout: 2000 }).should(
+    cy.get('#citizen-status-0', { timeout: 2000 }).should(
       'not.contain',
       'Identity Hash :',
     );
