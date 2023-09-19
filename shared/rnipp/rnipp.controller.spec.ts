@@ -122,6 +122,11 @@ describe('RnippController', () => {
 
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
+        rectifyResponseCodes: {
+          error: 4,
+          found: 2,
+          rectified: 3,
+        },
         searchResults: [
           {
             person: {

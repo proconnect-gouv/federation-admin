@@ -103,14 +103,6 @@
     "isFrench": "false",
     "birthLocation": "99139"
   },
-  "utilisateur_divergent": {
-    "gender": "male",
-    "familyName": "NORRIS",
-    "givenName": "E010008",
-    "birthdate": "0001-01-01",
-    "isFrench": "true",
-    "birthLocation": "Ambleon"
-  },
   "utilisateur_mauvais_format": {
     "gender": "male",
     "familyName": "NORRIS",
@@ -134,5 +126,29 @@
     "birthdate": "1985-01-01",
     "isFrench": "true",
     "birthLocation": "75107"
+  },
+  "utilisateur_divergent": {
+    "gender": "male",
+    "familyName": "MUSTACCHI",
+    "givenName": "multiCogError",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "claville"
+  },
+  "utilisateur_echo": {
+    "gender": "male",
+    "familyName": "MUSTACCHI",
+    "givenName": "multiCogEcho",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "claville"
+  },
+  "utilisateurs_trouve": {
+    "gender": "male",
+    "familyName": "MUSTACCHI",
+    "givenName": "multiCog",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "claville"
   }
 }

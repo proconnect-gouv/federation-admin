@@ -158,7 +158,7 @@
                       name="isFrench"
                       value="true"
                       required
-                      <% if (!locals.requestedIdentity || (locals.requestedIdentity && locals.requestedIdentity.birthCountry === '99100')){ %> checked <%} %>
+                      <% if (!locals.requestedIdentity || (locals.requestedIdentity && locals.requestedIdentity.isFrench)){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="french">Oui</label>
                   </div>
@@ -170,7 +170,7 @@
                       name="isFrench"
                       value="false"
                       required
-                      <% if (locals.requestedIdentity && locals.requestedIdentity.birthCountry !== '99100'){ %> checked <%} %>
+                      <% if (locals.requestedIdentity && !locals.requestedIdentity.isFrench){ %> checked <%} %>
                     >
                     <label class="custom-control-label" for="no-french">Non</label>
                   </div>
@@ -212,9 +212,10 @@
     <script type="text/javascript">
       const __RNIPP_DATA_RESULTS__ = <%- locals.searchResults
         ? JSON.stringify( locals.searchResults)
-        : 'undefined';
+        : 'undefined'
         %>
       const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
+      const __RECTIFY_RESPONSE_CODES__ = <%- JSON.stringify(locals.rectifyResponseCodes) %>
       const __APP_NAME__ = "<%= locals.appName %>"
     </script>
     <% } %>

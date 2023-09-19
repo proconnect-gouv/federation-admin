@@ -22,6 +22,7 @@ import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
 import { RnippService } from './rnipp.service';
 import { IResponseFromRnipp } from './interface';
+import { RNIPP_IDENTITY_RESPONSE_CODES } from './rnipp-constants';
 
 @Controller()
 export class RnippController {
@@ -87,7 +88,12 @@ export class RnippController {
         }) => {
           this.track({
             action: RnippActions.SUPPORT_RNIPP_CALL,
-            state: RnippStates.SUCCESS,
+            state:
+              Number(rnippCode) ===
+              (RNIPP_IDENTITY_RESPONSE_CODES.found ||
+                RNIPP_IDENTITY_RESPONSE_CODES.rectified)
+                ? RnippStates.SUCCESS
+                : RnippStates.ERRORED,
             code: rnippCode,
             user: req.user.username,
             reason: `ticket support : ${rectificationRequest.supportId}`,
@@ -103,6 +109,7 @@ export class RnippController {
 
       return {
         appName,
+        rectifyResponseCodes: RNIPP_IDENTITY_RESPONSE_CODES,
         searchResults,
         requestedIdentity: rectificationRequest,
         supportId: rectificationRequest.supportId,

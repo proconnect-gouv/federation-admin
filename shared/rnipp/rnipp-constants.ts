@@ -23,6 +23,9 @@ export const RNIPP_CODE =
 
 // DATA
 
-export const RNIPP_IDENTITY_NOT_RECTIFIED = '2';
-export const RNIPP_IDENTITY_RECTIFIED = '3';
 export const FRANCE_COG = '99100';
+export const RNIPP_IDENTITY_RESPONSE_CODES = {
+  error: 4,
+  found: 2,
+  rectified: 3,
+};

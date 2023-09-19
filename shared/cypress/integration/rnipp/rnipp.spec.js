@@ -231,6 +231,209 @@ describe('Rnipp rectification', () => {
     cy.formControl({ ...person, familyName: 'NORRIS' });
   });
 
+  it('Should retrieve one thruty result from RNIPP with rnippCode equal to 2 (found)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateurs_trouve'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > .card > .card-header > button > .text-success',
+    ).should($elts => {
+      expect($elts).to.have.length(1);
+      expect($elts.eq(0)).to.contain('2');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
+  it('Should show a thruty userinfo from RNIPP with rnippCode equal to 2 (found)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateurs_trouve'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > #person-0 > .card-header > button > .text-success',
+    ).should($elts => {
+      expect($elts.eq(0)).to.contain('2');
+    });
+    cy.get(
+      '#results-accordion > #person-0 > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
+    ).should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('MUSTACCHI');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('multiCog');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('27161');
+      expect($divs.eq(7)).to.contain('99100');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
+  it('Should retrieve two falsey results from RNIPP with rnippCode equal to 8 (not found)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_divergent'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > .card > .card-header > button > .text-danger',
+    ).should($elts => {
+      expect($elts).to.have.length(2);
+      expect($elts.eq(0)).to.contain('8');
+      expect($elts.eq(1)).to.contain('8');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
+  it('Should show a falsey userinfo from RNIPP with rnippCode equal to 8 (not found)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_divergent'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > #person-0 > .card-header > button > .text-danger',
+    ).should($elts => {
+      expect($elts.eq(0)).to.contain('8');
+    });
+    cy.get(
+      '#results-accordion > #person-0 > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
+    ).should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('MUSTACCHI');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('multiCogError');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('27161');
+      expect($divs.eq(7)).to.contain('99100');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
+  it('Should retrieve two falsey results from RNIPP with rnippCode equal to 4 and 8 (echo)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_echo'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > .card > .card-header > button > .text-danger',
+    ).should($elts => {
+      expect($elts).to.have.length(2);
+      expect($elts.eq(0)).to.contain('4');
+      expect($elts.eq(1)).to.contain('8');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
+  it('Should show a falsey userinfo from RNIPP with rnippCode equal to 4 (echo)', () => {
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_echo'],
+    };
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Should
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').contains('Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > #person-0 > .card-header > button > .text-danger',
+    ).should($elts => {
+      expect($elts.eq(0)).to.contain('4');
+    });
+    cy.get(
+      '#results-accordion > #person-0 > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
+    ).should($divs => {
+      // Expect
+      expect($divs).to.have.length(8);
+      expect($divs.eq(0)).to.contain('1234567891234567');
+      expect($divs.eq(1)).to.contain('Masculin');
+      expect($divs.eq(2)).to.contain('MUSTACCHI');
+      expect($divs.eq(3)).to.contain('');
+      expect($divs.eq(4)).to.contain('multiCogEcho');
+      expect($divs.eq(5)).to.contain('0001-01-01');
+      expect($divs.eq(6)).to.contain('27161');
+      expect($divs.eq(7)).to.contain('99100');
+    });
+
+    cy.formControl({
+      ...person,
+      // @NOTE is uppercased by DTO
+      birthLocation: 'CLAVILLE',
+      familyName: 'MUSTACCHI',
+    });
+  });
+
   describe('Dead people', () => {
     it('Should retrieve userinfo from RNIPP (man who died)', () => {
       const person = {
@@ -416,32 +619,6 @@ describe('Rnipp rectification', () => {
       }).contains('Retour brut du RNIPP');
 
       cy.get('#xml-raw').then(value => hasReturnCarriage(value, 42));
-    });
-
-    it('Should display a formatted XML answer with an incorrect RNIPP answer', () => {
-      // Arrange
-      const person = {
-        supportId: '1234567891234567',
-        ...rnippIdentities['utilisateur_divergent'],
-      };
-
-      // Action
-      cy.formFill(person, configuration);
-      cy.get('form[name="rnipp-form"] button[type="submit"]').click();
-
-      cy.url().should('equal', `${BASE_URL}/research`);
-
-      cy.get('#message').contains(
-        "Une erreur s'est produite lors de l'appel au RNIPP.",
-      );
-      cy.get('#message > div.row > div.col-md-2.text-right > button').click();
-
-      // Assert
-      cy.get('#rnippModal-0 > div > div > div.modal-header > h4', {
-        timeout: 3000,
-      }).contains('Retour brut du RNIPP');
-
-      cy.get('#xml-raw').then(value => hasReturnCarriage(value, 30));
     });
 
     it('Should display an error message if RNIPP failed', () => {

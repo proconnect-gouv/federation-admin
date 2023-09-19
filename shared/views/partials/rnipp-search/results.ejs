@@ -1,11 +1,22 @@
 <div id="result" class="col-md-6 col-sm-12" >
     <h3>Résultat du redressement RNIPP</h3>
-    <div class="scrollbox-container mt-3">
+    <div class="scrollbox-container my-3">
       <div class="scrollbox-wrapper">
         <div class="accordion" id="results-accordion">
+          <%
+          const hasValidIdentity = locals.searchResults
+            .some(({ rnippResponse }) => ~~rnippResponse.code < locals.rectifyResponseCodes.error);
 
-          <% locals.searchResults.map( ({ person, rnippResponse }, index) => { %>
-
+          locals.searchResults
+            .filter(({ rnippResponse }) => {
+              const isValidIdentity = ~~rnippResponse.code < locals.rectifyResponseCodes.error;
+              if (!hasValidIdentity) {
+                return true;
+              }
+              return hasValidIdentity && isValidIdentity;
+            })
+            .forEach( ({ person, rnippResponse }, index) => {
+          %>
           <!-- ACCORDION PERSON CARD-->
           <div id="person-<%= index %>" class="card">
             <!-- card header-->
@@ -31,9 +42,14 @@
               %>
 
               <% if (rnippResponse.code) {
-                const codeColor = rnippResponse.code === '2'
+                let codeColor = ~~rnippResponse.code === locals.rectifyResponseCodes.found
                   ? 'success'
-                  : rnippResponse.code === '3' && 'warning' || 'danger'
+                  : undefined;
+                if (!codeColor) {
+                  codeColor = ~~rnippResponse.code === locals.rectifyResponseCodes.rectified
+                    ? 'warning'
+                    : 'danger';
+                }
                 %>
                 Code RNIPP : <strong class="text-<%= codeColor %>"><%= rnippResponse.code %></strong>&nbsp;-&nbsp;
               <% } %>
