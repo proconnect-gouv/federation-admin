@@ -13,9 +13,8 @@ import {
   BIRTH_PLACE,
   BIRTH_COUNTRY,
   DEAD,
-  RNIPP_IDENTITY_NOT_RECTIFIED,
-  RNIPP_IDENTITY_RECTIFIED,
   FRANCE_COG,
+  RNIPP_IDENTITY_RESPONSE_CODES,
 } from './rnipp-constants';
 
 import { ParsedData } from './interface/parsed-data.interface';
@@ -45,9 +44,10 @@ export class RnippSerializer {
   private parseToJSON(parsedXml: JSON): ParsedData {
     const rnippCode: string = this.getJsonAttribute(parsedXml, RNIPP_CODE);
 
+    const rnippCodeToNumber: number = parseInt(rnippCode, 10);
     if (
-      rnippCode !== RNIPP_IDENTITY_NOT_RECTIFIED &&
-      rnippCode !== RNIPP_IDENTITY_RECTIFIED
+      rnippCodeToNumber !== RNIPP_IDENTITY_RESPONSE_CODES.found &&
+      rnippCodeToNumber !== RNIPP_IDENTITY_RESPONSE_CODES.rectified
     ) {
       return { rnippCode };
     }

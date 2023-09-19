@@ -7,3 +7,4 @@ export * from './person-information.dto';
 export * from './rnipp-information.dto';
 export * from './rectification-request.dto';
 export * from './rnipp-response.dto';
+export * from './rectify-response-codes.dto';

@@ -99,10 +99,15 @@ export class RnippService {
 
     const { identity, rnippCode, dead } = parsedIdentity;
     if (!identity) {
-      throw {
-        ...templateError,
-        message: "Une erreur s'est produite lors de l'appel au RNIPP.",
+      return {
+        rectifiedIdentity: identityData,
+        rnippDead: false,
         rnippCode,
+        rawResponse,
+        statusCode,
+        identityHash: {
+          idp: idpIdentityHash,
+        },
       };
     }
 

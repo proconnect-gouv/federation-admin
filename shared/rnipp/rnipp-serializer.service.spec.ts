@@ -94,6 +94,23 @@ describe('RnippSerializer (e2e)', () => {
       });
     });
 
+    describe('parseToJSON', () => {
+      beforeEach(() => {
+        const rnippCodeMock = '4';
+        rnippSerializer['getJsonAttribute'] = jest
+          .fn()
+          .mockReturnValue(rnippCodeMock);
+      });
+
+      it('should return only the rnippCode only when identity can not be rectified', () => {
+        // when
+        const result = rnippSerializer['parseToJSON'](expect.any(JSON));
+
+        // then
+        expect(result).toStrictEqual({ rnippCode: '4' });
+      });
+    });
+
     describe('XML parser', () => {
       it('should return a json with xml as template (person who in not born in France)', async () => {
         mockedXmlService.parseString.mockImplementation(

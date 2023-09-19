@@ -196,17 +196,17 @@ describe('RnippService (e2e)', () => {
         dead: true,
       };
 
+      jest.spyOn(loggerMock, 'info');
       jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
       jest
         .spyOn(rnippSerializerMock, 'serializeXmlFromRnipp')
         .mockImplementation(() => Promise.resolve(personParsedData));
-      jest.spyOn(loggerMock, 'info');
 
       const person = await rnippService.requestIdentityRectification(
         personParsedData.identity,
       );
 
-      expect(person).toEqual({
+      expect(person).toStrictEqual({
         rectifiedIdentity: personParsedData.identity,
         rnippCode: personParsedData.rnippCode,
         rnippDead: personParsedData.dead,
@@ -215,6 +215,45 @@ describe('RnippService (e2e)', () => {
         identityHash: {
           idp: 'fhsekfeshsfefeefeseshjehkfhefsk',
           rnipp: 'fhsekfeshsfefeefeseshjehkfhefsk',
+        },
+      });
+    });
+
+    it(`should return a falsey userInfo when identity is not found`, async () => {
+      // given
+      const result: AxiosResponse<string> = {
+        data: 'Components',
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {},
+      };
+
+      const personParsedData = {
+        identity: null,
+        rnippCode: '8',
+        dead: expect.any(Boolean),
+      };
+
+      jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+      jest
+        .spyOn(rnippSerializerMock, 'serializeXmlFromRnipp')
+        .mockImplementation(() => Promise.resolve(personParsedData));
+
+      // when
+      const results = await rnippService.requestIdentityRectification(
+        personData,
+      );
+
+      // then
+      expect(results).toStrictEqual({
+        rectifiedIdentity: personData,
+        rnippDead: false,
+        rnippCode: '8',
+        rawResponse: result.data,
+        statusCode: result.status,
+        identityHash: {
+          idp: expect.any(String),
         },
       });
     });
@@ -234,7 +273,7 @@ describe('RnippService (e2e)', () => {
       try {
         await rnippService.requestIdentityRectification(personData);
       } catch (error) {
-        expect(error).toEqual({
+        expect(error).toStrictEqual({
           rawResponse: result.data,
           statusCode: result.status,
           message: result.statusText,
@@ -259,7 +298,7 @@ describe('RnippService (e2e)', () => {
       try {
         await rnippService.requestIdentityRectification(personData);
       } catch (error) {
-        expect(error).toEqual({
+        expect(error).toStrictEqual({
           rawResponse: 'No Data from rnipp',
           statusCode: result.status,
           message: result.statusText,
@@ -284,7 +323,7 @@ describe('RnippService (e2e)', () => {
       try {
         await rnippService.requestIdentityRectification(personData);
       } catch (error) {
-        expect(error).toEqual({
+        expect(error).toStrictEqual({
           rawResponse: 'No Data from rnipp',
           statusCode: result.status,
           message: result.statusText,

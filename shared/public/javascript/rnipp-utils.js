@@ -104,7 +104,6 @@ function updateUIError(target, data) {
 }
 
 function createUserIdpList(list) {
-  console.log('createUserIdpList', { list });
   let li = '';
   let myList;
 
@@ -181,7 +180,6 @@ function createUserIdpList(list) {
 }
 
 function createFuturesIdpPreferences(allowFutureIdp) {
-  console.log('createFuturesIdpPreferences', { allowFutureIdp });
   const futurIdpBadge = allowFutureIdp
     ? 'label-idp-preferences-success'
     : 'label-idp-preferences-danger';
@@ -236,17 +234,14 @@ function createFuturesIdpPreferences(allowFutureIdp) {
 }
 
 function updateUIPreferencesPost(data) {
-  console.log('updateUIPreferencesPost', { data, INDEX });
   updateUIPreferences(INDEX, data);
 }
 
 function updateUIPreferencesInit(index, data) {
-  console.log('updateUIPreferencesInit', { data, index });
   updateUIPreferences(index, data);
 }
 
 function updateUIPreferences(index, data) {
-  console.log('updateUIPreferences', { data, index });
   let userIdpList;
   let futuresIdpPreferences;
   if (data.havePreferencesSettings && data.userIdpSettings) {
@@ -332,20 +327,23 @@ export function checkUserStatus(callback) {
 
   const csrfToken = getCSRFToken();
 
-  __RNIPP_DATA_RESULTS__.forEach(({ person: { rectifiedIdentity } }, index) => {
-    const httpOptions = {
-      method: 'POST',
-      data: rectifiedIdentity,
-      headers: { 'CSRF-Token': csrfToken },
-    };
+  __RNIPP_DATA_RESULTS__.forEach(
+    ({ person: { rectifiedIdentity }, rnippResponse: { code } }, index) => {
+      const httpOptions = {
+        method: 'POST',
+        data: rectifiedIdentity,
+        headers: { 'CSRF-Token': csrfToken },
+      };
 
-    checkUser(httpOptions, index, callback);
-  });
+      const identityFound = ~~code < __RECTIFY_RESPONSE_CODES__.error;
+      if (identityFound) {
+        checkUser(httpOptions, index, callback);
+      }
+    },
+  );
 }
 
 export function initUIActiveButton(data) {
-  console.log('initUIActiveButton', { data, INDEX });
-
   // Errors handling
   if (data.status && data.status !== 404) {
     $(`${CITIZEN_STATUS_TARGET}-${INDEX}`).html(`
