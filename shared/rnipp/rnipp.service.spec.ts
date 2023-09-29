@@ -1,17 +1,20 @@
-import { createReadStream } from 'fs';
-import { Test } from '@nestjs/testing';
-import { HttpService } from '@nestjs/common';
-import { ConfigService } from 'nestjs-config';
-import { RnippService } from './rnipp.service';
-import { of } from 'rxjs';
-import { AxiosResponse } from 'axios';
-import { RnippSerializer } from './rnipp-serializer.service';
+import * as Fuse from 'fuse.js/dist/fuse.common';
+
 import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { LoggerService } from '@fc/shared/logger/logger.service';
-import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
+import { HttpService } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { AxiosResponse } from 'axios';
+import { createReadStream } from 'fs';
+import { ConfigService } from 'nestjs-config';
+import { of } from 'rxjs';
 import { RectificationRequestDTO } from './dto';
+import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
+import { RnippSerializer } from './rnipp-serializer.service';
+import { RnippService } from './rnipp.service';
 
 jest.mock('fs');
+jest.mock('fuse.js');
 
 describe('RnippService (e2e)', () => {
   let rnippService: RnippService;
@@ -347,11 +350,11 @@ describe('RnippService (e2e)', () => {
           fieldsToSearch: ['fieldsToSearchCountry'],
         });
     });
-    it('should return city data found by findAllCog and log technical info', async () => {
+    it('should return city data found by findAllCog', async () => {
       // Given
       rnippService['findAllCog'] = jest
         .fn()
-        .mockResolvedValue(['some city data']);
+        .mockReturnValue(['some city data']);
       rnippService['cityCSVparsed'] = cityData;
 
       // When
@@ -363,20 +366,14 @@ describe('RnippService (e2e)', () => {
         'PARIS',
         ['fieldsToSearchCity'],
       );
-      expect(loggerMock.log).toHaveBeenCalledTimes(1);
-      expect(loggerMock.log).toHaveBeenCalledWith({
-        searchType: 'commune',
-        birthLocation: 'PARIS',
-        totalFound: 1,
-      });
       expect(result).toEqual(['some city data']);
     });
 
-    it('should return country data found by findAllCog and log technical info', async () => {
+    it('should return country data found by findAllCog', async () => {
       // Given
       rnippService['findAllCog'] = jest
         .fn()
-        .mockResolvedValue(['some country data']);
+        .mockReturnValue(['some country data']);
       rnippService['countryCSVparsed'] = countryData;
 
       // When
@@ -391,12 +388,6 @@ describe('RnippService (e2e)', () => {
         'PORTUGAL',
         ['fieldsToSearchCountry'],
       );
-      expect(loggerMock.log).toHaveBeenCalledTimes(1);
-      expect(loggerMock.log).toHaveBeenCalledWith({
-        searchType: 'pays',
-        birthLocation: 'PORTUGAL',
-        totalFound: 1,
-      });
       expect(result).toEqual(['some country data']);
     });
 
@@ -408,7 +399,7 @@ describe('RnippService (e2e)', () => {
       });
       rnippService['findAllCog'] = jest
         .fn()
-        .mockResolvedValue([
+        .mockReturnValue([
           '1st city data',
           '2nd city data',
           '3th city data',
@@ -473,20 +464,37 @@ describe('RnippService (e2e)', () => {
   });
 
   describe('findAllCog', () => {
-    it('should filter and return matching cities name', async () => {
-      // Given
-      const searchTerm = 'PARIS';
-      const fieldsToSearch = ['name', 'cog'];
-      const expected = [
-        {
-          cog: '123',
-          name: 'PARIS',
-          arr: 'arr',
-          abr: 'abr',
-          cp: '75000',
-          specificPlace: '',
-        },
-        {
+    const searchTerm = 'PARIS';
+    const fieldsToSearch = ['name', 'cog'];
+    const dataMock = [
+      {
+        cog: '456',
+        name: 'CORMEILLES EN PARISIS',
+        arr: 'arr',
+        abr: 'abr',
+        cp: '95123',
+        specificPlace: '',
+      },
+      {
+        cog: '123',
+        name: 'PARIS',
+        arr: 'arr',
+        abr: 'abr',
+        cp: '75000',
+        specificPlace: '',
+      },
+      {
+        cog: '938',
+        name: 'ANOTHER ONE BITE THE DUST',
+        arr: 'arr',
+        abr: 'abr',
+        cp: '98696',
+        specificPlace: '',
+      },
+    ];
+    const resultsMock = [
+      {
+        item: {
           cog: '456',
           name: 'CORMEILLES EN PARISIS',
           arr: 'arr',
@@ -494,101 +502,83 @@ describe('RnippService (e2e)', () => {
           cp: '95123',
           specificPlace: '',
         },
-      ];
-
-      // when
-      const result = await rnippService['findAllCog'](
-        cityData,
-        searchTerm,
-        fieldsToSearch,
-      );
-
-      // Then
-      expect(result).toEqual(expected);
-    });
-
-    it('should filter and return matching cities cog', async () => {
-      // Given
-      const searchTerm = '789';
-      const fieldsToSearch = ['name', 'cog'];
-      const expected = [
-        {
-          cog: '789',
-          name: 'COURBEVOIE',
+      },
+      {
+        item: {
+          cog: '123',
+          name: 'PARIS',
           arr: 'arr',
           abr: 'abr',
-          cp: '92123',
+          cp: '75000',
+          specificPlace: '',
+        },
+      },
+    ];
+
+    const searchMock = jest.fn();
+
+    beforeEach(() => {
+      Fuse.mockImplementation(function construct() {
+        return {
+          search: searchMock,
+        };
+      });
+
+      searchMock.mockReturnValue(resultsMock);
+    });
+
+    it('should instantiate fuse', () => {
+      // When
+      rnippService['findAllCog'](dataMock, searchTerm, fieldsToSearch);
+
+      // Then
+      expect(Fuse).toHaveBeenCalledTimes(1);
+      expect(Fuse).toHaveBeenCalledWith(dataMock, {
+        keys: fieldsToSearch,
+        shouldSort: true,
+        threshold: 0,
+      });
+    });
+
+    it('should search using fuse', () => {
+      // When
+      rnippService['findAllCog'](dataMock, searchTerm, fieldsToSearch);
+
+      // Then
+      expect(searchMock).toHaveBeenCalledTimes(1);
+      expect(searchMock).toHaveBeenCalledWith(searchTerm);
+    });
+
+    it('should return the results', () => {
+      // Given
+      const expected = [
+        {
+          abr: 'abr',
+          arr: 'arr',
+          cog: '456',
+          cp: '95123',
+          name: 'CORMEILLES EN PARISIS',
+          specificPlace: '',
+        },
+        {
+          abr: 'abr',
+          arr: 'arr',
+          cog: '123',
+          cp: '75000',
+          name: 'PARIS',
           specificPlace: '',
         },
       ];
 
       // When
-      const result = await rnippService['findAllCog'](
-        cityData,
+      const result = rnippService['findAllCog'](
+        dataMock,
         searchTerm,
         fieldsToSearch,
       );
 
       // Then
-      expect(result).toEqual(expected);
-    });
-
-    it('should filter and return matching countries name', async () => {
-      // Given
-      const searchTerm = 'FRANCE';
-      const fieldsToSearch = ['name'];
-      const expected = [
-        {
-          cog: '99100',
-          name: 'FRANCE',
-          oldName: '',
-          oldGeographicCode: '',
-          geographicCode: '',
-        },
-      ];
-
-      // When
-      const result = await rnippService['findAllCog'](
-        countryData,
-        searchTerm,
-        fieldsToSearch,
-      );
-
-      // Then
-      expect(result).toEqual(expected);
-    });
-
-    it('should return all data if handle empty searchTerm', async () => {
-      // Given
-      const searchTerm = '';
-      const fieldsToSearch = ['name'];
-      const expected = cityData;
-
-      // When
-      const result = await rnippService['findAllCog'](
-        cityData,
-        searchTerm,
-        fieldsToSearch,
-      );
-
-      // Then
-      expect(result).toEqual(expected);
-    });
-
-    it('should return empty array if handle empty fieldsToSearch', async () => {
-      // Given
-      const searchTerm = 'City A';
-      const fieldsToSearch: string[] = ['foo'];
-
-      // When
-      const result = await rnippService['findAllCog'](
-        cityData,
-        searchTerm,
-        fieldsToSearch,
-      );
-
-      // Then
-      expect(result).toEqual([]);
+      expect(result).toStrictEqual(expected);
     });
   });
 
@@ -632,14 +622,38 @@ describe('RnippService (e2e)', () => {
         .mockResolvedValue([{ cog: 75107 }]);
     });
 
-    it('should call method "findCogByLocationName" to retrieve all cog', async () => {
+    it('should not call method "findCogByLocationName" if already a cog', async () => {
       // When
       await rnippService.buildIdentitiestoRectify(rectificationRequest);
 
       // Then
+      expect(rnippService['findCogByLocationName']).toHaveBeenCalledTimes(0);
+    });
+
+    it('should resolve one result if already a cog', async () => {
+      // When
+      const result = await rnippService.buildIdentitiestoRectify(
+        rectificationRequest,
+      );
+
+      // Then
+      expect(result).toStrictEqual([identity]);
+    });
+
+    it('should call method "findCogByLocationName" if not a cog', async () => {
+      // Given
+      const rectificationRequestCog = ({
+        ...rectificationRequest,
+        birthLocation: 'test',
+      } as unknown) as RectificationRequestDTO;
+
+      // When
+      await rnippService.buildIdentitiestoRectify(rectificationRequestCog);
+
+      // Then
       expect(rnippService['findCogByLocationName']).toHaveBeenCalledTimes(1);
       expect(rnippService['findCogByLocationName']).toHaveBeenCalledWith(
-        '75107',
+        rectificationRequestCog.birthLocation,
         true,
       );
     });

@@ -1,20 +1,22 @@
-import { createReadStream } from 'fs';
-import * as csvParser from 'csv-parser';
-import { cloneDeep } from 'lodash';
-import { Injectable, HttpService } from '@nestjs/common';
-import { InjectConfig } from 'nestjs-config';
+import * as Fuse from 'fuse.js/dist/fuse.common';
+
+import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { IIdentity } from '@fc/shared/citizen/interfaces/identity.interface';
 import { IPivotIdentity } from '@fc/shared/citizen/interfaces/pivot-identity.interface';
-import { RnippSerializer } from './rnipp-serializer.service';
-import * as queryString from 'query-string';
-import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
-import { ParsedData } from './interface/parsed-data.interface';
-import { CitizenServiceBase } from '@fc/shared/citizen/citizen-base.service';
 import { LoggerService } from '@fc/shared/logger/logger.service';
-import { PersonGenericDTO } from './dto/person-generic.dto';
+import { HttpService, Injectable } from '@nestjs/common';
 import { ValidationError, validateSync } from 'class-validator';
+import * as csvParser from 'csv-parser';
+import { createReadStream } from 'fs';
+import { cloneDeep } from 'lodash';
+import { InjectConfig } from 'nestjs-config';
+import * as queryString from 'query-string';
 import { RectificationRequestDTO } from './dto';
+import { PersonGenericDTO } from './dto/person-generic.dto';
 import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
+import { ParsedData } from './interface/parsed-data.interface';
+import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
+import { RnippSerializer } from './rnipp-serializer.service';
 
 @Injectable()
 export class RnippService {
@@ -170,10 +172,21 @@ export class RnippService {
   ): Promise<IIdentity[]> {
     const { birthLocation, isFrench } = rectificationRequest;
 
-    const cogByLocationNameList = await this.findCogByLocationName(
-      birthLocation,
-      isFrench,
-    );
+    let cogByLocationNameList;
+
+    // If this is a cog already, we don't need to search for it
+    if (birthLocation.match(/^(?:2[AB]|[0-9]{2})[0-9]{3}$/)) {
+      cogByLocationNameList = [
+        {
+          cog: birthLocation,
+        },
+      ];
+    } else {
+      cogByLocationNameList = await this.findCogByLocationName(
+        birthLocation,
+        isFrench,
+      );
+    }
 
     const identitiesToRectify: IIdentity[] = [];
     cogByLocationNameList.forEach(({ cog }) => {
@@ -206,13 +219,13 @@ export class RnippService {
     const limit = isFrench ? limitCityDisplaying : limitCountryDisplaying;
 
     if (isFrench) {
-      data = await this.findAllCog(
+      data = this.findAllCog(
         this.cityCSVparsed,
         birthLocation,
         fieldsToSearchInCity,
       );
     } else {
-      data = await this.findAllCog(
+      data = this.findAllCog(
         this.countryCSVparsed,
         birthLocation,
         fieldsToSearchInCountry,
@@ -247,17 +260,28 @@ export class RnippService {
     });
   }
 
-  private async findAllCog(
+  private findAllCog(
     data: any[],
     searchTerm: string,
     fieldsToSearch: string[],
-  ): Promise<InseeCityDBInterface[] | InseeCountryDBInterface[]> {
-    const matchingObjects = data.filter(item => {
-      return fieldsToSearch.some(
-        key => item[key] && item[key].toString().includes(searchTerm),
-      );
-    });
+  ): Array<Fuse.FuseResult<InseeCityDBInterface | InseeCountryDBInterface>> {
+    const options = {
+      shouldSort: true,
+      threshold: 0,
+      keys: fieldsToSearch,
+    };
 
-    return matchingObjects;
+    const fuse = new Fuse<InseeCityDBInterface | InseeCountryDBInterface>(
+      data,
+      options,
+    );
+    const searchResult = fuse
+      .search(searchTerm)
+      .map(
+        ({ item }: { item: InseeCityDBInterface | InseeCountryDBInterface }) =>
+          item,
+      );
+
+    return searchResult;
   }
 }
