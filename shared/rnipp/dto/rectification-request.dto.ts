@@ -1,15 +1,15 @@
 /* istanbul ignore file */
 
 // Declarative code
-import { IsString, Matches, IsIn, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { IsBirthdate } from '../validator/is-birthdate.validator';
-import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
-import { IsValidInputString } from '../../validators/is-valid-input-string';
-import { toBoolean } from '../../transforms/string.transform';
+import { IsBoolean, IsIn, IsString, Matches } from 'class-validator';
 import { IIdentity } from '../../citizen/interfaces/identity.interface';
 import { IOidcIdentity } from '../../citizen/interfaces/oidc-identity.interface';
+import { toBoolean } from '../../transforms/string.transform';
+import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
+import { IsValidInputString } from '../../validators/is-valid-input-string';
 import { FRANCE_COG } from '../rnipp-constants';
+import { IsBirthdate } from '../validator/is-birthdate.validator';
 
 const BIRTH_LOCATION_REGEX = /^(?:(?:2[AB]|[0-9]{2})[0-9]{3}|[\p{Letter} -._]+)$/u;
 
@@ -51,6 +51,7 @@ export class RectificationRequestDTO {
       .trim() // removes whitespace from both ends
       .normalize('NFD') // Breaks down accented characters into base characters and diacritics
       .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/-/g, ' ') // Replace hyphens with spaces
       .toUpperCase(),
   )
   readonly birthLocation: string;

@@ -5,19 +5,24 @@
         <div class="accordion" id="results-accordion">
           <%
           const hasValidIdentity = locals.searchResults
-            .some(({ rnippResponse }) => ~~rnippResponse.code < locals.rectifyResponseCodes.error);
+            .some(({ rnippResponse }) => parseInt(rnippResponse.code, 10) < locals.rectifyResponseCodes.error);
 
-          locals.searchResults
+
+          const filteredSearchResult = locals.searchResults
             .filter(({ rnippResponse }) => {
-              const isValidIdentity = ~~rnippResponse.code < locals.rectifyResponseCodes.error;
               if (!hasValidIdentity) {
                 return true;
               }
+              const isValidIdentity = parseInt(rnippResponse.code, 10) < locals.rectifyResponseCodes.error;
               return hasValidIdentity && isValidIdentity;
-            })
-            .forEach( ({ person, rnippResponse }, index) => {
+            });
+
+          filteredSearchResult.forEach( ({ person, rnippResponse }, index) => {
           %>
           <!-- ACCORDION PERSON CARD-->
+          <% let intResponseCode = parseInt(rnippResponse.code, 10); %>
+          <% let shouldDisplayDetails = intResponseCode > 0 && intResponseCode < 4; %>
+
           <div id="person-<%= index %>" class="card">
             <!-- card header-->
             <div class="card-header" id="accordion-card-heading-<%= index %>">
@@ -25,9 +30,11 @@
                 type="button"
                 class="btn btn-block text-left  <%= locals.searchResults.length > 1 ? 'collapsed' : '' %>"
                 aria-expanded="<%= locals.searchResults.length > 1 ? false : true -%>"
+                <% if (shouldDisplayDetails) { %>
                 data-toggle="collapse"
                 data-target="#collapse-<%= index %>"
                 aria-controls="collapse-<%= index %>"
+                <% } %>
               >
               <%
               const {
@@ -42,11 +49,11 @@
               %>
 
               <% if (rnippResponse.code) {
-                let codeColor = ~~rnippResponse.code === locals.rectifyResponseCodes.found
+                let codeColor = intResponseCode === locals.rectifyResponseCodes.found
                   ? 'success'
                   : undefined;
                 if (!codeColor) {
-                  codeColor = ~~rnippResponse.code === locals.rectifyResponseCodes.rectified
+                  codeColor = intResponseCode === locals.rectifyResponseCodes.rectified
                     ? 'warning'
                     : 'danger';
                 }
@@ -73,7 +80,7 @@
             <!-- ENDOF card header-->
             <div
               id="collapse-<%= index %>"
-              class="collapse <%= locals.searchResults.length > 1 ? '' : 'show' %>"
+              class="collapse <%= shouldDisplayDetails && filteredSearchResult.length === 1 ? 'show' : '' %>"
               aria-labelledby="heading"
               data-parent="#results-accordion"
             >
