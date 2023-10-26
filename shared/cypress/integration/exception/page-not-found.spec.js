@@ -39,7 +39,5 @@ describe('Page not found - error 404', () => {
         expect(response.status).to.eq(404);
         expect(response.statusText).to.eq('Not Found');
       });
-
-    cy.logout(USER_OPERATOR);
   });
 });

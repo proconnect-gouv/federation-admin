@@ -11,7 +11,7 @@ describe('Forbidden - error 403', () => {
   };
 
   it('Should not possible to see content if we are not right roles', () => {
-    cy.login(USER_ONLY_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ONLY_ADMIN, USER_PASS);
 
     cy.visit(option);
     cy.url().should('eq', `${Cypress.env('APP_FORBIDDEN_PAGE')}`);

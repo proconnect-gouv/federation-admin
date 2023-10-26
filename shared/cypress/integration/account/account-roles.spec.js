@@ -31,26 +31,22 @@ describe('Account', () => {
 
         expect(number).to.be.a('number');
       });
-      cy.logout(USER_OPERATOR);
     });
 
     it("should'nt give access to deletion buttons inside account list", () => {
       cy.get('form[name="deleteForm"]').should('not.exist');
-      cy.logout(USER_OPERATOR);
     });
   });
 
   describe('User has the ADMIN role', () => {
     it('should redirect the user who has just the admin role to the account list page when he connects himself', () => {
-      cy.login(USER_ONLY_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ONLY_ADMIN, USER_PASS);
 
       cy.url().should('contain', `/account`);
       cy.contains('Gestion des utilisateurs');
       cy.contains('Fournisseurs de service').should('not.exist');
       cy.contains("Fournisseurs d'identité").should('not.exist');
       cy.get('form[name="deleteForm"]').should('exist');
-
-      cy.logout(USER_ONLY_ADMIN);
     });
   });
 
@@ -61,8 +57,6 @@ describe('Account', () => {
 
     it('should land on his post login page', () => {
       cy.url().should('contain', `${Cypress.env('APP_HOME_ROLE_SECURITY')}`);
-
-      cy.logout(USER_SECURITY);
     });
 
     it('should not be able to make any create, update or delete actions', () => {
@@ -87,8 +81,6 @@ describe('Account', () => {
         );
         cy.get('.btn-action-delete', { timeout: 0 }).should('not.exist');
       });
-
-      cy.logout(USER_SECURITY);
     });
   });
 });

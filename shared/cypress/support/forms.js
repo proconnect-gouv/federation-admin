@@ -1,4 +1,3 @@
-import { getTotp } from './totp';
 import { SECRET_TOTP } from './constants';
 
 /**
@@ -79,7 +78,7 @@ export function formFill(inputs, configuration) {
   });
 
   if (typeof configuration.totp !== 'undefined') {
-    cy.get('input[name="_totp"]').then(() => totp(configuration));
+    cy.totp(configuration);
   }
 }
 
@@ -124,15 +123,14 @@ export function formControl(inputs) {
  * Fill _totp field if it exists, according to configuration flag
  * IF totp flag is set to true, a correct totp will fill the field
  * Otherwise, a wrong code (000000) will fill the field
- * Warning You should await this function !
  *
  * @param {object?} subject the previous cypress object that call totp
  * @param {object} configuration Configuration object from test suite
  * @param {string} secret Secret for TOTP generator
  * @return {Promise}
  * @exports
- * @example cy.formFillTotp({ totp: true }, 'ZAERZRERAZAZEZA');
- * @example cy.formFillTotp({ totp: true });
+ * @example cy.totp({ totp: true }, 'ZAERZRERAZAZEZA');
+ * @example cy.totp({ totp: true });
  */
 
 export function totp(subject, arg1, arg2) {
@@ -150,7 +148,7 @@ export function totp(subject, arg1, arg2) {
   }
 
   // Retrieve the totp when the totp input is present
-  cy.get(input).then(() => cy.wrap(getTotp(secret)).as('totp:token'));
-  cy.get('@totp:token').then(token => formType(input, token, configuration));
-  cy.get('@totp:token').should('have.length',6)
+  cy.get(input)
+    .then(() => cy.task('getTotp', { secret }))
+    .then(token => formType(input, token, configuration));
 }

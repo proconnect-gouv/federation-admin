@@ -5,9 +5,9 @@ export function testIsCompliantPasswordUpdate(basicConfiguration, request) {
     cy.contains(USER_ADMIN).click();
     cy.contains('Mon compte').click();
 
-    cy.get('#secret > td').then(async secret => {
-      await cy.totp(basicConfiguration, secret[0].textContent);
-    })
+    cy.get('#secret > td')
+      .invoke('text')
+      .then(secret => cy.totp(basicConfiguration, secret));
 
     cy.get('input[name="_totp"]').invoke('val').then(totp => {
       cy.get('input[name="_csrf"]').invoke('val').then(csrf => {
@@ -23,7 +23,6 @@ export function testIsCompliantPasswordUpdate(basicConfiguration, request) {
             _totp: totp,
           },
         }).its('body').should('include', request.errorMessage);
-        cy.visit(`/logout`);
       });
     });
 }
@@ -47,7 +46,7 @@ export function testIsCompliantPasswordEnrollment (basicConfiguration, userInfo,
             _totp: totp,
           },
         }).its('body').should('include', request.errorMessage);
-        cy.visit(`/logout`);
+        cy.clearAllCookies();
         deleteUserAndLogout(adminAccount, userInfo.username, basicConfiguration); 
       });
     });
