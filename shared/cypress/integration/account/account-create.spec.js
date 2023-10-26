@@ -10,14 +10,16 @@ function logoutAndDeleteUser(username, basicConfiguration) {
     cy.visit(`/account`);
     cy.logout(username);
   }
-  cy.login(USER_ADMIN, USER_PASS);
+  cy.forceLogin(USER_ADMIN, USER_PASS);
   cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-  deleteUser(username, basicConfiguration);
+  deleteUser(username);
   cy.logout(USER_ADMIN);
 }
 
 describe('Account', () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() => {
+    Cypress.session.clearAllSavedSessions();
+  });
   describe('Create user', () => {
     const userInfo = {
       username: 'christophe',
@@ -35,8 +37,6 @@ describe('Account', () => {
       adminRole: true,
       operatorRole: true,
       securityRole: true,
-      _csrf: true,
-      confirmSuppression: true,
       submit: true,
       redirect: true,
       totp: true,
@@ -49,7 +49,7 @@ describe('Account', () => {
       cy.clearBusinessLog();
 
       cy.resetEnv('postgres');
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
     });
 
     it('should be possible for an admin to create a new user with all the roles', () => {
@@ -79,7 +79,7 @@ describe('Account', () => {
           expect(fourthRole).to.equal('Nouvel utilisateur');
         });
 
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
       cy.logout(USER_ADMIN);
     });
 
@@ -103,7 +103,7 @@ describe('Account', () => {
           expect(secondRole).to.equal('Nouvel utilisateur');
         });
 
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
       cy.logout(USER_ADMIN);
     });
 
@@ -127,7 +127,7 @@ describe('Account', () => {
           expect(secondRole).to.equal('Nouvel utilisateur');
         });
 
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
       cy.logout(USER_ADMIN);
     });
 
@@ -151,7 +151,7 @@ describe('Account', () => {
           expect(secondRole).to.equal('Nouvel utilisateur');
         });
 
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
       cy.logout(USER_ADMIN);
     });
 
@@ -162,13 +162,13 @@ describe('Account', () => {
       cy.contains("Le nom d'utilisateur est déjà utilisé").should('be.visible');
 
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
       cy.logout(USER_ADMIN);
     });
 
     it("shouldn't validate the user creation if the csrf token is invalid", () => {
       const configuration = Object.assign({}, basicConfiguration, {
-        _csrf: false,
+        invalidCsrf: true,
       });
       createUserAccount(userInfo, configuration);
 
@@ -462,7 +462,7 @@ describe('Account', () => {
           email: 'christophe@email.com',
         };
 
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
 
         cy.contains('Comptes utilisateurs').click();
         cy.contains('Créer un utilisateur').click();
@@ -487,25 +487,24 @@ describe('Account', () => {
 
               cy.url().should('contain', `/account/enrollment`);
 
-              cy.get('#secret > td').then(async secret => {
-                cy.formType('#password', password, basicConfiguration);
-                cy.formType('#confirm-password', password, basicConfiguration);
+              cy.formType('#password', password, basicConfiguration);
+              cy.formType('#confirm-password', password, basicConfiguration);
 
-                cy.totp(
-                  { totp: basicConfiguration.totpFirstLogin },
-                  secret[0].textContent,
+              cy.get('#secret > td')
+                .invoke('text')
+                .then(secret =>
+                  cy.totp({ totp: basicConfiguration.totpFirstLogin }, secret),
                 );
 
-                if (basicConfiguration.submit) {
-                  cy.get('button[type="submit"]').click();
-                }
-              });
+              if (basicConfiguration.submit) {
+                cy.get('button[type="submit"]').click();
+              }
 
-              cy.visit(`/logout`);
-              cy.login(USER_ADMIN, USER_PASS);
+              cy.clearAllCookies();
+              cy.forceLogin(USER_ADMIN, USER_PASS);
               cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
 
-              deleteUser(userInfo.username, basicConfiguration);
+              deleteUser(userInfo.username);
               cy.logout(USER_ADMIN);
             },
           );

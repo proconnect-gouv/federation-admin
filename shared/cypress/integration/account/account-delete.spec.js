@@ -8,7 +8,10 @@ import { deleteUser } from './account-delete.utils';
 import { createUserAccount } from './account-create.utils';
 
 describe('Account', () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() => {
+    Cypress.session.clearAllSavedSessions();
+    cy.resetEnv('postgres');
+  });
   describe('Delete user', () => {
     const userInfo = {
       username: 'cypress',
@@ -16,10 +19,8 @@ describe('Account', () => {
     };
 
     const basicConfiguration = {
-      confirmSuppression: true,
       adminRole: true,
       operatorRole: true,
-      _csrf: true,
       fast: true,
     };
     beforeEach(() => {
@@ -31,7 +32,7 @@ describe('Account', () => {
       createUserAccount(userInfo, basicConfiguration);
 
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
 
       cy.contains(
         `Le compte ${userInfo.username} a été supprimé avec succès !`,
@@ -46,28 +47,19 @@ describe('Account', () => {
         user: USER_ADMIN,
         name: userInfo.email,
       });
-
-      cy.logout(USER_ADMIN);
     });
 
     describe('Should not delete the user', () => {
       it('If cancel button is clicked in the modal confirmation', () => {
-        createUserAccount(userInfo, {
-          ...basicConfiguration,
-          confirmSuppression: false,
-        });
+        createUserAccount(userInfo, basicConfiguration);
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-        deleteUser(userInfo.username, {
-          ...basicConfiguration,
-          confirmSuppression: false,
-        });
+        deleteUser(userInfo.username, false);
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.contains(`${userInfo.username}`).should('be.visible');
 
-        deleteUser(userInfo.username, basicConfiguration);
-        cy.logout(USER_ADMIN);
+        deleteUser(userInfo.username);
       });
 
       it('If the csrf token is invalid', () => {
@@ -80,13 +72,12 @@ describe('Account', () => {
           user[0].value = 'obviouslyBadCSRF';
         });
 
-        deleteUser(userInfo.username, basicConfiguration);
+        deleteUser(userInfo.username);
 
         cy.contains('Error - 500').should('be.visible');
 
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-        deleteUser(userInfo.username, basicConfiguration);
-        cy.logout(USER_ADMIN);
+        deleteUser(userInfo.username);
       });
 
       it('If totp is not correct or empty', () => {
@@ -107,8 +98,7 @@ describe('Account', () => {
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.contains(`${userInfo.username}`).should('be.visible');
 
-        deleteUser(userInfo.username, basicConfiguration);
-        cy.logout(USER_ADMIN);
+        deleteUser(userInfo.username);
       });
     });
   });

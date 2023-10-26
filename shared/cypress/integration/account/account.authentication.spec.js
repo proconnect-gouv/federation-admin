@@ -1,14 +1,16 @@
 import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../support/constants';
 import { createUserAndLogWith } from './account-create.utils';
 import { deleteUser } from './account-delete.utils';
-import { getTotp } from '../../support/totp';
 
 describe('Authentication failures', () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() => {
+    Cypress.session.clearAllSavedSessions();
+    cy.resetEnv('postgres');
+  });
   const BASE_URL = Cypress.config('baseUrl');
   describe('Login regular user', () => {
     it('should be possible for a user to login when using good username and password', () => {
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.url().should('match', /(?!login)/);
     });
 
@@ -16,7 +18,7 @@ describe('Authentication failures', () => {
       /**
        * Should not be necessary but csrf issues occurs *sometimes* without this
        */
-      cy.clearCookies();
+      cy.clearAllCookies();
       cy.clearBusinessLog();
       cy.resetEnv('postgres');
     });
@@ -24,7 +26,7 @@ describe('Authentication failures', () => {
     it('should renew session id when loging in', () => {
       cy.visit('/login');
       cy.getCookie('sessionId').then(firstSessionCookie => {
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.getCookie('sessionId').then(secondSessionCookie => {
           expect(firstSessionCookie.value).not.to.equal(
             secondSessionCookie.value,
@@ -34,7 +36,7 @@ describe('Authentication failures', () => {
     });
 
     it('should renew session id when loging out', () => {
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.getCookie('sessionId').then(firstSessionCookie => {
         cy.logout(USER_ADMIN);
         cy.getCookie('sessionId').then(secondSessionCookie => {
@@ -47,7 +49,7 @@ describe('Authentication failures', () => {
 
     it('should not be possible to be logged in using previous session id (cookie forgery)', () => {
       // Regular Login
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       // Grab logged in cookie
       cy.getCookie('sessionId').then(firstSessionCookie => {
         cy.logout(USER_ADMIN);
@@ -58,13 +60,13 @@ describe('Authentication failures', () => {
     });
 
     it('should flash an error to the user trying to log in with a bad username', () => {
-      cy.login('badUsername', USER_PASS);
+      cy.forceLogin('badUsername', USER_PASS);
       cy.url().should('eq', `${BASE_URL}/login`);
       cy.get('.login-form').contains('Connexion impossible');
     });
 
     it('should flash an error to the user trying to log in with a good username but a bad password', () => {
-      cy.login(USER_ADMIN, 'badPassword');
+      cy.forceLogin(USER_ADMIN, 'badPassword');
       cy.url().should('eq', `${BASE_URL}/login`);
       cy.get('.login-form').contains('Connexion impossible');
     });
@@ -457,8 +459,6 @@ describe('Authentication failures', () => {
       adminRole: true,
       operatorRole: true,
       securityRole: true,
-      _csrf: true,
-      confirmSuppression: true,
       submit: true,
       redirect: true,
       totp: true,
@@ -468,15 +468,15 @@ describe('Authentication failures', () => {
     };
     beforeEach(() => {
       cy.resetEnv('postgres');
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
     });
 
     it('should be possible for a new user to login when using good username, password and token', () => {
       createUserAndLogWith(userInfo, basicConfiguration);
 
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-      deleteUser(userInfo.username, basicConfiguration);
+      deleteUser(userInfo.username);
     });
 
     it('should flash an error to the new user trying to log in with a bad username', () => {
@@ -504,9 +504,9 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
 
             cy.get('.login-form').contains('Connexion impossible');
-            cy.login(USER_ADMIN, USER_PASS);
+            cy.forceLogin(USER_ADMIN, USER_PASS);
             cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-            deleteUser(userInfo.username, basicConfiguration);
+            deleteUser(userInfo.username);
           },
         );
       });
@@ -530,9 +530,9 @@ describe('Authentication failures', () => {
         cy.firstLogin(userInfo.username, 'badPassword');
 
         cy.get('.login-form').contains('Connexion impossible');
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-        deleteUser(userInfo.username, basicConfiguration);
+        deleteUser(userInfo.username);
       });
     });
 
@@ -564,9 +564,9 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
 
             cy.get('.login-form').contains('Connexion impossible');
-            cy.login(USER_ADMIN, USER_PASS);
+            cy.forceLogin(USER_ADMIN, USER_PASS);
             cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-            deleteUser(userInfo.username, basicConfiguration);
+            deleteUser(userInfo.username);
           },
         );
       });
@@ -604,10 +604,10 @@ describe('Authentication failures', () => {
           "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
         );
 
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.get(`#${'kevin'} > .roles`).contains('Utilisateur bloqué');
-        deleteUser('kevin', basicConfiguration);
+        deleteUser('kevin');
       });
     });
 
@@ -673,10 +673,10 @@ describe('Authentication failures', () => {
           "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
         );
 
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.get(`#${'Arthur'} > .roles`).contains('Utilisateur bloqué');
-        deleteUser('Arthur', basicConfiguration);
+        deleteUser('Arthur');
       });
     });
 
@@ -742,10 +742,10 @@ describe('Authentication failures', () => {
           "Vous avez commis trop d'erreurs. Votre compte est bloqué. Veuillez demander un nouveau compte à un administrateur",
         );
 
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
         cy.get(`#${'Tom'} > .roles`).contains('Utilisateur bloqué');
-        deleteUser('Tom', basicConfiguration);
+        deleteUser('Tom');
       });
     });
 
@@ -804,9 +804,9 @@ describe('Authentication failures', () => {
         cy.get('button[type="submit"]').click();
         cy.get('.login-form').contains('Connexion impossible');
 
-        cy.login(USER_ADMIN, USER_PASS);
+        cy.forceLogin(USER_ADMIN, USER_PASS);
         cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-        deleteUser('Tristan', basicConfiguration);
+        deleteUser('Tristan');
       });
     });
 
@@ -869,10 +869,10 @@ describe('Authentication failures', () => {
       });
 
       cy.visit('/login');
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.get(`#${'Margot'} > .roles`).contains('Utilisateur bloqué');
-      deleteUser('Margot', basicConfiguration);
+      deleteUser('Margot');
     });
 
     it('should block the user after the fifth error on his token', () => {
@@ -938,10 +938,10 @@ describe('Authentication failures', () => {
       });
 
       cy.visit('/login');
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.get(`#${'Laetitia'} > .roles`).contains('Utilisateur bloqué');
-      deleteUser('Laetitia', basicConfiguration);
+      deleteUser('Laetitia');
     });
 
     it('should block the user after the fifth error on his password and his token', () => {
@@ -1007,10 +1007,10 @@ describe('Authentication failures', () => {
       });
 
       cy.visit('/login');
-      cy.login(USER_ADMIN, USER_PASS);
+      cy.forceLogin(USER_ADMIN, USER_PASS);
       cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
       cy.get(`#${'Marie'} > .roles`).contains('Utilisateur bloqué');
-      deleteUser('Marie', basicConfiguration);
+      deleteUser('Marie');
     });
 
     it("should flash 'Connexion impossible' to the new user failling four times his password, logging in, out, then failling again his password", () => {
@@ -1066,25 +1066,25 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type('new_Password01');
             cy.get('#confirm-password').type('new_Password01');
-            cy.get('#secret > td').then(([{ textContent: secret }]) => {
-              cy.wrap(getTotp(secret)).as('totp:token');
-              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
 
-              cy.get('button[type="submit"]').click();
-              cy.logout('Dominique');
+            cy.get('#secret > td')
+              .invoke('text')
+              .then(secret => cy.totp(basicConfiguration, secret));
 
-              cy.formFill(
-                { username: 'Dominique', password: 'badPassword5' },
-                { fast: true },
-              );
-              cy.get('button[type="submit"]').click();
-              cy.get('.login-form').contains('Connexion impossible');
+            cy.get('button[type="submit"]').click();
+            cy.logout('Dominique');
 
-              cy.visit('/login');
-              cy.login(USER_ADMIN, USER_PASS);
-              cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-              deleteUser('Dominique', basicConfiguration);
-            });
+            cy.formFill(
+              { username: 'Dominique', password: 'badPassword5' },
+              { fast: true },
+            );
+            cy.get('button[type="submit"]').click();
+            cy.get('.login-form').contains('Connexion impossible');
+
+            cy.visit('/login');
+            cy.forceLogin(USER_ADMIN, USER_PASS);
+            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+            deleteUser('Dominique');
           },
         );
       });
@@ -1147,25 +1147,24 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type('new_Password01');
             cy.get('#confirm-password').type('new_Password01');
-            cy.get('#secret > td').then(([{ textContent: secret }]) => {
-              cy.wrap(getTotp(secret)).as('totp:token');
-              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
+            cy.get('#secret > td')
+              .invoke('text')
+              .then(secret => cy.totp(basicConfiguration, secret));
 
-              cy.get('button[type="submit"]').click();
-              cy.logout('Cyril');
+            cy.get('button[type="submit"]').click();
+            cy.logout('Cyril');
 
-              cy.formFill(
-                { username: 'Cyril', password: 'badPassword5' },
-                { fast: true },
-              );
-              cy.get('button[type="submit"]').click();
-              cy.get('.login-form').contains('Connexion impossible');
+            cy.formFill(
+              { username: 'Cyril', password: 'badPassword5' },
+              { fast: true },
+            );
+            cy.get('button[type="submit"]').click();
+            cy.get('.login-form').contains('Connexion impossible');
 
-              cy.visit('/login');
-              cy.login(USER_ADMIN, USER_PASS);
-              cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-              deleteUser('Cyril', basicConfiguration);
-            });
+            cy.visit('/login');
+            cy.forceLogin(USER_ADMIN, USER_PASS);
+            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+            deleteUser('Cyril');
           },
         );
       });
@@ -1228,25 +1227,25 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('#password').type('new_Password01');
             cy.get('#confirm-password').type('new_Password01');
-            cy.get('#secret > td').then(([{ textContent: secret }]) => {
-              cy.wrap(getTotp(secret)).as('totp:token');
-              cy.get('@totp:token').then(token => cy.get('#_totp').type(token));
 
-              cy.get('button[type="submit"]').click();
-              cy.logout('Mathias');
+            cy.get('#secret > td')
+              .invoke('text')
+              .then(secret => cy.totp(basicConfiguration, secret));
 
-              cy.formFill(
-                { username: 'Mathias', password: 'badPassword5' },
-                { fast: true },
-              );
-              cy.get('button[type="submit"]').click();
-              cy.get('.login-form').contains('Connexion impossible');
+            cy.get('button[type="submit"]').click();
+            cy.logout('Mathias');
 
-              cy.visit('/login');
-              cy.login(USER_ADMIN, USER_PASS);
-              cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-              deleteUser('Mathias', basicConfiguration);
-            });
+            cy.formFill(
+              { username: 'Mathias', password: 'badPassword5' },
+              { fast: true },
+            );
+            cy.get('button[type="submit"]').click();
+            cy.get('.login-form').contains('Connexion impossible');
+
+            cy.visit('/login');
+            cy.forceLogin(USER_ADMIN, USER_PASS);
+            cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
+            deleteUser('Mathias');
           },
         );
       });
@@ -1286,9 +1285,9 @@ describe('Authentication failures', () => {
             cy.get('button[type="submit"]').click();
             cy.get('.login-form').contains('Connexion impossible');
 
-            cy.login(USER_ADMIN, USER_PASS);
+            cy.forceLogin(USER_ADMIN, USER_PASS);
             cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-            deleteUser('tempUser', basicConfiguration);
+            deleteUser('tempUser');
           },
         );
       });

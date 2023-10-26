@@ -9,7 +9,10 @@ import { updatePassword } from './account-update.utils';
 import { testIsCompliantPasswordUpdate } from '../../support/request';
 
 describe('Update account', () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() => {
+    Cypress.session.clearAllSavedSessions();
+    cy.resetEnv('postgres');
+  });
   const userInfo = {
     username: 'thomas',
     email: 'thomas@email.com',
@@ -20,16 +23,14 @@ describe('Update account', () => {
     adminRole: true,
     operatorRole: true,
     securityRole: true,
-    _csrf: true,
     submit: true,
-    confirmSuppression: true,
     totpAccountCreate: true,
     totpFirstLogin: true,
     fast: true,
   };
   beforeEach(() => {
     cy.resetEnv('postgres');
-    cy.login(USER_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ADMIN, USER_PASS);
     createUserAndLogWith(userInfo, basicConfiguration);
   });
 
@@ -37,9 +38,9 @@ describe('Update account', () => {
     cy.visit(`/account`);
     cy.logout(userInfo.username);
 
-    cy.login(USER_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ADMIN, USER_PASS);
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-    deleteUser(userInfo.username, basicConfiguration);
+    deleteUser(userInfo.username);
     cy.logout(USER_ADMIN);
   });
 
@@ -51,9 +52,9 @@ describe('Update account', () => {
     cy.formType('#password', 'MyNewPassword20!!');
     cy.formType('#confirm-password', 'MyNewPassword20!!');
 
-    cy.get('#secret > td').then(async secret => {
-      await cy.totp(basicConfiguration, secret[0].textContent);
-    });
+    cy.get('#secret > td')
+      .invoke('text')
+      .then(secret => cy.totp(basicConfiguration, secret));
 
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains('Le mot de passe a bien été mis à jour !');
@@ -67,9 +68,9 @@ describe('Update account', () => {
     cy.formType('#password', 'MyNewPassword22!!');
     cy.formType('#confirm-password', 'MyNewPassword22!!');
 
-    cy.get('#secret > td').then(secret =>
-      cy.totp(basicConfiguration, secret[0].textContent),
-    );
+    cy.get('#secret > td')
+      .invoke('text')
+      .then(secret => cy.totp(basicConfiguration, secret));
 
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.contains(
@@ -87,9 +88,9 @@ describe('Update account', () => {
     cy.get('#password').should('have.class', 'is-invalid');
     cy.formType('#confirm-password', 'badone!!');
 
-    cy.get('#secret > td').then(secret =>
-      cy.totp(basicConfiguration, secret[0].textContent),
-    );
+    cy.get('#secret > td')
+      .invoke('text')
+      .then(secret => cy.totp(basicConfiguration, secret));
 
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
@@ -104,9 +105,9 @@ describe('Update account', () => {
     cy.formType('#confirm-password', 'badconfirmation', { typeEvent: true });
     cy.get('#confirm-password').should('have.class', 'is-invalid');
 
-    cy.get('#secret > td').then(secret =>
-      cy.totp(basicConfiguration, secret[0].textContent),
-    );
+    cy.get('#secret > td')
+      .invoke('text')
+      .then(secret => cy.totp(basicConfiguration, secret));
 
     cy.contains('Mettre à jour mon mot de passe').click();
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
@@ -129,24 +130,18 @@ describe('Update account', () => {
 describe('Patch update-account/:username', () => {
   beforeEach(() => {
     cy.resetEnv('postgres');
-    cy.login(USER_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ADMIN, USER_PASS);
   });
 
   const basicConfiguration = {
     adminRole: true,
     operatorRole: true,
     securityRole: true,
-    _csrf: true,
-    confirmSuppression: true,
     submit: true,
     redirect: true,
     totp: true,
     fast: true,
   };
-
-  afterEach(() => {
-    cy.visit(`/logout`);
-  });
 
   describe("is-compliant-validator", () => {
     it("should throw an error if his password is too short", () => {
@@ -214,7 +209,10 @@ describe('Patch update-account/:username', () => {
 });
 
 describe("isEqualToOneOfTheLastFivePasswords", () => {
-  before(() => cy.resetEnv('postgres'));
+  before(() => {
+    Cypress.session.clearAllSavedSessions();
+    cy.resetEnv('postgres');
+  });
   const userInfo = {
     username: 'bill',
     email: 'bill@email.com',
@@ -225,27 +223,48 @@ describe("isEqualToOneOfTheLastFivePasswords", () => {
     adminRole: true,
     operatorRole: true,
     securityRole: true,
-    _csrf: true,
     submit: true,
-    confirmSuppression: true,
     totpAccountCreate: true,
     totpFirstLogin: true,
     fast: true,
   };
   beforeEach(() => {
-    cy.login(USER_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ADMIN, USER_PASS);
     createUserAndLogWith(userInfo, basicConfiguration);
   });
   afterEach(() => {
     cy.visit(`/account`);
     cy.logout(userInfo.username);
 
-    cy.login(USER_ADMIN, USER_PASS);
+    cy.forceLogin(USER_ADMIN, USER_PASS);
     cy.visit(`/account?page=1&limit=${LIMIT_PAGE}`);
-    deleteUser(userInfo.username, basicConfiguration);
+    deleteUser(userInfo.username);
     cy.logout(USER_ADMIN);
   });
   it('should update password if not equal to one of the last five passwords', () => {
-    updatePassword(basicConfiguration);
+    let currentPassword = userInfo.password;
+    let newPassword = 'MyNewPassword20!!';
+    updatePassword(userInfo.username, currentPassword, newPassword);
+    cy.contains('Le mot de passe a bien été mis à jour !');
+
+    currentPassword = newPassword;
+    newPassword = 'MyNewPassword201!!';
+    updatePassword(userInfo.username, currentPassword, newPassword);
+    cy.contains('Le mot de passe a bien été mis à jour !');
+
+    currentPassword = newPassword;
+    newPassword = 'MyNewPassword202!!';
+    updatePassword(userInfo.username, currentPassword, newPassword);
+    cy.contains('Le mot de passe a bien été mis à jour !');
+
+    currentPassword = newPassword;
+    newPassword = 'MyNewPassword203!!';
+    updatePassword(userInfo.username, currentPassword, newPassword);
+    cy.contains('Le mot de passe a bien été mis à jour !');
+
+    currentPassword = newPassword;
+    newPassword = 'MyNewPassword10!!';
+    updatePassword(userInfo.username, currentPassword, newPassword);
+    cy.contains("Votre nouveau mot de passe ne peut être l'un des cinq derniers mots de passe utilisés");
   });
 });

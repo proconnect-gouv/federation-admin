@@ -13,6 +13,7 @@ module.exports = defineConfig({
     supportFile: 'cypress/support/index.js',
     retries: 2,
     video: false,
+    experimentalRunAllSpecs: true,
   },
   env: {
     APP_NAME: 'stats',
