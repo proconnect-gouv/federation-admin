@@ -52,6 +52,7 @@ export class RectificationRequestDTO {
       .normalize('NFD') // Breaks down accented characters into base characters and diacritics
       .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .replace(/-/g, ' ') // Replace hyphens with spaces
+      .replace(/'/g, ' ') // Replace apostrophes with spaces
       .toUpperCase(),
   )
   readonly birthLocation: string;
