@@ -150,5 +150,13 @@
     "birthdate": "0001-01-01",
     "isFrench": "true",
     "birthLocation": "claville"
+  },
+  "utilisateur_collectivite_outre_mer": {
+    "gender": "male",
+    "familyName": "NORRIS",
+    "givenName": "Chuck",
+    "birthdate": "0001-01-01",
+    "isFrench": "true",
+    "birthLocation": "La Passion-Clipperton"
   }
 }

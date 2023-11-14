@@ -245,6 +245,39 @@ describe('Rnipp rectification', () => {
     cy.formControl({ ...person, familyName: 'NORRIS' });
   });
 
+  it('Should retrieve one thruty result from RNIPP with rnippCode equal to 2 for user from "collectivité d\'outre mer"', () => {
+    // Arrange
+    const person = {
+      supportId: '1234567891234567',
+      ...rnippIdentities['utilisateur_collectivite_outre_mer'],
+    };
+
+    // Action
+    cy.formFill(person, configuration);
+
+    cy.get('form[name="rnipp-form"] button[type="submit"]').click();
+
+    // Assert
+    cy.url().should('equal', `${BASE_URL}/research`);
+    cy.get('#result').should('contain', 'Résultat du redressement RNIPP');
+    cy.get(
+      '#results-accordion > #person-0 > .collapse > .card-body > div.mb-2 > div.font-weight-bold',
+    )
+      .should('have.length', 8)
+      .then($divs => {
+        expect($divs.eq(0)).to.contain('1234567891234567');
+        expect($divs.eq(1)).to.contain('Masculin');
+        expect($divs.eq(2)).to.contain('NORRIS');
+        expect($divs.eq(3)).to.contain('');
+        expect($divs.eq(4)).to.contain('Chuck');
+        expect($divs.eq(5)).to.contain('0001-01-01');
+        expect($divs.eq(6)).to.contain('98901');
+        expect($divs.eq(7)).to.contain('99100');
+      });
+
+    cy.formControl({ ...person, birthLocation: 'LA PASSION CLIPPERTON' });
+  });
+
   it('Should retrieve one thruty result from RNIPP with rnippCode equal to 2 (found)', () => {
     // Arrange
     const person = {
