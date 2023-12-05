@@ -1,6 +1,7 @@
 import { sortBy } from './pagination-sort.enum';
 import { IOptions } from './interface/options-query-mongodb.interface';
 import { aggregateProjectTagName } from './aggregate.constants';
+import { PaginatedResult } from './interface';
 
 /**
  *
@@ -11,7 +12,11 @@ import { aggregateProjectTagName } from './aggregate.constants';
  *
  */
 
-async function paginate(query, route, options: IOptions) {
+async function paginate<T>(
+  query: object,
+  route: string,
+  options: IOptions,
+): Promise<PaginatedResult<T>> {
   let items = [];
   const { page, limit } = options;
   const total = await this.countDocuments(query);
