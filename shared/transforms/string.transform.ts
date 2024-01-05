@@ -30,7 +30,10 @@ export function toBoolean(value: string): boolean | undefined {
 export function linesToArray(value: string): string[] | undefined {
   let result: string[];
   try {
-    result = value.split(/\r\n|\n|\r|[;]/);
+    result = value
+      .split(/\r\n|\n|\r|[;]/)
+      .map((v: string) => v.trim())
+      .filter((v: string) => Boolean(v));
   } catch (e) {
     return undefined;
   }
@@ -39,8 +42,8 @@ export function linesToArray(value: string): string[] | undefined {
 
 /**
  * Force the input to be an array in DTO
- * @param {string} value
+ * @param {string | unknown[]} value
  */
-export function toArray(value: string) {
+export function toArray(value: string | string[]) {
   return Array.isArray(value) ? value : [value];
 }
