@@ -1,5 +1,6 @@
 stages:
   - install
+  - Code quality
   - test
   - e2e
   - Checkmarx
@@ -65,3 +66,4 @@ include:
   - '/fc-workers/.gitlab-ci.yml'
   - '/fc-support/.gitlab-ci.yml'
   - '/.gitlab-build.yml'
+  - '.gitlab-ci-security-scanning.yml'

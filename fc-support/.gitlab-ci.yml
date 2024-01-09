@@ -1,5 +1,5 @@
 test/support:
-  stage: test
+  stage: Code quality
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   tags:
     - node
