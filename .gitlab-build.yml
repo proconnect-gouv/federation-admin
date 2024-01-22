@@ -88,20 +88,6 @@ fc-exploitation/tag-to-prod-image:
   needs:
     - job: fc-exploitation/build-image
 
-fc-stats/build-image:
-  extends: .base-build
-  variables:
-    APP: stats
-    MSG: "environments/pa4-integ/group_vars/all/versions.yml\nfc_stats_version:"
-
-fc-stats/tag-to-prod-image:
-  extends: .base-tag-to-prod
-  variables:
-    DOCKER_IMAGE: fc-stats
-    MSG: "environments/pa4-preprod/group_vars/all/versions.yml\nenvironments/pa4-prod/group_vars/all/versions.yml\nfc_stats_version:"
-  needs:
-    - job: fc-stats/build-image
-
 fc-support/build-image:
   extends: .base-build
   variables:
