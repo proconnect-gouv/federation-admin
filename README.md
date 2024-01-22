@@ -18,7 +18,6 @@
 
 ## Etc/hosts
 
-- fc-stats.docker.dev-franceconnect.fr
 - fc-exploitation.docker.dev-franceconnect.fr
 - fc-support.docker.dev-franceconnect.fr
 
