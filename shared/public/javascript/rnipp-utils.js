@@ -285,17 +285,17 @@ function createCitizenStatusUi(index, data) {
 
   let accountIdHTML = '';
   if (data.accountId) {
-    accountIdHTML = `<li><b>AccountId : </b>${data.accountId}</li>`;
+    accountIdHTML = `<li><b>AccountId : </b><span data-testid="citizen-account-id">${data.accountId}</span></li>`;
   }
 
   $(`${CITIZEN_STATUS_TARGET}-${index}`).html(`
     <ul>
       <li><b>Actif :</b> ${
         data.active
-          ? '<span class="badge badge-success">Oui</span>'
-          : '<span class="badge badge-danger">Non</span>'
+          ? '<span class="badge badge-success" data-testid="citizen-account-status">Oui</span>'
+          : '<span class="badge badge-danger" data-testid="citizen-account-status">Non</span>'
       }</li>
-      <li><b>Dernière connexion :</b> ${lastConnection}</li>
+      <li><b>Dernière connexion : </b><span data-testid="citizen-account-last-connection">${lastConnection}</span></li>
       ${accountIdHTML}
     </ul>
   `);
@@ -396,13 +396,13 @@ export function initUIActiveButton(data) {
 
 
     <div class="form-group" id="citizen-management">
-    <button type="submit" class="btn btn-warning" ${action === 'Activer' &&
-      'disabled'}>
+    <button type="submit" class="btn btn-warning" data-testid="citizen-disable-account-button" ${action ===
+      'Activer' && 'disabled'}>
       Désactiver
     </button>
     &nbsp;
-    <button type="submit" class="btn btn-warning" ${action === 'Désactiver' &&
-      'disabled'}>
+    <button type="submit" class="btn btn-warning" data-testid="citizen-enable-account-button" ${action ===
+      'Désactiver' && 'disabled'}>
       Activer
     </button>
     </div>

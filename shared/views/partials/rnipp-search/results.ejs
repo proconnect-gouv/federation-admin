@@ -100,63 +100,56 @@
 
               <div class="mb-2">
                 <div class="label">Numéro de ticket support</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-support-id">
                   <%= locals.supportId || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">Genre</div>
-                <% if (gender === 'male') { %>
-                  <div class="font-weight-bold">
-                    Masculin
+                  <div class="font-weight-bold" data-testid="rnipp-gender">
+                    <%= gender === 'male' ? 'Masculin' : 'Féminin' %>
                   </div>
-                <% } %>
-                <% if (gender === 'female') { %>
-                  <div class="font-weight-bold">
-                    Féminin
-                  </div>
-                <% } %>
               </div>
 
               <div class="mb-2">
                 <div class="label">Nom</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-family_name">
                   <%= familyName || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">Nom d'usage</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-preferred_username">
                   <%= preferredUsername || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">Prénoms</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-given_name">
                   <%= givenName || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">Date de naissance</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-birthdate">
                   <%= birthdate || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">COG du lieu de naissance</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-birthplace">
                   <%= birthPlace || '' %>
                 </div>
               </div>
 
               <div class="mb-2">
                 <div class="label">COG du pays de naissance</div>
-                <div class="font-weight-bold">
+                <div class="font-weight-bold" data-testid="rnipp-birthcountry">
                   <%= birthCountry || '' %>
                 </div>
               </div>
