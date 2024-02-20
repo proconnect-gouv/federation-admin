@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-md-10">
 		<% if (rnippCode) { %>
-		Code retour RNIPP : <strong><%= rnippCode %></strong>
+		Code retour RNIPP : <strong data-testid="rnipp-status-code"><%= rnippCode %></strong>
 		<span data-toggle="tooltip" data-placement="right" data-html="true" data-container="body" title="
 				2 : demande identifiée sans divergence d'état civil
 				3 : demande identifiée avec divergence(s) d'état civil ou NIR

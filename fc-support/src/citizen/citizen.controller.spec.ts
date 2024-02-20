@@ -62,6 +62,7 @@ describe('CitizenController', () => {
         havePreferencesSettings: false,
         active: true,
         lastConnection: '2019-06-01T12:34:56.000Z',
+        accountId: 'bar',
       });
     });
 

@@ -22,10 +22,10 @@ export class CitizenController {
   @Roles(UserRole.OPERATOR)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async getCitizenStatus(@Body() citizenIdentity: IIdentity) {
-    const citizenHash: string = this.citizenService.getPivotIdentityHash(
+    const identityHash: string = this.citizenService.getPivotIdentityHash(
       citizenIdentity as IPivotIdentity,
     );
-    const citizenAccount = await this.citizenService.findByHash(citizenHash);
+    const citizenAccount = await this.citizenService.findByHash(identityHash);
 
     if (!citizenAccount) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -40,6 +40,7 @@ export class CitizenController {
         havePreferencesSettings: true,
         active: citizenAccount.active,
         lastConnection: this.getLastConnection(citizenAccount),
+        accountId: citizenAccount.id,
       };
     }
 
@@ -47,6 +48,7 @@ export class CitizenController {
       havePreferencesSettings: false,
       active: citizenAccount.active,
       lastConnection: this.getLastConnection(citizenAccount),
+      accountId: citizenAccount.id,
     };
   }
 
