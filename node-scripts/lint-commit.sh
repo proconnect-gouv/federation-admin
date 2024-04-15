@@ -8,5 +8,5 @@ if [ -z "$files" ]
 then 
     echo 'no TS files to lint';
 else  
-    $(npm bin)/tslint $files --exclude '**/node_modules/**/*';
+    yarn tslint $files --exclude '**/node_modules/**/*';
 fi
