@@ -28,7 +28,6 @@ module.exports = defineConfig({
     LOG_FILE_PATH: '../../fc/docker/volumes/log/fcsupport.log',
   },
   chromeWebSecurity: false,
-  videoUploadOnPasses: false,
   viewportHeight: 1800,
   viewportWidth: 1400,
   pageLoadTimeout: 30000,

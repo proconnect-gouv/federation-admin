@@ -20,7 +20,7 @@
     "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
   },
   "devDependencies": {
-    "cypress": "12.17.4",
+    "cypress": "13.6.0",
     "husky": "^4.0.0-beta.5",
     "prettier": "^1.18.2",
     "tslint": "^5.18.0",
