@@ -1,5 +1,6 @@
 export default {
-  hostname: process.env.RNIPP_HOSTNAME || 'rnipp.docker.dev-franceconnect.fr',
+  hostname:
+    process.env.RNIPP_HOSTNAME || 'mock-rnipp.docker.dev-franceconnect.fr',
   baseUrl:
     process.env.RNIPP_BASE_URL ||
     '/Brpp2IdentificationComplet/individus?rechercheType=S',
