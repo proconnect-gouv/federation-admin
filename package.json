@@ -8,8 +8,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e:exploitation": "cypress run -P fc-exploitation",
-    "test:e2e:support": "cypress run -P fc-support"
+    "test:e2e:exploitation": "cypress run -P fc-exploitation --browser chrome",
+    "test:e2e:support": "cypress run -P fc-support --browser chrome"
   },
   "resolutions": {
     "cookie-signature": "1.1.0",
@@ -20,7 +20,7 @@
     "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
   },
   "devDependencies": {
-    "cypress": "13.6.0",
+    "cypress": "13.15.0",
     "husky": "^4.0.0-beta.5",
     "prettier": "^1.18.2",
     "tslint": "^5.18.0",
