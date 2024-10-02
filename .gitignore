@@ -3,6 +3,7 @@
 node_modules
 
 # Cypress
+*/cypress/downloads
 */cypress/screenshots
 */cypress/videos
 
