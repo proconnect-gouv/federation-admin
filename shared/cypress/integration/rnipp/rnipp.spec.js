@@ -608,7 +608,7 @@ describe('Rnipp rectification', () => {
     cy.contains('Veuillez renseigner un prénom ou vos prénoms').should(
       'be.visible',
     );
-    cy.contains('Veuillez renseigner une date au format YYY-mm-dd').should(
+    cy.contains('Veuillez renseigner une date au format AAAA-MM-JJ ou JJ/MM/AAAA').should(
       'be.visible',
     );
     cy.contains(
