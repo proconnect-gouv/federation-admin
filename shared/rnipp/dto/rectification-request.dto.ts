@@ -5,6 +5,7 @@ import { Transform } from 'class-transformer';
 import { IsBoolean, IsIn, IsString, Matches } from 'class-validator';
 import { IIdentity } from '../../citizen/interfaces/identity.interface';
 import { IOidcIdentity } from '../../citizen/interfaces/oidc-identity.interface';
+import { NormalizeDate } from '../../transforms/normalize-date.transform';
 import { toBoolean } from '../../transforms/string.transform';
 import { IsOptionalExtended } from '../../validators/is-optional-extended.validator';
 import { IsValidInputString } from '../../validators/is-valid-input-string';
@@ -36,6 +37,7 @@ export class RectificationRequestDTO {
   @IsString()
   readonly givenName: string;
 
+  @NormalizeDate()
   @IsBirthdate()
   @IsString()
   readonly birthdate: string;

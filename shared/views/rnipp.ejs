@@ -129,21 +129,21 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="birthdate" class="control-label">Date de naissance (format YYYY-mm-dd)</label>
+                  <label for="birthdate" class="control-label">Date de naissance (format AAAA-MM-JJ ou JJ/MM/AAAA)</label>
                   <div class="input-group">
                     <input
                       type="text"
                       class="form-control"
                       id="birthdate"
                       name="birthdate"
-                      placeholder="exemple : 1987-02-21"
+                      placeholder="exemple : 1987-02-21 ou 21/02/1987"
                       value="<%= (locals.requestedIdentity && locals.requestedIdentity.birthdate) ? locals.requestedIdentity.birthdate : '' %>"
                       required
                       autocomplete="off"
-                      pattern="^\d{4}-\d{2}-\d{2}$"
+                      pattern="^(?:\d{4}-\d{2}-\d{2})|(?:\d{2}[-/]\d{2}[-/]\d{4})$"
                     >
                     <div class="invalid-feedback">
-                      Veuillez renseigner une date au format YYY-mm-dd
+                      Veuillez renseigner une date au format AAAA-MM-JJ ou JJ/MM/AAAA
                     </div>
                   </div>
                 </div>
