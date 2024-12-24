@@ -203,13 +203,28 @@ describe('Config', () => {
         FC_DB_PASSWORD: 'un',
         FC_DB_DATABASE: 'gentil',
         FC_DB_CONNECT_OPTIONS: 'developpeur',
+        FC_DB_PASS: undefined,
+        FC_DB_TLS_CA_FILE: 'fc/db/tls/ca/file',
+        FC_DB_TLS: 'true',
+        FC_DB_TLS_INSECURE: 'false',
+        FC_DB_TLS_ALLOW_INVALID_HOST_NAME: 'false',
       };
-      const resultMock = 'mongodb://suis:un@je/gentildeveloppeur';
+      const resultMock = {
+        uri: 'mongodb://suis:un@je/gentildeveloppeur',
+        authSource: 'gentil',
+        tls: true,
+        tlsAllowInvalidCertificates: false,
+        tlsCAFile: 'fc/db/tls/ca/file',
+        tlsInsecure: false,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      };
+
       const config = new Config(input);
       // When
       const result = config.getMongo();
       // Then
-      expect(result).toBe(resultMock);
+      expect(result).toEqual(resultMock);
     });
   });
 });
