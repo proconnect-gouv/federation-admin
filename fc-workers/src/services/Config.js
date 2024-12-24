@@ -1,3 +1,5 @@
+import { parseBoolean } from '../utils';
+
 class Config {
   constructor(config) {
     this.config = config;
@@ -40,10 +42,7 @@ class Config {
   }
 
   getElasticOptions() {
-    const {
-      ES_STATS_HOSTS: hosts,
-      REQUEST_TIMEOUT,
-    } = this.config;
+    const { ES_STATS_HOSTS: hosts, REQUEST_TIMEOUT } = this.config;
     return {
       node: hosts.split(','),
       requestTimeout: REQUEST_TIMEOUT,
@@ -51,10 +50,7 @@ class Config {
   }
 
   getLogElastic() {
-    const {
-      ES_LOGS_HOSTS: hosts,
-      REQUEST_TIMEOUT,
-    } = this.config;
+    const { ES_LOGS_HOSTS: hosts, REQUEST_TIMEOUT } = this.config;
     return {
       node: hosts.split(','),
       requestTimeout: REQUEST_TIMEOUT,
@@ -80,12 +76,37 @@ class Config {
     const {
       FC_DB_HOSTS,
       FC_DB_USER,
+      FC_DB_PASS,
       FC_DB_PASSWORD,
       FC_DB_DATABASE,
+      FC_DB_TLS_CA_FILE,
+      FC_DB_TLS,
+      FC_DB_TLS_INSECURE,
+      FC_DB_TLS_ALLOW_INVALID_HOST_NAME,
       FC_DB_CONNECT_OPTIONS,
     } = this.config;
 
-    return `mongodb://${FC_DB_USER}:${FC_DB_PASSWORD}@${FC_DB_HOSTS}/${FC_DB_DATABASE}${FC_DB_CONNECT_OPTIONS}`;
+    const config = {
+      uri: `mongodb://${FC_DB_USER}:${FC_DB_PASS ||
+        FC_DB_PASSWORD}@${FC_DB_HOSTS}/${FC_DB_DATABASE}${FC_DB_CONNECT_OPTIONS}`,
+      authSource: FC_DB_DATABASE,
+      tls: parseBoolean(FC_DB_TLS),
+      tlsCAFile: FC_DB_TLS_CA_FILE,
+      tlsInsecure: parseBoolean(FC_DB_TLS_INSECURE),
+      /**
+       * This env var name does not strictly matches the usage.
+       * Still, the situations where it is true or false are the same.
+       *
+       * @todo rename the env var
+       */
+      tlsAllowInvalidCertificates: parseBoolean(
+        FC_DB_TLS_ALLOW_INVALID_HOST_NAME
+      ),
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    };
+
+    return config;
   }
 }
 

@@ -4,11 +4,9 @@ import './models/clientModel';
 
 class FcDatabase {
   static getInstance(config) {
-    return mongoose.connect(config, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true,
-    });
+    const { uri, ...options } = config;
+
+    return mongoose.connect(uri, options);
   }
 }
 
