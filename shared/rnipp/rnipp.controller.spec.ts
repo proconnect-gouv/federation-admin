@@ -15,6 +15,7 @@ describe('RnippController', () => {
   const rnippService = {
     requestIdentityRectification: jest.fn(),
     buildIdentitiestoRectify: jest.fn(),
+    getFilteredSearchResult: jest.fn(),
   };
 
   const identity = {
@@ -120,6 +121,27 @@ describe('RnippController', () => {
         statusCode: 200,
       };
 
+      const filteredSearchResult = [
+        {
+          person: {
+            rectifiedIdentity: {
+              gender: 'male',
+              familyName: 'Dupont',
+              preferredUsername: 'Henri',
+              givenName: 'Pierr',
+              birthdate: '1992-03-03',
+              birthPlace: '75107',
+              birthCountry: '99100',
+            },
+            dead: false,
+          },
+          rnippResponse: {
+            code: 2,
+            raw: formattedXml.xmlString,
+          },
+        },
+      ];
+
       const expectedResult: PersonFoundDTO = {
         appName: 'FC_EXPLOITATION',
         rectifyResponseCodes: {
@@ -127,26 +149,7 @@ describe('RnippController', () => {
           found: 2,
           rectified: 3,
         },
-        searchResults: [
-          {
-            person: {
-              rectifiedIdentity: {
-                gender: 'male',
-                familyName: 'Dupont',
-                preferredUsername: 'Henri',
-                givenName: 'Pierr',
-                birthdate: '1992-03-03',
-                birthPlace: '75107',
-                birthCountry: '99100',
-              },
-              dead: false,
-            },
-            rnippResponse: {
-              code: 2,
-              raw: formattedXml.xmlString,
-            },
-          },
-        ],
+        searchResults: filteredSearchResult,
         requestedIdentity: rectificationRequest,
         supportId: '1234567891234567',
         csrfToken: 'mygreatcsrftoken',
@@ -158,6 +161,9 @@ describe('RnippController', () => {
       rnippService.requestIdentityRectification.mockImplementationOnce(() => {
         return mockedRnippService;
       });
+      rnippService.getFilteredSearchResult.mockReturnValue(
+        filteredSearchResult,
+      );
 
       configServiceMock.get.mockReturnValueOnce(configMock);
 

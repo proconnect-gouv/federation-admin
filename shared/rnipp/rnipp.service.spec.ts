@@ -9,9 +9,14 @@ import { createReadStream } from 'fs';
 import { ConfigService } from 'nestjs-config';
 import { of } from 'rxjs';
 import { RectificationRequestDTO } from './dto';
-import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
+import {
+  InseeCityDBInterface,
+  InseeCountryDBInterface,
+  Personfound,
+} from './interface';
 import { RnippSerializer } from './rnipp-serializer.service';
 import { RnippService } from './rnipp.service';
+import { RNIPP_IDENTITY_RESPONSE_CODES } from './rnipp-constants';
 
 jest.mock('fs');
 jest.mock('fuse.js');
@@ -678,6 +683,98 @@ describe('RnippService (e2e)', () => {
 
       // Then
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('getFilteredSearchResult', () => {
+    it('should return person found', () => {
+      // Given
+      const personMock = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.found },
+        },
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.error },
+        },
+      ] as unknown) as Personfound[];
+
+      const expected = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.found },
+        },
+      ] as unknown) as Personfound[];
+
+      // When
+      const result = rnippService.getFilteredSearchResult(personMock);
+
+      // Then
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('should return person rectified', () => {
+      // Given
+      const personMock = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.rectified },
+        },
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.error },
+        },
+      ] as unknown) as Personfound[];
+
+      const expected = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.rectified },
+        },
+      ] as unknown) as Personfound[];
+
+      // When
+      const result = rnippService.getFilteredSearchResult(personMock);
+
+      // Then
+      expect(result).toStrictEqual(expected);
+    });
+
+    it('should return person found & rectified', () => {
+      // Given
+      const personMock = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.found },
+        },
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.rectified },
+        },
+      ] as unknown) as Personfound[];
+
+      // When
+      const result = rnippService.getFilteredSearchResult(personMock);
+
+      // Then
+      expect(result).toStrictEqual(personMock);
+    });
+
+    it('should return all other rnipp code error when a result with the found code exists', () => {
+      // Given
+      const personMock = ([
+        {
+          person: { rectifiedIdentity: { ...personData } },
+          rnippResponse: { code: RNIPP_IDENTITY_RESPONSE_CODES.error },
+        },
+      ] as unknown) as Personfound[];
+
+      // When
+      const result = rnippService.getFilteredSearchResult(personMock);
+
+      // Then
+      expect(result).toStrictEqual(personMock);
     });
   });
 });

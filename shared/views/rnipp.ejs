@@ -212,11 +212,11 @@
     <script type="text/javascript">
       const __RNIPP_DATA_RESULTS__ = <%- locals.searchResults
         ? JSON.stringify( locals.searchResults)
-        : 'undefined'
+        : 'undefined';
         %>
       const __SUPPORT_ID__ = "<%= locals.supportId || '' %>";
-      const __RECTIFY_RESPONSE_CODES__ = <%- JSON.stringify(locals.rectifyResponseCodes) %>
-      const __APP_NAME__ = "<%= locals.appName %>"
+      const __RECTIFY_RESPONSE_CODES__ = <%- JSON.stringify(locals.rectifyResponseCodes) %>;
+      const __APP_NAME__ = "<%= locals.appName %>";
     </script>
     <% } %>
   </section>
