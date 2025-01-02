@@ -21,7 +21,7 @@ import { PersonFoundDTO } from './dto/person-found-output.dto';
 import { RectificationRequestDTO } from './dto/rectification-request.dto';
 import { ErrorControllerInterface } from './interface/error-controller.interface';
 import { RnippService } from './rnipp.service';
-import { IResponseFromRnipp } from './interface';
+import { IResponseFromRnipp, Personfound } from './interface';
 import { RNIPP_IDENTITY_RESPONSE_CODES } from './rnipp-constants';
 
 @Controller()
@@ -78,7 +78,7 @@ export class RnippController {
       );
 
       responseRNIPPArray = await Promise.all(responseRNIPPromises);
-      const searchResults = responseRNIPPArray.map(
+      const searchResults: Personfound[] = responseRNIPPArray.map(
         ({
           rectifiedIdentity,
           rnippDead,
@@ -102,15 +102,22 @@ export class RnippController {
 
           return {
             person: { rectifiedIdentity, dead: rnippDead },
-            rnippResponse: { code: rnippCode, raw: beautify(rawResponse) },
+            rnippResponse: {
+              code: rnippCode,
+              raw: beautify(rawResponse),
+            },
           };
         },
+      );
+
+      const filteredSearchResult = this.rnippService.getFilteredSearchResult(
+        searchResults,
       );
 
       return {
         appName,
         rectifyResponseCodes: RNIPP_IDENTITY_RESPONSE_CODES,
-        searchResults,
+        searchResults: filteredSearchResult,
         requestedIdentity: rectificationRequest,
         supportId: rectificationRequest.supportId,
         csrfToken,

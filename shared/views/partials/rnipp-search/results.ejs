@@ -4,20 +4,7 @@
       <div class="scrollbox-wrapper">
         <div class="accordion" id="results-accordion">
           <%
-          const hasValidIdentity = locals.searchResults
-            .some(({ rnippResponse }) => parseInt(rnippResponse.code, 10) < locals.rectifyResponseCodes.error);
-
-
-          const filteredSearchResult = locals.searchResults
-            .filter(({ rnippResponse }) => {
-              if (!hasValidIdentity) {
-                return true;
-              }
-              const isValidIdentity = parseInt(rnippResponse.code, 10) < locals.rectifyResponseCodes.error;
-              return hasValidIdentity && isValidIdentity;
-            });
-
-          filteredSearchResult.forEach( ({ person, rnippResponse }, index) => {
+            locals.searchResults.forEach( ({ person, rnippResponse }, index) => {
           %>
           <!-- ACCORDION PERSON CARD-->
           <% let intResponseCode = parseInt(rnippResponse.code, 10); %>
@@ -80,7 +67,7 @@
             <!-- ENDOF card header-->
             <div
               id="collapse-<%= index %>"
-              class="collapse <%= shouldDisplayDetails && filteredSearchResult.length === 1 ? 'show' : '' %>"
+              class="collapse <%= shouldDisplayDetails && locals.searchResults.length === 1 ? 'show' : '' %>"
               aria-labelledby="heading"
               data-parent="#results-accordion"
             >

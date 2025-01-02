@@ -13,10 +13,15 @@ import { InjectConfig } from 'nestjs-config';
 import * as queryString from 'query-string';
 import { RectificationRequestDTO } from './dto';
 import { PersonGenericDTO } from './dto/person-generic.dto';
-import { InseeCityDBInterface, InseeCountryDBInterface } from './interface';
+import {
+  InseeCityDBInterface,
+  InseeCountryDBInterface,
+  Personfound,
+} from './interface';
 import { ParsedData } from './interface/parsed-data.interface';
 import { IResponseFromRnipp } from './interface/response-from-rnipp.interface';
 import { RnippSerializer } from './rnipp-serializer.service';
+import { RNIPP_IDENTITY_RESPONSE_CODES } from './rnipp-constants';
 
 @Injectable()
 export class RnippService {
@@ -199,6 +204,23 @@ export class RnippService {
     });
 
     return identitiesToRectify;
+  }
+
+  getFilteredSearchResult(searchResults: Personfound[]): Personfound[] {
+    const hasValidIdentity = searchResults.some(
+      ({ rnippResponse }) =>
+        Number(rnippResponse.code) < RNIPP_IDENTITY_RESPONSE_CODES.error,
+    );
+
+    return searchResults.filter(({ rnippResponse }) => {
+      if (!hasValidIdentity) {
+        return true;
+      }
+
+      const isValidIdentity =
+        Number(rnippResponse.code) < RNIPP_IDENTITY_RESPONSE_CODES.error;
+      return hasValidIdentity && isValidIdentity;
+    });
   }
 
   private async findCogByLocationName(
