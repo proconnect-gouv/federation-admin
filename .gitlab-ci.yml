@@ -19,7 +19,7 @@ global-install:
   tags:
     - node
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "fca-staging"'
   cache:
     key: '${CACHE_KEY}'
     policy: pull
@@ -58,7 +58,7 @@ build-cache:
   dependencies: []
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "fca-staging"'
 
 include:
   - '/shared/.gitlab-ci.yml'
