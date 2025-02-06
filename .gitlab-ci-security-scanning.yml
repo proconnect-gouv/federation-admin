@@ -20,18 +20,18 @@ variables:
   # Can cause problems due to multiples package.json project
   DS_REMEDIATE: 'false'
   # SAST (Static Application Security Testing)
-  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, quality, docker, cypress, .mocks, node_modules"
-  SAST_EXCLUDED_ANALYZERS: "spotbugs"
+  SAST_EXCLUDED_PATHS: 'spec, test, tests, tmp, quality, docker, cypress, .mocks, node_modules'
+  SAST_EXCLUDED_ANALYZERS: 'spotbugs'
 
 gemnasium-dependency_scanning:
   image: registry.gitlab.dev-franceconnect.fr/france-connect/fc/gitlab-security-scanning/gemnasium:3
   stage: test
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "fca-staging"'
   interruptible: true
 
 semgrep-sast:
   stage: test
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "fca-staging"'
   interruptible: true
