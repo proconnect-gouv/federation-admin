@@ -19,7 +19,6 @@
 ## Etc/hosts
 
 - fc-exploitation.docker.dev-franceconnect.fr
-- fc-support.docker.dev-franceconnect.fr
 
 
 ## Variables d'env 

@@ -26,8 +26,6 @@ global-install:
     paths:
       - node_modules
       - fc-exploitation/node_modules
-      - fc-support/node_modules
-      - fc-workers/node_modules
       - shared/node_modules
   script:
     - yarn install
@@ -47,8 +45,6 @@ build-cache:
     paths:
       - node_modules
       - fc-exploitation/node_modules
-      - fc-support/node_modules
-      - fc-workers/node_modules
       - shared/node_modules
       # Cypress cache
       - cache/Cypress
@@ -63,7 +59,5 @@ build-cache:
 include:
   - '/shared/.gitlab-ci.yml'
   - '/fc-exploitation/.gitlab-ci.yml'
-  - '/fc-workers/.gitlab-ci.yml'
-  - '/fc-support/.gitlab-ci.yml'
   - '/.gitlab-build.yml'
   - '.gitlab-ci-security-scanning.yml'

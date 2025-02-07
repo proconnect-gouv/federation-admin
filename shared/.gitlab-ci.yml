@@ -13,8 +13,6 @@ test/shared:
     paths:
       - node_modules
       - fc-exploitation/node_modules
-      - fc-support/node_modules
-      - fc-workers/node_modules
       - shared/node_modules
   script:
     - cd shared

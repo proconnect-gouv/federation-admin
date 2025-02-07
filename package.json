@@ -3,13 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "lint": "tslint 'fc-exploitation/src/**/*.ts' 'shared/**/*.ts' 'fc-support/**/*.ts' --exclude '**/node_modules/**/*'",
+    "lint": "tslint 'fc-exploitation/src/**/*.ts' 'shared/**/*.ts' --exclude '**/node_modules/**/*'",
     "lint:commit": "./node-scripts/lint-commit.sh",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e:exploitation": "cypress run -P fc-exploitation --browser chrome",
-    "test:e2e:support": "cypress run -P fc-support --browser chrome"
+    "test:e2e:exploitation": "cypress run -P fc-exploitation --browser chrome"
   },
   "resolutions": {
     "cookie-signature": "1.1.0",
@@ -43,15 +42,11 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/fc-exploitation/",
-      "<rootDir>/fc-support/",
-      "<rootDir>/fc-workers/",
       "<rootDir>/shared/"
     ]
   },
   "workspaces": [
     "fc-exploitation",
-    "fc-support",
-    "fc-workers",
     "shared"
   ]
 }
