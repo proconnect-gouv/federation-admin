@@ -1,6 +1,6 @@
 import { formType, formFill, formControl, totp } from './forms';
 import {
-  resetMongoFC,
+  resetMongo,
   resetPostgres,
   resetEventsStats,
   resetMetricsStats,
@@ -15,8 +15,8 @@ Cypress.Commands.add('resetEnv', type => {
     case 'postgres':
       resetPostgres();
       break;
-    case 'mongoFC':
-      resetMongoFC();
+    case 'mongo':
+      resetMongo();
       break;
     case 'events':
       resetEventsStats();

@@ -3,7 +3,7 @@ const LONG_EXEC_TIMEOUT = 60 * 1000; // 1 minutes
 
 const DOCKER_DIR = 'cd $FC_ROOT/fc/docker';
 
-export function resetMongoFC() {
+export function resetMongo() {
   const command = `${DOCKER_DIR} && CI=1 ./docker-stack reset-db`;
 
   console.log(`
