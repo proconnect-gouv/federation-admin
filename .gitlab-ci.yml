@@ -1,3 +1,6 @@
+include:
+  - '.gitlab-ci-security-scanning.yml'
+
 global-install:
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   stage: install
@@ -39,9 +42,6 @@ stages:
   - Cache
   - Build
   - Tag
-
-include:
-  - '.gitlab-ci-security-scanning.yml'
 
 variables:
   FC_ROOT: '$CI_BUILDS_DIR/france-connect'
