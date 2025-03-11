@@ -1,18 +1,3 @@
-stages:
-  - install
-  - Code quality
-  - e2e
-  - test
-  - Checkmarx
-  - Cache
-  - Build
-  - Tag
-
-variables:
-  FC_ROOT: '$CI_BUILDS_DIR/france-connect'
-  PROXY_EXPLOITATION: 'http://$EXPLOITATION_PROXY_HOST:$EXPLOITATION_PROXY_PORT'
-  CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
-
 global-install:
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   stage: install
@@ -44,6 +29,24 @@ global-install:
     - ./node-scripts/coverage.sh
   coverage: '/Global coverage is: \[([\d\.]+)%\]/'
   interruptible: true
+
+stages:
+  - install
+  - Code quality
+  - e2e
+  - test
+  - Checkmarx
+  - Cache
+  - Build
+  - Tag
+
+include:
+  - '.gitlab-ci-security-scanning.yml'
+
+variables:
+  FC_ROOT: '$CI_BUILDS_DIR/france-connect'
+  PROXY_EXPLOITATION: 'http://$EXPLOITATION_PROXY_HOST:$EXPLOITATION_PROXY_PORT'
+  CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
 
 test/shared:
   stage: Code quality
@@ -183,6 +186,3 @@ FC+/FCA/exploitation/build-image:
   variables:
     APP: exploitation-v2
     MSG: "environments/pa4-integ/group_vars/all/versions.yml\nfc_exploitation_v2_version:$PROD_RELEASE_VERSION\n\nenvironments/nubo12-fca-integ/group_vars/all/versions.yml\nenvironments/nubo12-fca-integ/group_vars/all/versions.yml\nenvironments/nubo01-fca-integ/group_vars/all/versions.yml\nfca_exploitation_version:"
-
-include:
-  - '.gitlab-ci-security-scanning.yml'
