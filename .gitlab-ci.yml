@@ -1,6 +1,3 @@
-include:
-  - '.gitlab-ci-security-scanning.yml'
-
 global-install:
   image: ${FC_DOCKER_REGISTRY}/nodejs:${NODE_VERSION}-dev
   stage: install
@@ -32,6 +29,9 @@ global-install:
     - ./node-scripts/coverage.sh
   coverage: '/Global coverage is: \[([\d\.]+)%\]/'
   interruptible: true
+
+include:
+  - '.gitlab-ci-security-scanning.yml'
 
 stages:
   - install
