@@ -44,7 +44,7 @@ stages:
   - Tag
 
 variables:
-  FC_ROOT: '$CI_BUILDS_DIR/france-connect'
+  FC_ROOT: '$CI_BUILDS_DIR/proconnect'
   CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
 
 test/shared:
@@ -133,6 +133,7 @@ cypress/exploitation:
     - cd $CI_PROJECT_DIR
     - yarn install
   script:
+    - docker network create --driver bridge fc_public
     - VERBOSE=1 docker-stack up exploitation-fca-low
     - docker-stack start-all
     - docker-stack wait "exploitation-fca-low" "https://exploitation-fca-low.docker.dev-franceconnect.fr/login" "240"
