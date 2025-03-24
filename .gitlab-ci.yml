@@ -106,6 +106,8 @@ cypress/exploitation:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "fca-staging"'
   tags:
     - cypress
+  services:
+    - name: docker:27-dind
   variables:
     TZ: 'Europe/Paris'
   cache:
