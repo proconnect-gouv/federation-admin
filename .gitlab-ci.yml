@@ -129,7 +129,7 @@ cypress/exploitation:
     - shopt -s expand_aliases
     - alias docker-stack=$FC_ROOT/proconnect-federation/docker/docker-stack
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - ln -s $CI_PROJECT_DIR $FC_ROOT/proconnect-federation/docker/volumes/src/fc-apps
+    - ln -s $CI_PROJECT_DIR $FC_ROOT/proconnect-federation/docker/volumes/src/proconnect-exploitation
     - cd $CI_PROJECT_DIR
     - yarn install
   script:

@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/france-connect/fc-apps.git"
+    "url": "git+ssh://git@gitlab.com/proconnect/proconnect-exploitation.git"
   },
   "devDependencies": {
     "cypress": "13.15.0",
