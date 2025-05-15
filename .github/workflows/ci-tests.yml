@@ -37,6 +37,34 @@ jobs:
 
       - name: Run tests
         run: yarn test
-  # unit-admin:
-  # cypress:
-  # snapshots:
+
+  unit-exploitation:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ./fc-exploitation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+
+      - name: Cache Node.js dependencies
+        id: exploitation-yarn-cache
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-modules-exploitation-${{ hashFiles('./yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-exploitation-
+
+      - name: Install dependencies
+        if: steps.exploitation-yarn-cache.outputs.cache-hit != 'true'
+        run: |
+          yarn install
+
+      - name: Run tests
+        run: yarn test
