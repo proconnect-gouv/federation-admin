@@ -115,12 +115,9 @@ jobs:
 
       - name: Set ADMIN_ROOT environment variable
         working-directory: ./
-        run: echo "ADMIN_ROOT=$(pwd)" >> $GITHUB_ENV
-
-      # - name: Install federation dependencies
-      #   run: |
-      #     cd ./federation/back
-      #     yarn install --ignore-engines --frozen-lockfile --no-progress
+        run: |
+          echo "ADMIN_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "PC_ROOT=$(pwd)" >> $GITHUB_ENV
 
       - name: Create symlinks in federation
         working-directory: ./federation/docker/volumes/src
@@ -141,8 +138,11 @@ jobs:
       - name: Start tests
         working-directory: ./
         run: |
-          yarn test:e2e:exploitation -c video=false || (
-          mkdir -p federation-admin/cypress/logs &&
-          (docker cp pc-exploitation-1:/tmp/.pm2/logs federation-admin/cypress/logs/fc-exploitation || true) &&
-          (docker cp pc-rp-all:/var/log/nginx fc-exploitation/cypress/logs || true) &&
-          exit 1)
+          yarn test:e2e:exploitation -c video=false
+
+      - name: Post failing tests
+        if: failure()
+        run: |
+          mkdir -p federation-admin/cypress/logs
+          docker cp pc-exploitation-1:/tmp/.pm2/logs federation-admin/cypress/logs/fc-exploitation || true
+          docker cp pc-rp-all:/var/log/nginx fc-exploitation/cypress/logs || true
