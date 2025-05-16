@@ -1,5 +1,8 @@
 import { USER_ADMIN, USER_PASS, LIMIT_PAGE } from '../../support/constants';
-import { createUserAccount, createUserAndLogWith } from './account-create.utils';
+import {
+  createUserAccount,
+  createUserAndLogWith,
+} from './account-create.utils';
 import { deleteUser } from './account-delete.utils';
 import { testIsCompliantPasswordEnrollment } from '../../support/request';
 
