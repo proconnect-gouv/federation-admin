@@ -26,9 +26,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-node-modules-shared-${{ hashFiles('./yarn.lock') }}
+          key: ${{ runner.os }}-node-modules-shared-v2-${{ hashFiles('./yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node-modules-shared-
+            ${{ runner.os }}-node-modules-shared-v2-
 
       - name: Install dependencies
         if: steps.shared-yarn-cache.outputs.cache-hit != 'true'
