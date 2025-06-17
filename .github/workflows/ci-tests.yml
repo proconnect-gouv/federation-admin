@@ -21,19 +21,8 @@ jobs:
         with:
           node-version-file: ./package.json
 
-      - name: Cache Node.js dependencies
-        id: shared-yarn-cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-shared-v2-${{ hashFiles('./yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-shared-v2-
-
       - name: Install dependencies
-        if: steps.shared-yarn-cache.outputs.cache-hit != 'true'
-        run: |
-          yarn install
+        run: yarn install
 
       - name: Run tests
         run: yarn test
@@ -52,19 +41,8 @@ jobs:
         with:
           node-version-file: ./package.json
 
-      - name: Cache Node.js dependencies
-        id: exploitation-yarn-cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-exploitation-${{ hashFiles('./yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-exploitation-
-
       - name: Install dependencies
-        if: steps.exploitation-yarn-cache.outputs.cache-hit != 'true'
-        run: |
-          yarn install
+        run: yarn install
 
       - name: Run tests
         run: yarn test
@@ -88,19 +66,8 @@ jobs:
         with:
           node-version-file: ./package.json
 
-      - name: Cache Node.js dependencies
-        id: admin-yarn-cache
-        uses: actions/cache@v4
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-admin-${{ hashFiles('./yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-admin-
-
       - name: Install dependencies
-        if: steps.exploitation-yarn-cache.outputs.cache-hit != 'true'
-        run: |
-          yarn install
+        run: yarn install
 
       - name: Clone federation repository
         uses: actions/checkout@v4
