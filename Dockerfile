@@ -33,10 +33,11 @@ yarn install --production && \
 rm -f package.json */package.json yarn.lock
 
 RUN mkdir /etc/pm2
-COPY deploy/pm2/app.json /etc/pm2/app.json
-
+COPY deploy/pm2/app.json /etc/pm2/
 
 FROM ${NODE_IMAGE} AS production
+
+RUN npm install -g pm2
 
 ENV PM2_HOME=/tmp/.pm2
 ENV NODE_ENV=production
