@@ -5,6 +5,8 @@ FROM ${NODE_IMAGE} AS builder
 
 COPY . /tmp/src
 
+RUN apk add python3 make g++ lscpu
+
 WORKDIR /tmp/src
 RUN yarn install
 
