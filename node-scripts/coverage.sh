@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Waiting for @phuynh to update the runner :wink:
-apt update -qq > /dev/null
-apt install bc -y -qq > /dev/null
-
-global=`cat ./coverage/clover.xml | grep "<metrics" | head -n 1 | sed -e 's/[^0-9 ]//g'`
+global=`grep -m1 "<metrics" ./coverage/clover.xml | sed -e 's/[^0-9 ]//g'`
 
 statements=`echo -n $global | cut -f1 -d ' '`;
 covered_statements=`echo -n $global | cut -f2 -d ' '`;
