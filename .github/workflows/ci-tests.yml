@@ -7,6 +7,31 @@ on:
       - main
 
 jobs:
+  global:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run lint
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Run coverage
+        run: |
+          yarn test --coverage
+          ./node-scripts/coverage.sh
+
   unit-shared:
     runs-on: ubuntu-24.04
     defaults:
@@ -47,7 +72,7 @@ jobs:
       - name: Run tests
         run: yarn test
 
-  snapshots:
+  e2e-exploitation:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -56,7 +81,7 @@ jobs:
       - name: Set up dockerx
         uses: docker/setup-buildx-action@v2
 
-      # Workaround for https://github.com/docker/compose/issues/12892 
+      # Workaround for https://github.com/docker/compose/issues/12892
       - name: Upgrade Docker Compose
         uses: docker/setup-compose-action@v1
         with:
