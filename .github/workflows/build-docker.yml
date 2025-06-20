@@ -46,9 +46,6 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          build-args: |
-            SOURCE_COMMIT=${{ github.sha }}
-            INSTANCE=exploitation-v2
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           push: true
