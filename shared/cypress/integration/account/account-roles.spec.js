@@ -64,7 +64,7 @@ describe('Account', () => {
 
       // l'utilisateur ne voit pas les liens suivants dans exploit, et à fortiori dans les autres app
       // l'utilisateur ne voit pas RNIPP dans support
-      cy.contains('Fournisseurs de données').should('not.exist');
+      cy.contains('Scopes et claims').should('not.exist');
       cy.contains('Configuration').should('not.exist');
 
       // l'utilisateur ne voit pas les liens suivants dans stats, et à fortiori dans les autres app
