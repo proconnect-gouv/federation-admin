@@ -63,6 +63,9 @@ const createPipelineAggregate = options => {
             clientID: userEntry,
           },
           {
+            client_id: userEntry,
+          },
+          {
             name: userEntry,
           },
           {
