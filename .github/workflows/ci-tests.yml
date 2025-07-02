@@ -123,7 +123,6 @@ jobs:
         working-directory: federation/docker
         run: |
           set -x
-          docker network create --driver bridge pc_public
           ./docker-stack prune-ci
           ./docker-stack up exploitation-fca-low
           ./docker-stack start-all
