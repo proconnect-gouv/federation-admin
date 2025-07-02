@@ -101,6 +101,7 @@ jobs:
           repository: proconnect-gouv/federation
           token: ${{ secrets.GITHUB_TOKEN }}
           path: ./federation
+          ref: pc-359
 
       - name: Set FEDERATION_ROOT environment variable
         working-directory: ./federation
