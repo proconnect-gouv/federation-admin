@@ -40,10 +40,39 @@ export function linesToArray(value: string): string[] | undefined {
   return result;
 }
 
-/**
- * Force the input to be an array in DTO
- * @param {string | unknown[]} value
- */
+export function arrayToLines(value: any) {
+  if (Array.isArray(value)) {
+    return value.join('\r\n');
+  }
+  return value;
+}
+
+export function defaultNoneOrLinesToNullableArray(value: any) {
+  if (!value || value === 'default') {
+    return null;
+  } else if (value === 'none') {
+    return [];
+  } else {
+    return linesToArray(value);
+  }
+}
+
+export function nullableArrayToDefaultNoneOrLines(value: any) {
+  if (!value) {
+    return 'default';
+  } else if (Array.isArray(value) && value.length === 0) {
+    return 'none';
+  } else if (Array.isArray(value) && value.length > 0) {
+    return arrayToLines(value);
+  } else {
+    return value;
+  }
+}
+
 export function toArray(value: string | string[]) {
   return Array.isArray(value) ? value : [value];
+}
+
+export function toNullableString(value: any) {
+  return value ? value : null;
 }

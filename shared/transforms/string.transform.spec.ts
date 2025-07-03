@@ -1,6 +1,15 @@
 import * as moment from 'moment-timezone';
 
-import { linesToArray, toArray, toBoolean, toDate } from './string.transform';
+import {
+  arrayToLines,
+  defaultNoneOrLinesToNullableArray,
+  linesToArray,
+  nullableArrayToDefaultNoneOrLines,
+  toArray,
+  toBoolean,
+  toDate,
+  toNullableString,
+} from './string.transform';
 
 describe('String transform', () => {
   describe('toDate', () => {
@@ -149,40 +158,6 @@ describe('String transform', () => {
     });
   });
 
-  describe('linesToArray', () => {
-    it('should split a string by line return and ";"', () => {
-      // Given
-      const value = 'toto\ntiti\rtata\r\ntutu;haha';
-      const expected = ['toto', 'titi', 'tata', 'tutu', 'haha'];
-
-      // When
-      const result = linesToArray(value);
-
-      // Then
-      expect(result).toEqual(expected);
-    });
-
-    it('should return undefined if it fails', () => {
-      // When
-      const result = linesToArray(null);
-
-      // Then
-      expect(result).toEqual(undefined);
-    });
-
-    it('should trim the values and filter empty values', () => {
-      // Given
-      const value = 'toto\n\n\n  \n\n\ntiti ;  ;';
-      const expected = ['toto', 'titi'];
-
-      // When
-      const result = linesToArray(value);
-
-      // Then
-      expect(result).toEqual(expected);
-    });
-  });
-
   describe('toArray', () => {
     it('should return an array if a string is provided', () => {
       // Given
@@ -204,6 +179,225 @@ describe('String transform', () => {
 
       // Then
       expect(result).toEqual(value);
+    });
+  });
+
+  describe('linesToArray', () => {
+    it('should split string by newline', () => {
+      // Given
+      const value = 'line1\nline2\nline3';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2', 'line3']);
+    });
+
+    it('should split string by carriage return', () => {
+      // Given
+      const value = 'line1\rline2\rline3';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2', 'line3']);
+    });
+
+    it('should split string by carriage return and newline', () => {
+      // Given
+      const value = 'line1\r\nline2\r\nline3';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2', 'line3']);
+    });
+
+    it('should split string by semicolon', () => {
+      // Given
+      const value = 'line1;line2;line3';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2', 'line3']);
+    });
+
+    it('should trim values', () => {
+      // Given
+      const value = ' line1 ; line2 ; line3 ';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2', 'line3']);
+    });
+
+    it('should filter out empty values', () => {
+      // Given
+      const value = 'line1;;line3';
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line3']);
+    });
+
+    it('should return undefined on error', () => {
+      // Given
+      const value = null;
+
+      // When
+      const result = linesToArray(value);
+
+      // Then
+      expect(result).toEqual(undefined);
+    });
+  });
+
+  describe('arrayToLines', () => {
+    it('should join array with carriage return and newline', () => {
+      // Given
+      const value = ['line1', 'line2', 'line3'];
+
+      // When
+      const result = arrayToLines(value);
+
+      // Then
+      expect(result).toEqual('line1\r\nline2\r\nline3');
+    });
+
+    it('should return the value if it is not an array', () => {
+      // Given
+      const value = 'not an array';
+
+      // When
+      const result = arrayToLines(value);
+
+      // Then
+      expect(result).toEqual(value);
+    });
+  });
+
+  describe('defaultNoneOrLinesToNullableArray', () => {
+    it('should return null if value is "default"', () => {
+      // Given
+      const value = 'default';
+
+      // When
+      const result = defaultNoneOrLinesToNullableArray(value);
+
+      // Then
+      expect(result).toEqual(null);
+    });
+
+    it('should return null if value is falsy', () => {
+      // Given
+      const value = '';
+
+      // When
+      const result = defaultNoneOrLinesToNullableArray(value);
+
+      // Then
+      expect(result).toEqual(null);
+    });
+
+    it('should return empty array if value is "none"', () => {
+      // Given
+      const value = 'none';
+
+      // When
+      const result = defaultNoneOrLinesToNullableArray(value);
+
+      // Then
+      expect(result).toEqual([]);
+    });
+
+    it('should return array of lines for other values', () => {
+      // Given
+      const value = 'line1\nline2';
+
+      // When
+      const result = defaultNoneOrLinesToNullableArray(value);
+
+      // Then
+      expect(result).toEqual(['line1', 'line2']);
+    });
+  });
+
+  describe('nullableArrayToDefaultNoneOrLines', () => {
+    it('should return "default" if value is falsy', () => {
+      // Given
+      const value = null;
+
+      // When
+      const result = nullableArrayToDefaultNoneOrLines(value);
+
+      // Then
+      expect(result).toEqual('default');
+    });
+
+    it('should return "none" if value is an empty array', () => {
+      // Given
+      const value = [];
+
+      // When
+      const result = nullableArrayToDefaultNoneOrLines(value);
+
+      // Then
+      expect(result).toEqual('none');
+    });
+
+    it('should return joined lines if value is a non-empty array', () => {
+      // Given
+      const value = ['line1', 'line2'];
+
+      // When
+      const result = nullableArrayToDefaultNoneOrLines(value);
+
+      // Then
+      expect(result).toEqual('line1\r\nline2');
+    });
+
+    it('should return the value if it is not an array', () => {
+      // Given
+      const value = 'not an array';
+
+      // When
+      const result = nullableArrayToDefaultNoneOrLines(value);
+
+      // Then
+      expect(result).toEqual(value);
+    });
+  });
+
+  describe('toNullableString', () => {
+    it('should return the value if it is truthy', () => {
+      // Given
+      const value = 'some string';
+
+      // When
+      const result = toNullableString(value);
+
+      // Then
+      expect(result).toEqual(value);
+    });
+
+    it('should return null if value is falsy', () => {
+      // Given
+      const value = '';
+
+      // When
+      const result = toNullableString(value);
+
+      // Then
+      expect(result).toEqual(null);
     });
   });
 });
