@@ -101,7 +101,6 @@ jobs:
           repository: proconnect-gouv/federation
           token: ${{ secrets.GITHUB_TOKEN }}
           path: ./federation
-          ref: pc-359
 
       - name: Set FEDERATION_ROOT environment variable
         working-directory: ./federation
@@ -122,11 +121,9 @@ jobs:
       - name: Start docker stack
         working-directory: federation/docker
         run: |
-          set -x
-          docker network create --driver bridge pc_public
           ./docker-stack prune-ci
           ./docker-stack up exploitation-fca-low
-          ./docker-stack start-all
+          ./docker-stack start-all-ci
           ./docker-stack wait "exploitation-fca-low" "https://exploitation-fca-low.docker.dev-franceconnect.fr/login" "240"
 
       - name: Start tests
@@ -140,3 +137,13 @@ jobs:
           mkdir -p federation-admin/cypress/logs
           docker cp pc-exploitation-1:/tmp/.pm2/logs federation-admin/cypress/logs/fc-exploitation || true
           docker cp pc-rp-all:/var/log/nginx fc-exploitation/cypress/logs || true
+
+      - name: Publish artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-outputs
+          path: |
+            fc-exploitation/cypress/screenshots
+            fc-exploitation/cypress/videos
+            fc-exploitation/cypress/logs
