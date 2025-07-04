@@ -47,3 +47,7 @@ export function linesToArray(value: string): string[] | undefined {
 export function toArray(value: string | string[]) {
   return Array.isArray(value) ? value : [value];
 }
+
+export function emptyStringToNull(value: string): string | null {
+  return value === '' ? null : value;
+}
