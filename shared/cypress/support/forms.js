@@ -61,7 +61,7 @@ export function formFill(inputs, configuration) {
         case 'INPUT':
           if (['checkbox', 'radio'].indexOf($input.attr('type')) > -1) {
             if (value) {
-              return input.check(value,{ force: true });
+              return input.check(value, { force: true });
             }
             return input.uncheck({ force: true });
           }
