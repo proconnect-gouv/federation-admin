@@ -78,5 +78,5 @@ export function toNullableString(value: any) {
 }
 
 export function toEmptiableString(value: any) {
-  return value ? value : "";
+  return value ? value : '';
 }
