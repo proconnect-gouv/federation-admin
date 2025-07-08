@@ -80,32 +80,4 @@ describe('InstanceService', () => {
       expect(result).toBe(false);
     });
   });
-
-  describe('isFcpHigh', () => {
-    it('Should return true if we are in a FranceConnect+ instance', () => {
-      // Setup
-      mockConfigService.get.mockReturnValue({
-        instanceFor: 'FCP-HIGH',
-      });
-
-      // Action
-      const result = service.isFcpHigh();
-
-      // Expect
-      expect(result).toBe(true);
-    });
-
-    it('Should return false if we are not in a FranceConnect+ instance', () => {
-      // Setup
-      mockConfigService.get.mockReturnValue({
-        instanceFor: 'FCA-LOW',
-      });
-
-      // Action
-      const result = service.isFcpHigh();
-
-      // Expect
-      expect(result).toBe(false);
-    });
-  });
 });
