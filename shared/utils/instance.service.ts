@@ -11,11 +11,6 @@ export class InstanceService {
     return instanceFor === Platform.FCA_LOW;
   }
 
-  isFcpHigh() {
-    const { instanceFor } = this.configService.get('app');
-    return instanceFor === Platform.FCP_HIGH;
-  }
-
   isCl() {
     const { instanceFor } = this.configService.get('app');
     return instanceFor === Platform.CL;
