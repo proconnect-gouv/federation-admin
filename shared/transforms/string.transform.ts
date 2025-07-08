@@ -76,3 +76,7 @@ export function toArray(value: string | string[]) {
 export function toNullableString(value: any) {
   return value ? value : null;
 }
+
+export function toEmptiableString(value: any) {
+  return value ? value : '';
+}
